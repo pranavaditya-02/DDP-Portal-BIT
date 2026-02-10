@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: faculty-tracking-db
+    environment:
+      POSTGRES_USER: faculty_user
+      POSTGRES_PASSWORD: faculty_password_dev
+      POSTGRES_DB: faculty_tracking_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - faculty-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U faculty_user']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: faculty-tracking-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - faculty-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: faculty-tracking-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://faculty_user:faculty_password_dev@postgres:5432/faculty_tracking_db
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+      PORT: 5000
+      JWT_SECRET: dev_secret_key_change_in_production
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - faculty-network
+    command: npm run dev
+
+  # Frontend App
+  frontend:
+    image: node:18-alpine
+    container_name: faculty-tracking-frontend
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api
+      NEXT_PUBLIC_WS_URL: ws://localhost:5000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - faculty-network
+    working_dir: /app
+    command: sh -c 'npm install && npm run dev'
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  faculty-network:
+    driver: bridge
