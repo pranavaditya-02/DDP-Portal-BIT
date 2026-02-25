@@ -1,4 +1,83 @@
 // ============================================================
+// ROLE MANAGEMENT DATA
+// ============================================================
+
+export interface Resource {
+  id: string
+  label: string
+  icon: string       // lucide icon name
+  href: string
+  group: string
+}
+
+export interface Role {
+  id: number
+  name: string
+  description: string
+  passwordPrefix: string
+  editAccess: boolean       // can edit activities / records
+  deleteAccess: boolean     // can delete activities / records
+  status: boolean           // active / inactive
+  resources: string[]       // resource ids
+  isSystem: boolean         // system roles can't be deleted
+  createdAt: string
+  usersCount: number
+}
+
+export const availableResources: Resource[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', href: '/dashboard', group: 'Overview' },
+  { id: 'my-activities', label: 'My Activities', icon: 'FileText', href: '/activities', group: 'Faculty' },
+  { id: 'submit-achievements', label: 'Submit Achievements', icon: 'Award', href: '/achievements/submit', group: 'Faculty' },
+  { id: 'submit-action-plan', label: 'Submit Action Plan', icon: 'Clipboard', href: '/action-plan/submit', group: 'Faculty' },
+  { id: 'department', label: 'Department', icon: 'Building2', href: '/department', group: 'Department' },
+  { id: 'leaderboard', label: 'Leaderboard', icon: 'Trophy', href: '/leaderboard', group: 'Department' },
+  { id: 'college-overview', label: 'College Overview', icon: 'GraduationCap', href: '/college', group: 'College' },
+  { id: 'verification-queue', label: 'Verification Queue', icon: 'ShieldCheck', href: '/verification', group: 'Management' },
+
+  { id: 'role-management', label: 'Manage Roles', icon: 'Shield', href: '/roles', group: 'Management' },
+  { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings', group: 'Management' },
+]
+
+export const roles: Role[] = [
+  {
+    id: 1, name: 'Faculty', description: 'Regular faculty member with basic access',
+    passwordPrefix: 'fc', editAccess: true, deleteAccess: false, status: true,
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'leaderboard'],
+    isSystem: true, createdAt: '2024-01-01', usersCount: 165,
+  },
+  {
+    id: 2, name: 'HOD', description: 'Head of Department with department-level access',
+    passwordPrefix: 'hd', editAccess: true, deleteAccess: true, status: true,
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard'],
+    isSystem: true, createdAt: '2024-01-01', usersCount: 6,
+  },
+  {
+    id: 3, name: 'Dean', description: 'Dean with college-wide access and analytics',
+    passwordPrefix: 'dn', editAccess: true, deleteAccess: true, status: true,
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'college-overview'],
+    isSystem: true, createdAt: '2024-01-01', usersCount: 2,
+  },
+  {
+    id: 4, name: 'Verification', description: 'Verification committee with queue access',
+    passwordPrefix: 'vc', editAccess: true, deleteAccess: false, status: true,
+    resources: ['dashboard', 'verification-queue'],
+    isSystem: true, createdAt: '2024-01-01', usersCount: 8,
+  },
+  {
+    id: 5, name: 'Maintenance', description: 'System admin with full portal access',
+    passwordPrefix: 'ad', editAccess: true, deleteAccess: true, status: true,
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'college-overview', 'verification-queue', 'role-management', 'settings'],
+    isSystem: true, createdAt: '2024-01-01', usersCount: 3,
+  },
+  {
+    id: 6, name: 'Guest Reviewer', description: 'External reviewer with read-only access',
+    passwordPrefix: 'gr', editAccess: false, deleteAccess: false, status: true,
+    resources: ['dashboard', 'leaderboard'],
+    isSystem: false, createdAt: '2025-06-15', usersCount: 4,
+  },
+]
+
+// ============================================================
 // Mock Data for Faculty Achievement Tracking System
 // ============================================================
 
@@ -626,6 +705,89 @@ export function getPersonalizedHodData(userId: number, userName: string, departm
     categoryBreakdown: deptCategoryBreakdown,
   }
 }
+
+// ============================================================
+// COLLEGE PAGE – DEEP ANALYTICS DATA
+// ============================================================
+
+// ---- Department quarterly growth trends (activities per quarter) ----
+export const deptQuarterlyGrowth = [
+  { quarter: 'Q1 2025', CSE: 68, IT: 42, ECE: 55, EEE: 35, MECH: 44, CIVIL: 28 },
+  { quarter: 'Q2 2025', CSE: 75, IT: 48, ECE: 62, EEE: 40, MECH: 50, CIVIL: 32 },
+  { quarter: 'Q3 2025', CSE: 82, IT: 52, ECE: 68, EEE: 44, MECH: 55, CIVIL: 35 },
+  { quarter: 'Q4 2025', CSE: 87, IT: 56, ECE: 71, EEE: 48, MECH: 61, CIVIL: 39 },
+]
+
+// ---- Department year-over-year growth rates (%) ----
+export const deptYoYGrowth = [
+  { dept: 'CSE', growth2024: 18, growth2025: 24, growth2026: 28 },
+  { dept: 'IT', growth2024: 12, growth2025: 20, growth2026: 22 },
+  { dept: 'ECE', growth2024: 15, growth2025: 18, growth2026: 21 },
+  { dept: 'EEE', growth2024: 8, growth2025: 14, growth2026: 16 },
+  { dept: 'MECH', growth2024: 10, growth2025: 16, growth2026: 19 },
+  { dept: 'CIVIL', growth2024: 5, growth2025: 10, growth2026: 14 },
+]
+
+// ---- Department research vs teaching balance ----
+export const deptResearchTeachingBalance = [
+  { dept: 'CSE', research: 62, teaching: 38 },
+  { dept: 'IT', research: 45, teaching: 55 },
+  { dept: 'ECE', research: 58, teaching: 42 },
+  { dept: 'EEE', research: 40, teaching: 60 },
+  { dept: 'MECH', research: 48, teaching: 52 },
+  { dept: 'CIVIL', research: 35, teaching: 65 },
+]
+
+// ---- Department monthly points trend (for sparklines & growth) ----
+export const deptMonthlyPoints = [
+  { month: 'Sep', CSE: 2250, IT: 1350, ECE: 1850, EEE: 1050, MECH: 1450, CIVIL: 820 },
+  { month: 'Oct', CSE: 2480, IT: 1520, ECE: 1980, EEE: 1180, MECH: 1620, CIVIL: 900 },
+  { month: 'Nov', CSE: 2680, IT: 1680, ECE: 2120, EEE: 1280, MECH: 1750, CIVIL: 980 },
+  { month: 'Dec', CSE: 2100, IT: 1280, ECE: 1720, EEE: 1020, MECH: 1380, CIVIL: 780 },
+  { month: 'Jan', CSE: 3050, IT: 1880, ECE: 2380, EEE: 1420, MECH: 1920, CIVIL: 1080 },
+  { month: 'Feb', CSE: 1650, IT: 980, ECE: 1280, EEE: 720, MECH: 1050, CIVIL: 580 },
+]
+
+// ---- Department quality metrics (publications per category) ----
+export const deptQualityMetrics = [
+  { dept: 'CSE', journals: 28, conferences: 22, patents: 5, bookChapters: 6, certifications: 18 },
+  { dept: 'IT', journals: 16, conferences: 14, patents: 2, bookChapters: 3, certifications: 22 },
+  { dept: 'ECE', journals: 22, conferences: 18, patents: 4, bookChapters: 4, certifications: 14 },
+  { dept: 'EEE', journals: 12, conferences: 10, patents: 1, bookChapters: 2, certifications: 10 },
+  { dept: 'MECH', journals: 14, conferences: 12, patents: 3, bookChapters: 2, certifications: 8 },
+  { dept: 'CIVIL', journals: 8, conferences: 8, patents: 1, bookChapters: 1, certifications: 6 },
+]
+
+// ---- Faculty distribution tiers per department ----
+export const deptFacultyTiers = [
+  { dept: 'CSE', highPerformers: 12, midPerformers: 22, lowPerformers: 11 },
+  { dept: 'IT', highPerformers: 7, midPerformers: 15, lowPerformers: 8 },
+  { dept: 'ECE', highPerformers: 10, midPerformers: 18, lowPerformers: 10 },
+  { dept: 'EEE', highPerformers: 5, midPerformers: 14, lowPerformers: 9 },
+  { dept: 'MECH', highPerformers: 8, midPerformers: 17, lowPerformers: 10 },
+  { dept: 'CIVIL', highPerformers: 4, midPerformers: 10, lowPerformers: 8 },
+]
+
+// ---- College overall semester trend ----
+export const collegeSemesterTrend = [
+  { semester: '2022-I', activities: 580, points: 16800, avgPerFaculty: 108, approvalRate: 82 },
+  { semester: '2022-II', activities: 640, points: 18500, avgPerFaculty: 114, approvalRate: 84 },
+  { semester: '2023-I', activities: 720, points: 21200, avgPerFaculty: 125, approvalRate: 85 },
+  { semester: '2023-II', activities: 810, points: 24500, avgPerFaculty: 138, approvalRate: 86 },
+  { semester: '2024-I', activities: 920, points: 28200, avgPerFaculty: 152, approvalRate: 87 },
+  { semester: '2024-II', activities: 1050, points: 32800, avgPerFaculty: 171, approvalRate: 88 },
+  { semester: '2025-I', activities: 1277, points: 38600, avgPerFaculty: 195, approvalRate: 89 },
+]
+
+// ---- Department approval efficiency ----
+export const deptApprovalEfficiency = [
+  { dept: 'CSE', avgDaysToApprove: 1.2, approvalRate: 91, rejectionRate: 9 },
+  { dept: 'IT', avgDaysToApprove: 0.8, approvalRate: 93, rejectionRate: 7 },
+  { dept: 'ECE', avgDaysToApprove: 1.5, approvalRate: 88, rejectionRate: 12 },
+  { dept: 'EEE', avgDaysToApprove: 1.0, approvalRate: 90, rejectionRate: 10 },
+  { dept: 'MECH', avgDaysToApprove: 1.8, approvalRate: 85, rejectionRate: 15 },
+  { dept: 'CIVIL', avgDaysToApprove: 2.1, approvalRate: 82, rejectionRate: 18 },
+]
 
 // ============================================================
 // DEPARTMENT PAGE – KPI HEATMAP & TARGETS

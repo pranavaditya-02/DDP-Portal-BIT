@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { useAuthStore } from '@/lib/store'
 import { useRoles } from '@/hooks/useRoles'
 import { RoleGuard } from '@/components/RoleGuard'
@@ -18,12 +18,17 @@ import {
   yearlyComparisonData, collegeActivityTypeData, facultyGrowthData,
   userGrowthData, roleDistributionData, deptActivityVolumeData, loginStatsData,
   getPersonalizedFacultyData, getPersonalizedHodData,
+  roles as initialRoles, availableResources,
+  type Role, type Resource,
 } from '@/lib/mock-data'
+import toast from 'react-hot-toast'
 import {
   TrendingUp, TrendingDown, Award, FileText, Clock, CheckCircle2,
   XCircle, Users, Building2, GraduationCap, ShieldCheck, Activity,
   BarChart3, Target, AlertTriangle, Star, ArrowUpRight, ArrowDownRight,
-  Zap, Eye, Calendar, Bell,
+  Zap, Eye, Calendar, Bell, Shield, Search, Plus, Edit3, Trash2, X, Check,
+  ChevronDown, ChevronRight, Copy, CheckSquare, Square, MinusSquare, Info,
+  Clipboard, Trophy, Settings, LayoutDashboard,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -198,7 +203,7 @@ function HodDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ChartCard title="Monthly Trends" subtitle={`${stats.departmentShort} – Activities & approvals over time`}>
-          <TrendAreaChart data={monthlyTrends} xKey="month"
+          <TrendAreaChart data={monthlyTrends as unknown as Record<string, unknown>[]} xKey="month"
             areas={[
               { key: 'activities', color: '#3b82f6', name: 'Activities' },
               { key: 'approved', color: '#10b981', name: 'Approved' },
@@ -274,57 +279,38 @@ function DeanDashboard() {
         <StatCard label="Research Output" value={deanStats.researchOutput} icon={GraduationCap} description={`${deanStats.patentsFiled} patents filed`} color="bg-amber-50 text-amber-600" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ChartCard title="Year-over-Year Comparison" subtitle="Points by month" className="lg:col-span-2">
-          <MultiLineChart data={yearlyComparisonData} xKey="month"
-            lines={[
-              { key: 'thisYear', color: '#3b82f6', name: '2025-26' },
-              { key: 'lastYear', color: '#94a3b8', name: '2024-25', dashed: true },
-            ]} />
-        </ChartCard>
-        <ChartCard title="Activity Types" subtitle="College-wide distribution">
-          <DonutChart data={collegeActivityTypeData.slice(0, 5).map(t => ({ name: t.type, value: t.count, color: t.color }))} innerRadius={50} outerRadius={75} showLabel={false} />
-          <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1">
-            {collegeActivityTypeData.slice(0, 6).map(t => (
-              <div key={t.type} className="flex items-center gap-2 text-[11px] text-slate-600">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                <span className="truncate">{t.type}</span>
-                <span className="ml-auto font-semibold">{t.count}</span>
-              </div>
-            ))}
+      {/* Department cards */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold text-slate-900 text-sm">Department Overview</h3>
+            <p className="text-xs text-slate-500">Performance summary</p>
           </div>
-        </ChartCard>
+          <Link href="/college" className="text-xs font-medium text-blue-600 hover:text-blue-700">View Full Dashboard &rarr;</Link>
+        </div>
+        <div className="space-y-3">
+          {departmentStats.map((d) => (
+            <div key={d.shortName} className="flex items-center gap-3 py-2">
+              <span className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">{d.shortName}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-800 truncate">{d.name}</p>
+                <p className="text-[11px] text-slate-400">{d.facultyCount} faculty &middot; {d.totalActivities} activities</p>
+              </div>
+              <span className="text-sm font-bold text-slate-700" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{d.avgPoints}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Faculty Growth" subtitle="Active faculty & new joiners by semester">
-          <ComposedBarLineChart data={facultyGrowthData} xKey="semester"
-            bars={[{ key: 'new', color: '#6366f1', name: 'New Joiners' }]}
-            lines={[{ key: 'active', color: '#10b981', name: 'Active Faculty' }]} />
-        </ChartCard>
-
-        {/* Department cards */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-slate-900 text-sm">Department Overview</h3>
-              <p className="text-xs text-slate-500">Performance summary</p>
-            </div>
-            <Link href="/college" className="text-xs font-medium text-blue-600 hover:text-blue-700">Details &rarr;</Link>
-          </div>
-          <div className="space-y-3">
-            {departmentStats.map((d) => (
-              <div key={d.shortName} className="flex items-center gap-3 py-2">
-                <span className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">{d.shortName}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{d.name}</p>
-                  <p className="text-[11px] text-slate-400">{d.facultyCount} faculty &middot; {d.totalActivities} activities</p>
-                </div>
-                <span className="text-sm font-bold text-slate-700" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{d.avgPoints}</span>
-              </div>
-            ))}
-          </div>
+      {/* Prompt to college page */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-purple-900 text-sm">DDP Indicator Dashboard</h3>
+          <p className="text-xs text-purple-600 mt-0.5">View complete institutional analytics, heatmaps, scorecards &amp; DDP tracking</p>
         </div>
+        <Link href="/college" className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
+          Open College Dashboard &rarr;
+        </Link>
       </div>
     </div>
   )
@@ -391,11 +377,231 @@ function VerificationDashboard() {
 }
 
 /* ------------------------------------------------------------------ */
+/* ROLES MANAGEMENT HELPERS                                            */
+/* ------------------------------------------------------------------ */
+const iconMap: Record<string, React.ElementType> = {
+  LayoutDashboard, FileText, Award, Clipboard, Building2,
+  Trophy, GraduationCap, ShieldCheck, Users, Shield, Settings,
+}
+
+function groupResources(resources: Resource[]) {
+  const groups: Record<string, Resource[]> = {}
+  resources.forEach(r => {
+    if (!groups[r.group]) groups[r.group] = []
+    groups[r.group].push(r)
+  })
+  return groups
+}
+
+const groupIcons: Record<string, React.ElementType> = {
+  Overview: LayoutDashboard, Faculty: FileText, Department: Building2,
+  College: GraduationCap, Management: Shield,
+}
+const groupColors: Record<string, string> = {
+  Overview: 'text-blue-600 bg-blue-50', Faculty: 'text-emerald-600 bg-emerald-50',
+  Department: 'text-purple-600 bg-purple-50', College: 'text-amber-600 bg-amber-50',
+  Management: 'text-red-600 bg-red-50',
+}
+
+/* ====== Resource Tree Component ====== */
+function ResourceTree({ selected, onToggle }: { selected: Set<string>; onToggle: (id: string) => void }) {
+  const grouped = groupResources(availableResources)
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(
+    Object.fromEntries(Object.keys(grouped).map(g => [g, true]))
+  )
+  const toggleGroup = (group: string) => setExpanded(prev => ({ ...prev, [group]: !prev[group] }))
+  const toggleAllInGroup = (group: string) => {
+    const items = grouped[group]
+    const allSelected = items.every(r => selected.has(r.id))
+    items.forEach(r => {
+      if (allSelected && selected.has(r.id)) onToggle(r.id)
+      if (!allSelected && !selected.has(r.id)) onToggle(r.id)
+    })
+  }
+  return (
+    <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+        <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Assign Resources</span>
+        <span className="text-[11px] text-slate-400">Selected: {selected.size} of {availableResources.length}</span>
+      </div>
+      <div className="max-h-[320px] overflow-y-auto">
+        {Object.entries(grouped).map(([group, resources]) => {
+          const selectedInGroup = resources.filter(r => selected.has(r.id)).length
+          const allSelected = selectedInGroup === resources.length
+          const someSelected = selectedInGroup > 0 && !allSelected
+          const GroupIcon = groupIcons[group] || Shield
+          const isExpanded = expanded[group]
+          const color = groupColors[group] || 'text-slate-600 bg-slate-50'
+          return (
+            <div key={group} className="border-b border-slate-100 last:border-0">
+              <div className="flex items-center gap-2 px-3 py-2.5 hover:bg-slate-50 cursor-pointer select-none" onClick={() => toggleGroup(group)}>
+                <button onClick={(e) => { e.stopPropagation(); toggleAllInGroup(group) }} className="text-slate-400 hover:text-blue-600 transition-colors">
+                  {allSelected ? <CheckSquare className="w-4 h-4 text-blue-600" /> : someSelected ? <MinusSquare className="w-4 h-4 text-blue-400" /> : <Square className="w-4 h-4" />}
+                </button>
+                {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+                <div className={`w-5 h-5 rounded flex items-center justify-center ${color}`}><GroupIcon className="w-3 h-3" /></div>
+                <span className="text-xs font-semibold text-slate-700 flex-1">{group}</span>
+                <span className="text-[10px] text-slate-400 font-mono">{selectedInGroup}/{resources.length}</span>
+              </div>
+              {isExpanded && (
+                <div className="pb-1">
+                  {resources.map(r => {
+                    const Icon = iconMap[r.icon] || FileText
+                    const isSelected = selected.has(r.id)
+                    return (
+                      <label key={r.id} className={`flex items-center gap-2.5 px-3 py-2 ml-6 mr-2 rounded-md cursor-pointer transition-colors ${isSelected ? 'bg-blue-50/70' : 'hover:bg-slate-50'}`}>
+                        <input type="checkbox" checked={isSelected} onChange={() => onToggle(r.id)} className="sr-only" />
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-blue-600 flex-shrink-0" /> : <Square className="w-4 h-4 text-slate-300 flex-shrink-0" />}
+                        <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isSelected ? 'text-blue-500' : 'text-slate-400'}`} />
+                        <span className={`text-xs ${isSelected ? 'text-slate-800 font-medium' : 'text-slate-600'}`}>{r.label}</span>
+                        <span className="text-[10px] text-slate-300 ml-auto font-mono">{r.href}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* ====== Add/Edit Role Modal ====== */
+function RoleModal({ role, onClose, onSave }: {
+  role: Role | null
+  onClose: () => void
+  onSave: (role: Omit<Role, 'id' | 'createdAt' | 'usersCount'> & { id?: number }) => void
+}) {
+  const [name, setName] = useState(role?.name || '')
+  const [description, setDescription] = useState(role?.description || '')
+  const [selectedResources, setSelectedResources] = useState<Set<string>>(new Set(role?.resources || []))
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const handleToggle = (id: string) => {
+    setSelectedResources(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
+  }
+  const validate = () => {
+    const errs: Record<string, string> = {}
+    if (!name.trim()) errs.name = 'Role name is required'
+    if (selectedResources.size === 0) errs.resources = 'Select at least one resource'
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+  const handleSubmit = () => {
+    if (!validate()) return
+    onSave({ id: role?.id, name: name.trim(), description: description.trim(), passwordPrefix: role?.passwordPrefix || '', editAccess: role?.editAccess ?? true, deleteAccess: role?.deleteAccess ?? false, status: role?.status ?? true, resources: Array.from(selectedResources), isSystem: role?.isSystem || false })
+  }
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col animate-slide-up">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">{role ? 'Edit Role' : 'Add New Role'}</h2>
+            <p className="text-xs text-slate-500 mt-0.5">{role ? `Editing "${role.name}" role configuration` : 'Create a new role and assign resources'}</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Role Name <span className="text-red-500">*</span></label>
+            <input type="text" value={name} onChange={(e) => { setName(e.target.value); setErrors(prev => ({ ...prev, name: '' })) }} placeholder="Enter role name" className={`input-base ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`} />
+            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description of this role" className="input-base" />
+          </div>
+          <div>
+            {errors.resources && <p className="text-xs text-red-500 mb-2 flex items-center gap-1"><Info className="w-3 h-3" /> {errors.resources}</p>}
+            <ResourceTree selected={selectedResources} onToggle={handleToggle} />
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/50 flex items-center justify-end gap-3">
+          <button onClick={onClose} className="btn-outline">Cancel</button>
+          <button onClick={handleSubmit} className="btn-primary"><Check className="w-4 h-4" />{role ? 'Save Changes' : 'Add Role'}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ====== Delete Confirmation Modal ====== */
+function DeleteConfirm({ role, onClose, onConfirm }: { role: Role; onClose: () => void; onConfirm: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 animate-slide-up">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0"><Trash2 className="w-5 h-5 text-red-600" /></div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">Delete Role</h3>
+            <p className="text-xs text-slate-500">This action cannot be undone</p>
+          </div>
+        </div>
+        <p className="text-sm text-slate-600 mb-1">Are you sure you want to delete the <span className="font-bold">&quot;{role.name}&quot;</span> role?</p>
+        {role.usersCount > 0 && (
+          <div className="flex items-center gap-2 mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <p className="text-xs text-amber-700"><span className="font-bold">{role.usersCount} users</span> are currently assigned this role. They&apos;ll lose these permissions.</p>
+          </div>
+        )}
+        <div className="flex items-center justify-end gap-3 mt-5">
+          <button onClick={onClose} className="btn-outline">Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-2"><Trash2 className="w-3.5 h-3.5" />Delete Role</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /* ADMIN DASHBOARD                                                     */
 /* ------------------------------------------------------------------ */
 function AdminDashboard() {
+  const [rolesList, setRolesList] = useState<Role[]>(initialRoles)
+  const [search, setSearch] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingRole, setEditingRole] = useState<Role | null>(null)
+  const [deletingRole, setDeletingRole] = useState<Role | null>(null)
+  const [expandedRow, setExpandedRow] = useState<number | null>(null)
+
+  const filtered = useMemo(() => {
+    if (!search) return rolesList
+    const q = search.toLowerCase()
+    return rolesList.filter(r => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q))
+  }, [rolesList, search])
+
+  const handleSave = (data: Omit<Role, 'id' | 'createdAt' | 'usersCount'> & { id?: number }) => {
+    if (data.id) {
+      setRolesList(prev => prev.map(r => r.id === data.id ? { ...r, name: data.name, description: data.description, passwordPrefix: data.passwordPrefix, editAccess: data.editAccess, deleteAccess: data.deleteAccess, status: data.status, resources: data.resources } : r))
+      toast.success(`Role "${data.name}" updated successfully`)
+    } else {
+      const newId = Math.max(...rolesList.map(r => r.id)) + 1
+      setRolesList(prev => [...prev, { id: newId, name: data.name, description: data.description, passwordPrefix: data.passwordPrefix, editAccess: data.editAccess, deleteAccess: data.deleteAccess, status: data.status, resources: data.resources, isSystem: false, createdAt: new Date().toISOString().split('T')[0], usersCount: 0 }])
+      toast.success(`Role "${data.name}" created successfully`)
+    }
+    setShowAddModal(false)
+    setEditingRole(null)
+  }
+
+  const handleDelete = () => {
+    if (!deletingRole) return
+    setRolesList(prev => prev.filter(r => r.id !== deletingRole.id))
+    toast.success(`Role "${deletingRole.name}" deleted`)
+    setDeletingRole(null)
+  }
+
+  const handleDuplicate = (role: Role) => {
+    const newId = Math.max(...rolesList.map(r => r.id)) + 1
+    setRolesList(prev => [...prev, { ...role, id: newId, name: `${role.name} (Copy)`, isSystem: false, createdAt: new Date().toISOString().split('T')[0], usersCount: 0 }])
+    toast.success(`Role duplicated as "${role.name} (Copy)"`)
+  }
+
+  const totalUsers = rolesList.reduce((s, r) => s + r.usersCount, 0)
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Users" value={adminStats.totalUsers} icon={Users} description={`${adminStats.activeUsers} active`} color="bg-blue-50 text-blue-600" />
         <StatCard label="New This Month" value={adminStats.newUsersThisMonth} icon={Zap} color="bg-emerald-50 text-emerald-600" />
@@ -403,6 +609,7 @@ function AdminDashboard() {
         <StatCard label="Storage" value={adminStats.storageUsed} icon={BarChart3} color="bg-purple-50 text-purple-600" />
       </div>
 
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ChartCard title="User Growth" subtitle="Total vs Active users" className="lg:col-span-2">
           <TrendAreaChart data={userGrowthData} xKey="month"
@@ -429,6 +636,139 @@ function AdminDashboard() {
             lines={[{ key: 'unique', color: '#3b82f6', name: 'Unique Users' }]} />
         </ChartCard>
       </div>
+
+      {/* ---- Roles Management Section ---- */}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-600" />
+              Manage Roles
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">Create and manage user roles with specific resource access</p>
+          </div>
+          <button onClick={() => setShowAddModal(true)} className="btn-primary w-fit">
+            <Plus className="w-4 h-4" /> Add Role
+          </button>
+        </div>
+
+        {/* Role Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          {[
+            { label: 'Total Roles', value: rolesList.length, color: 'text-blue-600' },
+            { label: 'System Roles', value: rolesList.filter(r => r.isSystem).length, color: 'text-emerald-600' },
+            { label: 'Custom Roles', value: rolesList.filter(r => !r.isSystem).length, color: 'text-purple-600' },
+            { label: 'Users Assigned', value: totalUsers, color: 'text-amber-600' },
+          ].map(s => (
+            <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4">
+              <p className="text-xs text-slate-500">{s.label}</p>
+              <p className={`text-xl font-bold ${s.color}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input type="text" placeholder="Search roles..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-base pl-10" />
+          </div>
+        </div>
+
+        {/* Roles Table */}
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-50 bg-slate-50/50">
+                  <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">S.No</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Role Name</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Description</th>
+                  <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Resources</th>
+                  <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Users</th>
+                  <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Type</th>
+                  <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={7} className="text-center py-12 text-slate-400"><Shield className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No roles found</p></td></tr>
+                ) : (
+                  filtered.map((role, idx) => (
+                    <React.Fragment key={role.id}>
+                      <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                        <td className="px-5 py-4 text-sm text-slate-500">{idx + 1}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                              role.name === 'Faculty' ? 'bg-blue-50 text-blue-600' :
+                              role.name === 'HOD' ? 'bg-emerald-50 text-emerald-600' :
+                              role.name === 'Dean' ? 'bg-purple-50 text-purple-600' :
+                              role.name === 'Verification' ? 'bg-amber-50 text-amber-600' :
+                              'bg-slate-100 text-slate-600'
+                            }`}>{role.name.charAt(0)}</div>
+                            <span className="text-sm font-medium text-slate-800">{role.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-slate-500 max-w-[240px] truncate">{role.description}</td>
+                        <td className="px-5 py-4 text-center">
+                          <button onClick={() => setExpandedRow(expandedRow === role.id ? null : role.id)} className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                            {role.resources.length} pages
+                            {expandedRow === role.id ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                          </button>
+                        </td>
+                        <td className="px-5 py-4 text-center"><span className="text-sm text-slate-600">{role.usersCount}</span></td>
+                        <td className="px-5 py-4 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${role.isSystem ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+                            {role.isSystem ? 'System' : 'Custom'}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => setEditingRole(role)} title="Edit role" className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><Edit3 className="w-4 h-4" /></button>
+                            <button onClick={() => handleDuplicate(role)} title="Duplicate role" className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><Copy className="w-4 h-4" /></button>
+                            <button onClick={() => !role.isSystem && setDeletingRole(role)} title={role.isSystem ? 'System roles cannot be deleted' : 'Delete role'} disabled={role.isSystem} className={`p-2 rounded-lg transition-colors ${role.isSystem ? 'text-slate-200 cursor-not-allowed' : 'hover:bg-red-50 text-slate-400 hover:text-red-500'}`}><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedRow === role.id && (
+                        <tr><td colSpan={7} className="px-5 py-3 bg-slate-50/80">
+                          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Assigned Resources ({role.resources.length})</p>
+                          <div className="flex flex-wrap gap-2">
+                            {role.resources.map(resId => {
+                              const res = availableResources.find(r => r.id === resId)
+                              if (!res) return null
+                              const Icon = iconMap[res.icon] || FileText
+                              return (
+                                <span key={resId} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-700">
+                                  <Icon className="w-3 h-3 text-slate-400" />{res.label}
+                                  <span className="text-[10px] text-slate-300 font-mono">{res.href}</span>
+                                </span>
+                              )
+                            })}
+                          </div>
+                        </td></tr>
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between">
+            <p className="text-xs text-slate-500">Showing {filtered.length} of {rolesList.length} roles</p>
+            <p className="text-[10px] text-slate-400">System roles cannot be deleted but can be edited</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      {(showAddModal || editingRole) && (
+        <RoleModal role={editingRole} onClose={() => { setShowAddModal(false); setEditingRole(null) }} onSave={handleSave} />
+      )}
+      {deletingRole && (
+        <DeleteConfirm role={deletingRole} onClose={() => setDeletingRole(null)} onConfirm={handleDelete} />
+      )}
     </div>
   )
 }

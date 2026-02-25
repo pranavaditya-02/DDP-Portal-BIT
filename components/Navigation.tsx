@@ -30,27 +30,27 @@ export const Navigation: React.FC = () => {
     {
       label: 'Dashboard',
       href: '/dashboard',
-      show: true, // All roles see dashboard
+      show: !isDean(),
     },
     {
       label: 'My Activities',
       href: '/activities',
-      show: isFaculty(),
+      show: isFaculty() && !isDean(),
     },
     {
       label: 'Submit Activity',
       href: '/activities/submit',
-      show: isFaculty(),
+      show: isFaculty() && !isDean(),
     },
     {
       label: 'Submit Achievements',
       href: '/achievements/submit',
-      show: isFaculty(),
+      show: isFaculty() && !isDean(),
     },
     {
       label: 'Submit Action Plan',
       href: '/action-plan/submit',
-      show: isFaculty(),
+      show: isFaculty() && !isDean(),
     },
     {
       label: 'Department',

@@ -89,9 +89,9 @@ export default function LeaderboardPage() {
 
       {/* Top 3 podium */}
       {topThree.length >= 3 && !search && deptFilter === 'All' && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {/* 2nd place */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center mt-8 hover:shadow-lg transition-all duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center sm:mt-8 hover:shadow-lg transition-all duration-200">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white font-bold text-xl mx-auto mb-3 shadow-lg shadow-slate-200">
               2
             </div>
@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
           </div>
 
           {/* 3rd place */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center mt-12 hover:shadow-lg transition-all duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center sm:mt-12 hover:shadow-lg transition-all duration-200">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-300 to-orange-500 flex items-center justify-center text-white font-bold text-xl mx-auto mb-3 shadow-lg shadow-orange-200">
               3
             </div>
@@ -150,29 +150,27 @@ export default function LeaderboardPage() {
         {/* Rows */}
         <div className="divide-y divide-slate-50">
           {filtered.map((f) => (
-            <div key={f.rank} className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors">
-              <div className="col-span-1 flex justify-center">
+            <div key={f.rank} className="flex items-center gap-3 px-5 py-4 hover:bg-slate-50/50 transition-colors">
+              <div className="flex-shrink-0">
                 <RankBadge rank={f.rank} />
               </div>
-              <div className="col-span-5 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {f.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                {f.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
+                  <BadgeIcon badge={f.badge} />
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
-                    <BadgeIcon badge={f.badge} />
-                  </div>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <span className="text-xs text-slate-400">{f.department}</span>
+                  <span className="text-[10px] text-slate-300">·</span>
+                  <span className="text-xs text-slate-400">{f.activities} activities</span>
                 </div>
               </div>
-              <div className="col-span-2">
-                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">{f.department}</span>
-              </div>
-              <div className="col-span-2 text-center">
-                <span className="text-sm text-slate-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{f.activities}</span>
-              </div>
-              <div className="col-span-2 text-center">
+              <div className="flex-shrink-0 text-right">
                 <span className="text-sm font-bold text-slate-800" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{f.points}</span>
+                <p className="text-[10px] text-slate-400">pts</p>
               </div>
             </div>
           ))}

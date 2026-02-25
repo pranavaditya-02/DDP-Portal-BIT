@@ -200,6 +200,31 @@ export function RadarChartComponent({ data, dataKey, nameKey, height = 240, colo
 }
 
 // ============================================================
+// MULTI-SERIES RADAR CHART – for comparing departments
+// ============================================================
+export function MultiRadarChart({ data, nameKey, series, height = 280 }: {
+  data: Record<string, unknown>[]; nameKey: string
+  series: { key: string; color: string; name?: string }[]
+  height?: number
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <RadarChart cx="50%" cy="50%" outerRadius="68%" data={data}>
+        <PolarGrid stroke="#e2e8f0" />
+        <PolarAngleAxis dataKey={nameKey} tick={{ fontSize: 11, fill: '#64748b' }} />
+        <PolarRadiusAxis tick={{ fontSize: 9, fill: '#94a3b8' }} domain={[0, 100]} />
+        {series.map(s => (
+          <Radar key={s.key} dataKey={s.key} name={s.name || s.key}
+            stroke={s.color} fill={s.color} fillOpacity={0.1} strokeWidth={2} />
+        ))}
+        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+        <Tooltip {...tooltipStyle} />
+      </RadarChart>
+    </ResponsiveContainer>
+  )
+}
+
+// ============================================================
 // STACKED BAR CHART
 // ============================================================
 export function StackedBarChart({ data, xKey, bars, height = 240 }: {
@@ -319,6 +344,31 @@ export function Sparkline({ data, dataKey, color = '#3b82f6', height = 40 }: {
         <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={1.5}
           fill={`url(#spark-${dataKey})`} dot={false} />
       </AreaChart>
+    </ResponsiveContainer>
+  )
+}
+
+// ============================================================
+// GROUPED BAR CHART – for side-by-side multi-year comparisons
+// ============================================================
+export function GroupedBarChart({ data, xKey, bars, height = 240 }: {
+  data: Record<string, unknown>[]; xKey: string
+  bars: { key: string; color: string; name?: string }[]
+  height?: number
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+        <Tooltip {...tooltipStyle} />
+        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+        {bars.map(b => (
+          <Bar key={b.key} dataKey={b.key} name={b.name || b.key}
+            fill={b.color} radius={3} barSize={16} />
+        ))}
+      </BarChart>
     </ResponsiveContainer>
   )
 }

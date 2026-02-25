@@ -13,7 +13,7 @@ import {
   Trophy,
   GraduationCap,
   ShieldCheck,
-  Users,
+  Shield,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -23,7 +23,15 @@ import {
   ChevronDown,
   Award,
   Clipboard,
+  X,
 } from 'lucide-react'
+
+interface SidebarProps {
+  collapsed: boolean
+  setCollapsed: (v: boolean) => void
+  mobileOpen: boolean
+  setMobileOpen: (v: boolean) => void
+}
 
 interface NavItem {
   label: string
@@ -38,12 +46,11 @@ interface NavGroup {
   items: NavItem[]
 }
 
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) => {
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const { isFaculty, isHod, isDean, isVerification, isMaintenance } = useRoles()
-  const [collapsed, setCollapsed] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
 
   const handleLogout = () => {
@@ -57,16 +64,16 @@ export const Sidebar: React.FC = () => {
     {
       title: 'Overview',
       items: [
-        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, show: true },
+        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, show: !isDean() },
       ],
     },
     {
       title: 'Faculty',
       items: [
-        { label: 'My Activities', href: '/activities', icon: FileText, show: isFaculty() },
-        { label: 'Submit Activity', href: '/activities/submit', icon: PlusCircle, show: isFaculty() },
-        { label: 'Submit Achievements', href: '/achievements/submit', icon: Award, show: isFaculty() },
-        { label: 'Submit Action Plan', href: '/action-plan/submit', icon: Clipboard, show: isFaculty() },
+        { label: 'My Activities', href: '/activities', icon: FileText, show: isFaculty() && !isDean() },
+        // { label: 'Submit Activity', href: '/activities/submit', icon: PlusCircle, show: isFaculty() },
+        { label: 'Submit Achievements', href: '/achievements/submit', icon: Award, show: isFaculty() && !isDean() },
+        { label: 'Submit Action Plan', href: '/action-plan/submit', icon: Clipboard, show: isFaculty() && !isDean() },
       ],
     },
     {
@@ -88,7 +95,7 @@ export const Sidebar: React.FC = () => {
       title: 'Management',
       items: [
         { label: 'Verification Queue', href: '/verification', icon: ShieldCheck, show: isVerification(), badge: 7 },
-        { label: 'User Management', href: '/users', icon: Users, show: isMaintenance() },
+        { label: 'Role Management', href: '/roles', icon: Shield, show: isMaintenance() },
         { label: 'Settings', href: '/settings', icon: Settings, show: isMaintenance() },
       ],
     },
@@ -114,8 +121,11 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      style={{ width: collapsed ? 72 : 260, transition: 'width 0.2s ease-in-out' }}
-      className="fixed left-0 top-0 h-screen bg-slate-900 text-white flex flex-col z-50 border-r border-slate-800"
+      className={`fixed left-0 top-0 h-screen bg-slate-900 text-white flex flex-col z-50 border-r border-slate-800
+        transition-all duration-300 ease-in-out w-[260px]
+        ${collapsed ? 'md:w-[72px]' : 'md:w-[260px]'}
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0`}
     >
       {/* Header / Logo */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
@@ -129,11 +139,19 @@ export const Sidebar: React.FC = () => {
             </span>
           )}
         </Link>
+        {/* Desktop collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="hidden md:flex p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </button>
+        {/* Mobile close button */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+        >
+          <X className="w-4 h-4" />
         </button>
       </div>
 
@@ -154,6 +172,7 @@ export const Sidebar: React.FC = () => {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setMobileOpen(false)}
                     className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
                       active
                         ? 'bg-blue-600/20 text-blue-400'

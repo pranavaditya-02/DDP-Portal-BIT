@@ -29,6 +29,19 @@ export interface AuthState {
   setHasHydrated: (value: boolean) => void;
 }
 
+/* ── Sidebar UI store (not persisted) ── */
+interface SidebarState {
+  collapsed: boolean
+  setCollapsed: (v: boolean) => void
+  toggleCollapsed: () => void
+}
+
+export const useSidebarStore = create<SidebarState>()((set) => ({
+  collapsed: false,
+  setCollapsed: (v) => set({ collapsed: v }),
+  toggleCollapsed: () => set((s) => ({ collapsed: !s.collapsed })),
+}))
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({

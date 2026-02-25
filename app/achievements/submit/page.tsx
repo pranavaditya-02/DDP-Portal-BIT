@@ -696,7 +696,7 @@ export default function SubmitAchievementsPage() {
                 </div>
 
                 {/* Special Labs Involved */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Special Labs Involved *</label>
                     <select
@@ -835,7 +835,7 @@ export default function SubmitAchievementsPage() {
                 </div>
 
                 {/* Event Duration */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Event Duration Unit *</label>
                     <select
@@ -865,7 +865,7 @@ export default function SubmitAchievementsPage() {
                 </div>
 
                 {/* Event Date & End Date */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Event Date *</label>
                     <input
@@ -1029,7 +1029,7 @@ export default function SubmitAchievementsPage() {
                 <h3 className="font-semibold text-slate-800">Events Organized Details</h3>
 
                 {/* Faculty Information */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Task ID *</label>
                     <input type="text" value={achievement.eventsOrganisedData?.taskId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'taskId', e.target.value)} placeholder="Enter task ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
@@ -1040,7 +1040,7 @@ export default function SubmitAchievementsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Role *</label>
                     <select value={achievement.eventsOrganisedData?.facultyRole || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'facultyRole', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
@@ -1070,7 +1070,7 @@ export default function SubmitAchievementsPage() {
                 <div className="pt-4 border-t border-blue-300">
                   <h4 className="font-medium text-slate-800 mb-4">Event Classifications</h4>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Whether this event comes under IIC</label>
                       <select value={achievement.eventsOrganisedData?.iicEvent || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'iicEvent', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1098,7 +1098,7 @@ export default function SubmitAchievementsPage() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Is this event belongs to Department Association</label>
                       <select value={achievement.eventsOrganisedData?.deptAssociation || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'deptAssociation', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1126,7 +1126,7 @@ export default function SubmitAchievementsPage() {
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Is this event an outcome of MoU</label>
                       <select value={achievement.eventsOrganisedData?.mouOutcome || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'mouOutcome', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1143,7 +1143,7 @@ export default function SubmitAchievementsPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Is this event an outcome of an IRP visit</label>
                       <select value={achievement.eventsOrganisedData?.irpOutcome || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'irpOutcome', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1160,7 +1160,7 @@ export default function SubmitAchievementsPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Is this event organized through the Centre of Excellence</label>
                       <select value={achievement.eventsOrganisedData?.coeOrganized || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'coeOrganized', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1177,7 +1177,7 @@ export default function SubmitAchievementsPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Is this event organized through Industry Supported Laboratories</label>
                       <select value={achievement.eventsOrganisedData?.islOrganized || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'islOrganized', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1246,7 +1246,7 @@ export default function SubmitAchievementsPage() {
                     <input type="text" value={achievement.eventsOrganisedData?.eventName || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventName', e.target.value)} placeholder="Enter event name" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Type of Program *</label>
                       <select value={achievement.eventsOrganisedData?.programType || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'programType', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
@@ -1271,7 +1271,7 @@ export default function SubmitAchievementsPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Event Mode *</label>
                       <select value={achievement.eventsOrganisedData?.eventMode || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventMode', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
@@ -1298,7 +1298,7 @@ export default function SubmitAchievementsPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Start Date *</label>
                       <input type="date" value={achievement.eventsOrganisedData?.startDate || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'startDate', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
@@ -1313,7 +1313,7 @@ export default function SubmitAchievementsPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Internal Participants (Student)</label>
                       <input type="number" value={achievement.eventsOrganisedData?.internalStudentParticipants || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'internalStudentParticipants', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
@@ -1337,7 +1337,7 @@ export default function SubmitAchievementsPage() {
                 <div className="pt-4 border-t border-blue-300">
                   <h4 className="font-medium text-slate-800 mb-4">Guest Speakers</h4>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Invited Guest or Notable Speaker</label>
                       <select value={achievement.eventsOrganisedData?.guestSpeakerType || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'guestSpeakerType', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
@@ -1390,7 +1390,7 @@ export default function SubmitAchievementsPage() {
                 <div className="pt-4 border-t border-blue-300">
                   <h4 className="font-medium text-slate-800 mb-4">Financial Information</h4>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Registration Amount</label>
                       <input type="number" value={achievement.eventsOrganisedData?.registrationAmount || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'registrationAmount', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
@@ -1401,7 +1401,7 @@ export default function SubmitAchievementsPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Amount Received From Management</label>
                       <select value={achievement.eventsOrganisedData?.managementAmount || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'managementAmount', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">

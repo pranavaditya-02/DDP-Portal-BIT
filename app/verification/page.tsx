@@ -5,12 +5,123 @@ import { pendingActivities, type Activity } from '@/lib/mock-data'
 import toast from 'react-hot-toast'
 import {
   ShieldCheck, Search, CheckCircle2, XCircle, Clock,
-  ChevronDown, ChevronUp, User, Building2, Calendar,
-  Tag, Award, MessageSquare, ExternalLink, Filter,
+  User, Building2, Calendar,
+  Tag, ExternalLink,
+  Eye, X, Hash, FileText, Layers, Star,
 } from 'lucide-react'
 
 type ReviewAction = 'approve' | 'reject' | null
 
+/* ── Detail Dialog ── */
+function ActivityDetailDialog({
+  activity,
+  open,
+  onClose,
+}: {
+  activity: Activity
+  open: boolean
+  onClose: () => void
+}) {
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Dialog */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+          <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+            <Eye className="w-4 h-4 text-blue-600" />
+            Activity Details
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Title */}
+          <div>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Title</p>
+            <p className="text-sm font-semibold text-slate-900">{activity.title}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <DetailItem icon={<User className="w-3.5 h-3.5" />}   label="Faculty Name" value={activity.facultyName || '—'} />
+            <DetailItem icon={<Hash className="w-3.5 h-3.5" />}   label="Faculty ID"   value={activity.facultyId ? `#${activity.facultyId}` : '—'} />
+            <DetailItem icon={<Building2 className="w-3.5 h-3.5" />} label="Department" value={activity.department || '—'} />
+            <DetailItem icon={<FileText className="w-3.5 h-3.5" />}  label="Type"       value={activity.type} />
+            <DetailItem icon={<Layers className="w-3.5 h-3.5" />}    label="Category"   value={activity.category} />
+            <DetailItem icon={<Calendar className="w-3.5 h-3.5" />}  label="Date"       value={activity.date} />
+            <DetailItem icon={<Star className="w-3.5 h-3.5" />}      label="Points"     value={`${activity.points} pts`} highlight />
+            <DetailItem icon={<Clock className="w-3.5 h-3.5" />}     label="Status"     value={activity.status.charAt(0).toUpperCase() + activity.status.slice(1)} statusColor={
+              activity.status === 'approved' ? 'text-emerald-600' : activity.status === 'rejected' ? 'text-red-600' : 'text-amber-600'
+            } />
+          </div>
+
+          {activity.proofUrl && (
+            <div>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Proof / Document</p>
+              <a
+                href={activity.proofUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                View attached proof
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DetailItem({
+  icon,
+  label,
+  value,
+  highlight,
+  statusColor,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  highlight?: boolean
+  statusColor?: string
+}) {
+  return (
+    <div className="bg-slate-50 rounded-lg p-3">
+      <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+        {icon} {label}
+      </p>
+      <p className={`text-sm font-semibold ${statusColor || (highlight ? 'text-blue-700' : 'text-slate-800')}`}>
+        {value}
+      </p>
+    </div>
+  )
+}
+
+/* ── Verification Card ── */
 function VerificationCard({
   activity,
   onAction,
@@ -18,11 +129,13 @@ function VerificationCard({
   activity: Activity
   onAction: (id: number, action: 'approve' | 'reject', reason?: string) => void
 }) {
-  const [expanded, setExpanded] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
 
   return (
+    <>
+    <ActivityDetailDialog activity={activity} open={showDetail} onClose={() => setShowDetail(false)} />
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-sm transition-all duration-200">
       {/* Main row */}
       <div className="p-5">
@@ -41,10 +154,11 @@ function VerificationCard({
               +{activity.points}
             </span>
             <button
-              onClick={() => setExpanded(!expanded)}
-              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"
+              onClick={() => setShowDetail(true)}
+              title="View full details"
+              className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-500 hover:text-blue-700 transition-colors"
             >
-              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <Eye className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -65,38 +179,8 @@ function VerificationCard({
             <XCircle className="w-4 h-4" />
             Reject
           </button>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="ml-auto text-xs text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            {expanded ? 'Less details' : 'More details'}
-          </button>
         </div>
       </div>
-
-      {/* Expanded details */}
-      {expanded && (
-        <div className="px-5 pb-5 pt-0 border-t border-slate-100 mt-0 animate-fade-in">
-          <div className="pt-4 grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Category</p>
-              <p className="font-medium text-slate-700">{activity.category}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Faculty ID</p>
-              <p className="font-medium text-slate-700">#{activity.facultyId}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Submission Date</p>
-              <p className="font-medium text-slate-700">{activity.date}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Points Requested</p>
-              <p className="font-medium text-slate-700">{activity.points}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Rejection form */}
       {showRejectForm && (
@@ -133,6 +217,7 @@ function VerificationCard({
         </div>
       )}
     </div>
+    </>
   )
 }
 
@@ -171,7 +256,7 @@ export default function VerificationPage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs text-slate-500">Pending</p>
           <p className="text-xl font-bold text-amber-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{queue.length}</p>

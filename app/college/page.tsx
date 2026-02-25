@@ -1,159 +1,753 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
-  deanStats, departmentStats, monthlyTrends,
-  yearlyComparisonData, collegeActivityTypeData, facultyGrowthData,
-  deptActivityVolumeData,
+  deanStats, monthlyTrends, yearlyComparisonData,
+  collegeActivityTypeData, facultyGrowthData,
+  deptRadarData, leaderboard,
 } from '@/lib/mock-data'
 import {
+  ddpOverallIndexing, ddpAllActivities, ddpOverallTotals,
+  ddpJournalDeptBreakdown, ddpMonthlyTrend,
+  ddpCategoryAchievementRates, ddpHeatmapData, getDDPInsights,
+} from '@/lib/ddp-data'
+import {
   ChartCard, TrendAreaChart, ComparisonBarChart, DonutChart,
-  MultiLineChart, ComposedBarLineChart,
+  MultiLineChart, ComposedBarLineChart, MultiRadarChart,
 } from '@/components/charts'
 import {
-  GraduationCap, Building2, Users, Activity, Award,
-  TrendingUp, FileText, BarChart3, ArrowUpRight,
+  GraduationCap, Building2, Users, Activity,
+  ArrowUpRight, AlertTriangle, CheckCircle2, ShieldAlert,
+  Trophy, ChevronDown, BarChart3, TrendingUp, Target,
 } from 'lucide-react'
 
-export default function CollegePage() {
+/* ================================================================
+   HELPERS & CONSTANTS
+   ================================================================ */
+
+const MONO_FONT = { fontFamily: "'JetBrains Mono', monospace" }
+
+const DEPT_COLORS: Record<string, string> = {
+  CSE: '#3b82f6', IT: '#10b981', ECE: '#8b5cf6', EEE: '#f59e0b', MECH: '#ef4444',
+  CIVIL: '#6366f1', AIML: '#14b8a6', AIDS: '#f97316', BIOTECH: '#ec4899',
+  AGRI: '#84cc16', EIE: '#a855f7', FT: '#06b6d4', MTRX: '#e11d48',
+  CSD: '#7c3aed', CT: '#0891b2',
+}
+
+const HEATMAP_LEGEND = [
+  { label: 'Exceeding (80%+)', cls: 'bg-green-500' },
+  { label: 'On Track (60-79%)', cls: 'bg-green-300' },
+  { label: 'At Risk (40-59%)', cls: 'bg-yellow-300' },
+  { label: 'Behind (20-39%)', cls: 'bg-orange-400' },
+  { label: 'Critical (<20%)', cls: 'bg-red-500' },
+  { label: 'No Progress', cls: 'bg-slate-100 border border-slate-200' },
+]
+
+const HEATMAP_COLS = ['Journals', 'Conferences', 'Patents', 'Placements', 'Funding', 'Guest Lect.', 'FDP', 'NPTEL', 'Events'] as const
+const HEATMAP_KEYS = ['journals', 'conferences', 'patents', 'placements', 'funding', 'guestLectures', 'fdp', 'nptel', 'events'] as const
+
+function heatBg(v: number) {
+  if (v >= 80) return { bg: '#22c55e', text: '#fff' }
+  if (v >= 60) return { bg: '#86efac', text: '#14532d' }
+  if (v >= 40) return { bg: '#fde047', text: '#713f12' }
+  if (v >= 20) return { bg: '#fb923c', text: '#fff' }
+  if (v > 0) return { bg: '#ef4444', text: '#fff' }
+  return { bg: '#f1f5f9', text: '#94a3b8' }
+}
+
+function progressColor(pct: number) {
+  if (pct >= 80) return '#22c55e'
+  if (pct >= 60) return '#eab308'
+  if (pct >= 40) return '#f97316'
+  return '#ef4444'
+}
+
+function pctTextColor(pct: number) {
+  if (pct >= 80) return 'text-emerald-600'
+  if (pct >= 60) return 'text-yellow-600'
+  if (pct >= 40) return 'text-orange-600'
+  return 'text-red-500'
+}
+
+/* ================================================================
+   DERIVED DATA
+   ================================================================ */
+
+const insights = getDDPInsights()
+
+const ddpDeptIndexData = ddpOverallIndexing.slice(0, 10).map(d => ({
+  dept: d.shortName,
+  baseIndex: +(d.baseIndex * 100).toFixed(1),
+  additionalIndex: +(d.additionalIndex * 100).toFixed(1),
+}))
+
+const ACTIVITY_OPTIONS = ['All', ...ddpAllActivities.map(a => a.activityName)]
+
+/* ================================================================
+   SUB-COMPONENTS
+   ================================================================ */
+
+/** Divider between major dashboard sections */
+function SectionDivider({ icon: Icon, title, subtitle }: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  subtitle?: string
+}) {
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+    <div className="flex items-center gap-3 mb-5 mt-2">
+      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+        <Icon className="w-4 h-4 text-slate-500" />
+      </div>
+      <div>
+        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+        {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+      </div>
+      <div className="hidden sm:block flex-1 h-px bg-slate-200" />
+    </div>
+  )
+}
+
+/** Big KPI number card */
+function KpiCard({ label, value, note, gradient, borderColor, noteIcon }: {
+  label: string
+  value: string | number
+  note: string
+  gradient: string
+  borderColor: string
+  noteIcon?: React.ReactNode
+}) {
+  return (
+    <div className={`${gradient} border ${borderColor} rounded-xl p-6 text-center`}>
+      <p className="text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-4xl font-black" style={MONO_FONT}>
+        {typeof value === 'number' ? value.toLocaleString() : value}
+      </p>
+      <div className="flex items-center justify-center gap-1 mt-1 text-xs">
+        {noteIcon}
+        <span className="font-bold">{note}</span>
+      </div>
+    </div>
+  )
+}
+
+/** Small stat card for institutional overview */
+function StatCard({ label, value, subtitle, icon: Icon, iconBg, iconColor }: {
+  label: string
+  value: string | number
+  subtitle?: string
+  icon: React.ComponentType<{ className?: string }>
+  iconBg: string
+  iconColor: string
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1" style={MONO_FONT}>{value}</p>
+          {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+        </div>
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg} ${iconColor}`}>
+          <Icon className="w-5 h-5" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Insight highlight card */
+function InsightCard({ label, title, detail, gradient, borderColor, iconBg, icon: Icon, iconColor }: {
+  label: string
+  title: string
+  detail: string
+  gradient: string
+  borderColor: string
+  iconBg: string
+  icon: React.ComponentType<{ className?: string }>
+  iconColor: string
+}) {
+  return (
+    <div className={`${gradient} border ${borderColor} rounded-xl p-4 flex items-start gap-3`}>
+      <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0`}>
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+      </div>
+      <div>
+        <p className="text-xs font-semibold">{label}</p>
+        <p className="text-base font-bold leading-tight">{title}</p>
+        <p className="text-[11px] opacity-80">{detail}</p>
+      </div>
+    </div>
+  )
+}
+
+/* ================================================================
+   MAIN PAGE COMPONENT
+   ================================================================ */
+
+export default function CollegePage() {
+  const [selectedActivity, setSelectedActivity] = useState(ACTIVITY_OPTIONS[0])
+  const [showAllIndexing, setShowAllIndexing] = useState(false)
+  const [showAllJournal, setShowAllJournal] = useState(false)
+
+  const allAggregated = {
+    activityName: 'All',
+    proposedTarget: ddpAllActivities.reduce((s, a) => s + a.proposedTarget, 0),
+    proposedAchieved: ddpAllActivities.reduce((s, a) => s + a.proposedAchieved, 0),
+    pending: ddpAllActivities.reduce((s, a) => s + a.pending, 0),
+  }
+  const selectedAct = selectedActivity === 'All'
+    ? allAggregated
+    : ddpAllActivities.find(a => a.activityName === selectedActivity) || ddpAllActivities[0]
+  const selectedDeptData = selectedActivity === 'All'
+    ? ddpJournalDeptBreakdown.map(d => ({
+        ...d,
+        totalTarget: Math.round(d.totalTarget * (allAggregated.proposedTarget / 238)),
+        achieved: Math.round(d.achieved * (allAggregated.proposedAchieved / 168)),
+        pending: Math.round(d.totalTarget * (allAggregated.proposedTarget / 238)) - Math.round(d.achieved * (allAggregated.proposedAchieved / 168)),
+      }))
+    : selectedActivity === 'JOURNAL PUBLICATIONS (SCI / WOS)'
+      ? ddpJournalDeptBreakdown
+      : ddpJournalDeptBreakdown.map(d => ({
+          ...d,
+          totalTarget: Math.round(d.totalTarget * (selectedAct.proposedTarget / 238)),
+          achieved: Math.round(d.achieved * (selectedAct.proposedAchieved / 168)),
+          pending: Math.round(d.totalTarget * (selectedAct.proposedTarget / 238)) - Math.round(d.achieved * (selectedAct.proposedAchieved / 168)),
+        }))
+
+  return (
+    <div className="p-6 lg:p-8 max-w-[1440px] mx-auto space-y-8">
+
+      {/* ================================================================
+         SECTION 1: HEADER & EXECUTIVE SUMMARY
+         ================================================================ */}
+      <header>
+        <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">College Overview</h1>
-            <p className="text-sm text-slate-500">Bannari Amman Institute of Technology — Dean Dashboard</p>
+            <h1 className="text-2xl font-bold text-slate-900">DDP Indicator Dashboard</h1>
+            <p className="text-sm text-slate-500">Department Development Plan &mdash; 2025-06-01 to 2026-05-31</p>
           </div>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Departments', value: deanStats.totalDepartments, icon: Building2, color: 'bg-blue-50 text-blue-600' },
-          { label: 'Total Faculty', value: deanStats.totalFaculty, icon: Users, color: 'bg-emerald-50 text-emerald-600' },
-          { label: 'Total Activities', value: deanStats.totalActivities, sub: `${deanStats.totalPending} pending`, icon: Activity, color: 'bg-purple-50 text-purple-600' },
-          { label: 'Research Papers', value: deanStats.researchOutput, sub: `${deanStats.patentsFiled} patents`, icon: FileText, color: 'bg-amber-50 text-amber-600' },
-        ].map(s => (
-          <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{s.label}</p>
-                <p className="text-2xl font-bold text-slate-900 mt-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</p>
-                {'sub' in s && s.sub && <p className="text-xs text-slate-400 mt-1">{s.sub}</p>}
-              </div>
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${s.color}`}>
-                <s.icon className="w-5 h-5" />
-              </div>
-            </div>
+        {/* Top KPI numbers */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <KpiCard
+            label="Proposed Targets"
+            value={ddpOverallTotals.proposedTargets}
+            note="Across all departments &amp; activities"
+            gradient="bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700"
+            borderColor="border-blue-200"
+          />
+          <KpiCard
+            label="Proposed Achieved"
+            value={ddpOverallTotals.proposedAchieved}
+            note={`${insights.overallRate.toFixed(1)}% achievement rate`}
+            gradient="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700"
+            borderColor="border-emerald-200"
+            noteIcon={<ArrowUpRight className="w-3 h-3" />}
+          />
+          <KpiCard
+            label="Pending"
+            value={ddpOverallTotals.pending}
+            note={`${(100 - insights.overallRate).toFixed(1)}% remaining to achieve`}
+            gradient="bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700"
+            borderColor="border-rose-200"
+          />
+        </div>
+      </header>
+
+      {/* ================================================================
+         SECTION 2: KEY INSIGHTS
+         ================================================================ */}
+      <section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <InsightCard
+            label="#1 Department" title={insights.topDept.shortName}
+            detail={`Index: ${insights.topDept.normalizedBonus.toFixed(3)} \u00b7 ${insights.topDept.achieved}/${insights.topDept.totalTarget}`}
+            gradient="bg-gradient-to-br from-yellow-50 to-amber-50 text-yellow-800"
+            borderColor="border-yellow-200" iconBg="bg-yellow-100" icon={Trophy} iconColor="text-yellow-600"
+          />
+          <InsightCard
+            label="Needs Attention" title={insights.bottomDept.shortName}
+            detail={`Index: ${insights.bottomDept.normalizedBonus.toFixed(3)} \u00b7 Rank #${insights.bottomDept.rank}`}
+            gradient="bg-gradient-to-br from-red-50 to-orange-50 text-red-800"
+            borderColor="border-red-200" iconBg="bg-red-100" icon={AlertTriangle} iconColor="text-red-600"
+          />
+          <InsightCard
+            label="Best Performing Activity" title={insights.bestPerforming[0].activityName.slice(0, 30)}
+            detail={`${Math.round((insights.bestPerforming[0].proposedAchieved / insights.bestPerforming[0].proposedTarget) * 100)}% achieved`}
+            gradient="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-800"
+            borderColor="border-emerald-200" iconBg="bg-emerald-100" icon={CheckCircle2} iconColor="text-emerald-600"
+          />
+          <InsightCard
+            label="Biggest Gap Activity" title={insights.biggestGaps[0].activityName.slice(0, 30)}
+            detail={`${insights.biggestGaps[0].pending} pending of ${insights.biggestGaps[0].proposedTarget}`}
+            gradient="bg-gradient-to-br from-purple-50 to-violet-50 text-purple-800"
+            borderColor="border-purple-200" iconBg="bg-purple-100" icon={ShieldAlert} iconColor="text-purple-600"
+          />
+        </div>
+      </section>
+
+      {/* ================================================================
+         SECTION 3: INSTITUTIONAL OVERVIEW
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={Building2} title="Institutional Overview" subtitle="Key institutional metrics at a glance" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Departments" value={deanStats.totalDepartments} icon={Building2} iconBg="bg-blue-50" iconColor="text-blue-600" />
+          <StatCard label="Total Faculty" value={deanStats.totalFaculty} subtitle="Across all departments" icon={Users} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+          <StatCard label="Activities" value={deanStats.totalActivities} subtitle={`${deanStats.totalPending} pending`} icon={Activity} iconBg="bg-purple-50" iconColor="text-purple-600" />
+          <StatCard label="Research Output" value={deanStats.researchOutput} subtitle={`${deanStats.patentsFiled} patents filed`} icon={GraduationCap} iconBg="bg-amber-50" iconColor="text-amber-600" />
+        </div>
+      </section>
+
+      {/* ================================================================
+         SECTION 4: DDP PERFORMANCE RANKINGS
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={Trophy} title="DDP Performance Rankings" subtitle="Department rankings by DDP performance index" />
+
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Overall Indexing</h3>
+            <button onClick={() => setShowAllIndexing(!showAllIndexing)} className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              {showAllIndexing ? 'Show Less' : 'View All'}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllIndexing ? 'rotate-180' : ''}`} />
+            </button>
           </div>
-        ))}
-      </div>
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-700 text-white">
+                  {['Rank', 'Department', 'Total Target', 'Achieved', 'Base Index', 'Additional Index', 'Normalized Bonus'].map((col, i) => (
+                    <th key={col} className={`${i < 2 ? 'text-left' : 'text-right'} px-4 py-3 font-semibold`}>{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(showAllIndexing ? ddpOverallIndexing : ddpOverallIndexing.slice(0, 8)).map((d, i) => {
+                  const pct = Math.round((d.achieved / d.totalTarget) * 100)
+                  return (
+                    <tr key={d.shortName} className={`border-b border-slate-100 hover:bg-slate-50/50 transition-colors ${i === 0 ? 'bg-yellow-50/60' : i === 1 ? 'bg-slate-50/40' : ''}`}>
+                      <td className="px-4 py-3">
+                        <span className={`w-6 h-6 inline-flex items-center justify-center rounded-full text-[10px] font-bold ${
+                          i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-slate-200 text-slate-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-slate-50 text-slate-500'
+                        }`}>{d.rank}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: DEPT_COLORS[d.shortName] || '#94a3b8' }} />
+                          <span className="font-semibold text-slate-800">{d.department}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-slate-700">{d.totalTarget.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-bold font-mono text-slate-800">{d.achieved.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-400 ml-1">({pct}%)</span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`font-bold font-mono ${d.baseIndex >= 0.4 ? 'text-emerald-600' : d.baseIndex >= 0.3 ? 'text-yellow-600' : 'text-red-500'}`}>
+                          {d.baseIndex.toFixed(3)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-slate-600">{d.additionalIndex.toFixed(4)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-bold font-mono text-indigo-700">{d.normalizedBonus.toFixed(3)}</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-      {/* Charts row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <ChartCard title="Year-over-Year Comparison" subtitle="Points by month" className="lg:col-span-2">
-          <MultiLineChart data={yearlyComparisonData} xKey="month"
-            lines={[
-              { key: 'thisYear', color: '#3b82f6', name: '2025-26' },
-              { key: 'lastYear', color: '#94a3b8', name: '2024-25', dashed: true },
-            ]} />
-        </ChartCard>
-        <ChartCard title="Activity Types" subtitle="Across all departments">
-          <DonutChart data={collegeActivityTypeData.slice(0, 5).map(t => ({ name: t.type, value: t.count, color: t.color }))} innerRadius={50} outerRadius={75} showLabel={false} />
-          <div className="mt-3 space-y-1.5">
-            {collegeActivityTypeData.slice(0, 6).map(t => (
-              <div key={t.type} className="flex items-center gap-2 text-[11px] text-slate-600">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                <span className="truncate flex-1">{t.type}</span>
-                <span className="font-semibold">{t.count}</span>
-              </div>
+      {/* ================================================================
+         SECTION 5: PERFORMANCE ANALYTICS
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={BarChart3} title="Performance Analytics" subtitle="Visual breakdown of department indices and monthly progress" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <ChartCard title="Department Index Distribution" subtitle="Base Index + Additional Index (scaled &times;100)">
+            <ComparisonBarChart
+              data={ddpDeptIndexData}
+              xKey="dept"
+              bars={[
+                { key: 'baseIndex', color: '#3b82f6', name: 'Base Index (\u00d7100)' },
+                { key: 'additionalIndex', color: '#10b981', name: 'Additional (\u00d7100)' },
+              ]}
+              height={300}
+            />
+          </ChartCard>
+          <ChartCard title="Monthly DDP Progress" subtitle="Target vs Achieved trend over time">
+            <TrendAreaChart
+              data={ddpMonthlyTrend}
+              xKey="month"
+              areas={[
+                { key: 'target', color: '#94a3b8', name: 'Target' },
+                { key: 'achieved', color: '#10b981', name: 'Achieved' },
+                { key: 'pending', color: '#f59e0b', name: 'Pending' },
+              ]}
+              height={300}
+            />
+          </ChartCard>
+        </div>
+
+        {/* Department x Activity Heatmap */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <h3 className="text-sm font-semibold text-slate-900 mb-1">Department &times; Activity Achievement Heatmap</h3>
+          <p className="text-xs text-slate-500 mb-3">Achievement percentage for each department across key DDP activities</p>
+          <div className="flex flex-wrap items-center gap-3 mb-4 text-[11px]">
+            {HEATMAP_LEGEND.map(l => (
+              <span key={l.label} className="flex items-center gap-1.5">
+                <span className={`inline-block w-3 h-3 rounded-sm ${l.cls}`} />
+                <span className="text-slate-600">{l.label}</span>
+              </span>
             ))}
           </div>
-        </ChartCard>
-      </div>
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full border-collapse text-xs" style={{ minWidth: 900 }}>
+              <thead>
+                <tr className="bg-slate-700">
+                  <th className="text-left px-3 py-2.5 text-white font-semibold sticky left-0 bg-slate-700 z-10">Dept</th>
+                  {HEATMAP_COLS.map(h => (
+                    <th key={h} className="text-center px-2 py-2.5 text-white font-semibold whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ddpHeatmapData.map(row => (
+                  <tr key={row.dept} className="border-b border-slate-100">
+                    <td className="px-3 py-0 font-semibold text-slate-800 sticky left-0 bg-white z-10 border-r border-slate-100">
+                      <div className="flex items-center gap-1.5 h-10">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: DEPT_COLORS[row.dept] || '#94a3b8' }} />
+                        {row.dept}
+                      </div>
+                    </td>
+                    {HEATMAP_KEYS.map(k => {
+                      const v = row[k]
+                      const c = heatBg(v)
+                      return (
+                        <td key={k} className="p-0">
+                          <div className="flex items-center justify-center h-10 text-xs font-bold" style={{ backgroundColor: c.bg, color: c.text }}>
+                            {v}%
+                          </div>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-      {/* Charts row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <ChartCard title="Faculty Growth" subtitle="Active faculty & new joiners by semester">
-          <ComposedBarLineChart data={facultyGrowthData} xKey="semester"
-            bars={[{ key: 'new', color: '#6366f1', name: 'New Joiners' }]}
-            lines={[{ key: 'active', color: '#10b981', name: 'Active Faculty' }]} />
-        </ChartCard>
-        <ChartCard title="Department Activity Volume" subtitle="Total activities by department">
-          <ComparisonBarChart data={deptActivityVolumeData} xKey="dept"
-            bars={[{ key: 'activities', color: '#3b82f6', name: 'Activities' }]} />
-        </ChartCard>
-      </div>
+      {/* ================================================================
+         SECTION 6: ACHIEVEMENT ANALYSIS
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={Target} title="Achievement Analysis" subtitle="Activity-wise and category-wise achievement breakdown" />
 
-      {/* Department cards */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Department Performance</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Activity-wise progress bars */}
+          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="font-semibold text-slate-900 text-sm mb-1">Activity-wise Achievement Rate</h3>
+            <p className="text-xs text-slate-500 mb-4">All DDP activities &mdash; sorted by completion percentage</p>
+            <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-2">
+              {[...ddpAllActivities]
+                .sort((a, b) => (b.proposedAchieved / Math.max(b.proposedTarget, 1)) - (a.proposedAchieved / Math.max(a.proposedTarget, 1)))
+                .map(a => {
+                  const pct = Math.round((a.proposedAchieved / Math.max(a.proposedTarget, 1)) * 100)
+                  return (
+                    <div key={a.activityName} className="group">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-medium text-slate-700 truncate max-w-[280px]" title={a.activityName}>
+                          {a.activityName}
+                        </p>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-[10px] text-slate-400">{a.proposedAchieved}/{a.proposedTarget}</span>
+                          <span className={`text-xs font-bold ${pctTextColor(pct)}`}>{pct}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-2">
+                        <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(pct, 100)}%`, background: progressColor(pct) }} />
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </div>
+
+          {/* Category donut */}
+          <ChartCard title="Category-wise Achievement" subtitle="Achievement distribution by category">
+            <DonutChart
+              data={ddpCategoryAchievementRates.map(c => ({ name: c.name, value: c.achieved, color: c.color }))}
+              innerRadius={45}
+              outerRadius={70}
+              showLabel={false}
+            />
+            <div className="mt-3 space-y-2">
+              {ddpCategoryAchievementRates.map(c => (
+                <div key={c.name} className="flex items-center gap-2 text-[11px]">
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: c.color }} />
+                  <span className="text-slate-600 flex-1 truncate">{c.name}</span>
+                  <span className="font-bold text-slate-800">{c.value}%</span>
+                </div>
+              ))}
+            </div>
+          </ChartCard>
+        </div>
+      </section>
+
+      {/* ================================================================
+         SECTION 7: ACTIVITY DEEP DIVE
+         ================================================================ */}
+      <section>
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Activity-wise Status</h2>
+              <p className="text-xs text-slate-500">Select an activity to view department-wise breakdown</p>
+            </div>
+            <select
+              value={selectedActivity}
+              onChange={e => setSelectedActivity(e.target.value)}
+              className="text-xs font-medium border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-700 max-w-md focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+            >
+              {ACTIVITY_OPTIONS.map(a => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Activity KPIs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <p className="text-xs font-semibold text-amber-700 uppercase mb-1">Proposed Target</p>
+              <p className="text-3xl font-black text-amber-900" style={MONO_FONT}>{selectedAct.proposedTarget}</p>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+              <p className="text-xs font-semibold text-emerald-700 uppercase mb-1">Proposed Achieved</p>
+              <p className="text-3xl font-black text-emerald-900" style={MONO_FONT}>{selectedAct.proposedAchieved}</p>
+            </div>
+            <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-center">
+              <p className="text-xs font-semibold text-rose-700 uppercase mb-1">Pending</p>
+              <p className="text-3xl font-black text-rose-900" style={MONO_FONT}>{selectedAct.pending}</p>
+            </div>
+          </div>
+
+          {/* Department breakdown table */}
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-amber-100">
+                  {['S.No', 'Department', 'Total Target', 'Achieved', 'Pending'].map((col, i) => (
+                    <th key={col} className={`${i < 2 ? 'text-left' : 'text-right'} px-4 py-2.5 font-semibold text-amber-900`}>{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(showAllJournal ? selectedDeptData : selectedDeptData.slice(0, 10)).map(d => (
+                  <tr key={d.sNo} className={`border-b border-slate-50 hover:bg-slate-50/50 ${
+                    d.pending < 0 ? 'bg-emerald-50/40' : d.pending > 5 ? 'bg-red-50/30' : ''
+                  }`}>
+                    <td className="px-4 py-2.5 text-slate-500">{d.sNo}</td>
+                    <td className="px-4 py-2.5 font-medium text-slate-800">{d.department}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-slate-700">{d.totalTarget}</td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className={`font-bold font-mono ${d.achieved >= d.totalTarget ? 'text-emerald-600' : 'text-slate-800'}`}>{d.achieved}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className={`font-bold font-mono ${
+                        d.pending < 0 ? 'text-emerald-600' : d.pending === 0 ? 'text-slate-400' : d.pending > 5 ? 'text-red-500' : 'text-amber-600'
+                      }`}>{d.pending}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-slate-100">
+                  <td colSpan={2} className="px-4 py-2.5 font-bold text-slate-700">Total</td>
+                  <td className="px-4 py-2.5 text-right font-bold font-mono text-slate-700">{selectedAct.proposedTarget}</td>
+                  <td className="px-4 py-2.5 text-right font-bold font-mono text-emerald-700">{selectedAct.proposedAchieved}</td>
+                  <td className="px-4 py-2.5 text-right font-bold font-mono text-rose-600">{selectedAct.pending}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          {selectedDeptData.length > 10 && (
+            <button onClick={() => setShowAllJournal(!showAllJournal)} className="mt-3 text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              {showAllJournal ? 'Show Less' : `View All ${selectedDeptData.length} Departments`}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllJournal ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* ================================================================
+         SECTION 8: DEPARTMENT SCORECARDS
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={BarChart3} title="Department DDP Scorecards" subtitle="Quick health-check per department based on DDP indicators" />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {departmentStats.map((dept) => {
-            const maxActivities = Math.max(...departmentStats.map(d => d.totalActivities))
-            const pct = ((dept.totalActivities / maxActivities) * 100).toFixed(0)
+          {ddpOverallIndexing.slice(0, 9).map((dept, idx) => {
+            const pct = Math.round((dept.achieved / dept.totalTarget) * 100)
             return (
               <div key={dept.shortName} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                    <span className="w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white"
+                      style={{ background: DEPT_COLORS[dept.shortName] || '#94a3b8' }}>
                       {dept.shortName}
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{dept.shortName}</p>
-                      <p className="text-[10px] text-slate-400">{dept.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-semibold text-slate-800">{dept.shortName}</p>
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                          idx === 0 ? 'bg-yellow-100 text-yellow-700' : idx < 3 ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-500'
+                        }`}>#{dept.rank}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 truncate max-w-[150px]">{dept.department}</p>
                     </div>
                   </div>
-                  {dept.pendingApprovals > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
-                      {dept.pendingApprovals} pending
-                    </span>
-                  )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="grid grid-cols-3 gap-2 mb-3">
                   <div>
-                    <p className="text-[10px] text-slate-400">Faculty</p>
-                    <p className="text-sm font-bold text-slate-800" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{dept.facultyCount}</p>
+                    <p className="text-[10px] text-slate-400">Target</p>
+                    <p className="text-sm font-bold text-slate-800 font-mono">{dept.totalTarget}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Activities</p>
-                    <p className="text-sm font-bold text-slate-800" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{dept.totalActivities}</p>
+                    <p className="text-[10px] text-slate-400">Achieved</p>
+                    <p className="text-sm font-bold text-emerald-600 font-mono">{dept.achieved}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Avg Pts</p>
-                    <p className="text-sm font-bold text-slate-800" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{dept.avgPoints}</p>
+                    <p className="text-[10px] text-slate-400">Index</p>
+                    <p className={`text-sm font-bold font-mono ${dept.normalizedBonus >= 0.4 ? 'text-emerald-600' : dept.normalizedBonus >= 0.3 ? 'text-yellow-600' : 'text-red-500'}`}>
+                      {dept.normalizedBonus.toFixed(3)}
+                    </p>
                   </div>
                 </div>
 
-                {/* Progress bar */}
-                <div className="w-full bg-slate-100 rounded-full h-1.5">
-                  <div className="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                <div className="w-full bg-slate-100 rounded-full h-2 mb-1.5">
+                  <div className="h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(pct, 100)}%`, background: progressColor(pct) }} />
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1.5">
-                  Top: <span className="font-medium text-slate-600">{dept.topPerformer}</span>
-                </p>
+                <p className="text-[10px] text-slate-400 text-right">{pct}% achieved</p>
               </div>
             )
           })}
         </div>
-      </div>
+      </section>
 
-      {/* Monthly trends */}
-      <ChartCard title="Monthly Activity Trends" subtitle="Submissions, approvals, and pending across college">
-        <TrendAreaChart data={monthlyTrends} xKey="month"
-          areas={[
-            { key: 'activities', color: '#3b82f6', name: 'Submitted' },
-            { key: 'approved', color: '#10b981', name: 'Approved' },
-            { key: 'pending', color: '#f59e0b', name: 'Pending' },
-          ]}
-          height={280} />
-      </ChartCard>
+      {/* ================================================================
+         SECTION 9: TRENDS & COMPARISONS
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={TrendingUp} title="Trends & Comparisons" subtitle="Year-over-year performance, faculty growth, and capability analysis" />
+
+        {/* YoY + Activity Type Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <ChartCard title="Year-over-Year Comparison" subtitle="Points trajectory vs last year" className="lg:col-span-2">
+            <MultiLineChart data={yearlyComparisonData} xKey="month"
+              lines={[
+                { key: 'thisYear', color: '#3b82f6', name: '2025-26' },
+                { key: 'lastYear', color: '#94a3b8', name: '2024-25', dashed: true },
+              ]}
+              height={260} />
+          </ChartCard>
+          <ChartCard title="Activity Types" subtitle="College-wide distribution">
+            <DonutChart data={collegeActivityTypeData.slice(0, 5).map(t => ({ name: t.type, value: t.count, color: t.color }))} innerRadius={50} outerRadius={75} showLabel={false} />
+            <div className="mt-3 space-y-1.5">
+              {collegeActivityTypeData.slice(0, 6).map(t => (
+                <div key={t.type} className="flex items-center gap-2 text-[11px] text-slate-600">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: t.color }} />
+                  <span className="truncate flex-1">{t.type}</span>
+                  <span className="font-semibold">{t.count}</span>
+                </div>
+              ))}
+            </div>
+          </ChartCard>
+        </div>
+
+        {/* Faculty Growth + Radar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ChartCard title="Faculty Growth" subtitle="Active faculty & new joiners by semester">
+            <ComposedBarLineChart data={facultyGrowthData} xKey="semester"
+              bars={[{ key: 'new', color: '#6366f1', name: 'New Joiners' }]}
+              lines={[{ key: 'active', color: '#10b981', name: 'Active Faculty' }]}
+              height={280}
+            />
+          </ChartCard>
+          <ChartCard title="Department Capability Radar" subtitle="Performance across 5 dimensions">
+            <MultiRadarChart data={deptRadarData} nameKey="metric"
+              series={[
+                { key: 'CSE', color: '#3b82f6', name: 'CSE' },
+                { key: 'ECE', color: '#8b5cf6', name: 'ECE' },
+                { key: 'MECH', color: '#ef4444', name: 'MECH' },
+                { key: 'EEE', color: '#f59e0b', name: 'EEE' },
+              ]}
+              height={280} />
+          </ChartCard>
+        </div>
+      </section>
+
+      {/* ================================================================
+         SECTION 10: TOP PERFORMERS & MONTHLY ACTIVITY
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={Trophy} title="Top Performers & Monthly Activity" subtitle="Leading faculty and submission trends across the college" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <div className="mb-4">
+              <h3 className="font-semibold text-slate-900 text-sm">College Top Performers</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Across all departments</p>
+            </div>
+            <div className="space-y-2.5">
+              {leaderboard.slice(0, 8).map(f => (
+                <div key={f.rank} className="flex items-center gap-2.5">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    f.rank === 1 ? 'bg-yellow-100 text-yellow-700' :
+                    f.rank === 2 ? 'bg-slate-200 text-slate-600' :
+                    f.rank === 3 ? 'bg-orange-100 text-orange-700' :
+                    'bg-slate-50 text-slate-400'
+                  }`}>{f.rank}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-800 truncate">{f.name}</p>
+                    <p className="text-[10px] text-slate-400">{f.department}</p>
+                  </div>
+                  <span className="text-xs font-bold text-slate-700 font-mono">{f.points}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <ChartCard title="Monthly Activity Trends" subtitle="Submissions, approvals & pending" className="lg:col-span-2">
+            <TrendAreaChart data={monthlyTrends as unknown as Record<string, unknown>[]} xKey="month"
+              areas={[
+                { key: 'activities', color: '#3b82f6', name: 'Submitted' },
+                { key: 'approved', color: '#10b981', name: 'Approved' },
+                { key: 'pending', color: '#f59e0b', name: 'Pending' },
+              ]}
+              height={300} />
+          </ChartCard>
+        </div>
+      </section>
+
+      {/* ================================================================
+         FOOTER
+         ================================================================ */}
+      <footer className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-center">
+        <p className="text-xs text-slate-500">
+          DDP Indicator Dashboard &middot; Data Period: 2025-06-01 to 2026-05-31 &middot; Last updated: Feb 11, 2026
+        </p>
+      </footer>
     </div>
   )
 }
