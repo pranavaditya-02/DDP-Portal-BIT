@@ -121,20 +121,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-slate-900 text-white flex flex-col z-50 border-r border-slate-800
+      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 text-white flex flex-col z-50 border-r border-slate-700/50
         transition-all duration-300 ease-in-out w-[260px]
         ${collapsed ? 'md:w-[72px]' : 'md:w-[260px]'}
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0`}
     >
       {/* Header / Logo */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
-        <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700/50 bg-gradient-to-b from-slate-800 to-slate-900">
+        <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden group">
+          <div className="w-9 h-9 bg-gradient-brand rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow duration-200">
             <span className="text-white font-bold text-lg">F</span>
           </div>
           {!collapsed && (
-            <span className="font-semibold text-sm whitespace-nowrap animate-fade-in">
+            <span className="font-bold text-sm whitespace-nowrap animate-fadeInUp text-slate-100">
               Faculty Tracker
             </span>
           )}
@@ -142,25 +142,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
         {/* Desktop collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden md:flex p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="hidden md:flex p-1.5 rounded-md hover:bg-slate-700 transition-all duration-200 text-slate-400 hover:text-slate-200 hover-scale"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
         {/* Mobile close button */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="md:hidden p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="md:hidden p-1.5 rounded-md hover:bg-slate-700 transition-all duration-200 text-slate-400 hover:text-slate-200 hover-scale"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700">
         {visibleGroups.map((group) => (
-          <div key={group.title}>
+          <div key={group.title} className="animate-fadeInUp">
             {!collapsed && (
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2 px-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2.5 px-3 opacity-70">
                 {group.title}
               </p>
             )}
@@ -173,29 +173,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
+                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative ${
                       active
-                        ? 'bg-blue-600/20 text-blue-400'
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        ? 'bg-blue-600/30 text-blue-300 shadow-lg shadow-blue-500/20'
+                        : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
-                      <div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-blue-500 rounded-r-full"
-                      />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gradient-to-b from-blue-400 to-blue-500 rounded-r-full shadow-lg" />
                     )}
-                    <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-blue-400' : ''}`} />
+                    <Icon
+                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${
+                        active ? 'text-blue-300 scale-110' : 'group-hover:scale-110'
+                      }`}
+                    />
                     {!collapsed && (
-                      <span className="flex-1 truncate">{item.label}</span>
-                    )}
-                    {!collapsed && item.badge && (
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full">
-                        {item.badge}
-                      </span>
+                      <>
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {item.badge && (
+                          <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500/80 text-white rounded-full animate-pulse-soft">
+                            {item.badge}
+                          </span>
+                        )}
+                      </>
                     )}
                     {collapsed && item.badge && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-red-500 text-white rounded-full flex items-center justify-center">
+                      <span className="absolute top-0 right-0 w-4 h-4 text-[9px] font-bold bg-red-500 text-white rounded-full flex items-center justify-center animate-pulse-soft">
                         {item.badge}
                       </span>
                     )}
@@ -208,14 +212,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
       </nav>
 
       {/* User Profile Section */}
-      <div className="border-t border-slate-800 p-3">
+      <div className="border-t border-slate-700/50 p-3 bg-gradient-to-t from-slate-900 to-slate-800/50">
         {/* Roles */}
         {!collapsed && (
-          <div className="flex flex-wrap gap-1 mb-3 px-1">
+          <div className="flex flex-wrap gap-1.5 mb-3 px-1">
             {user.roles.map((role) => (
               <span
                 key={role}
-                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${getRoleBadgeColor(role)}`}
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-full transition-all duration-200 ${getRoleBadgeColor(
+                  role
+                )}`}
               >
                 {role.charAt(0).toUpperCase() + role.slice(1)}
               </span>
@@ -225,10 +231,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
 
         {/* User Info */}
         <div
-          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+          className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-700/50 transition-all duration-200 cursor-pointer group"
           onClick={() => setProfileOpen(!profileOpen)}
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-sm font-bold text-white shadow-lg group-hover:shadow-xl transition-shadow duration-200">
             {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
           {!collapsed && (
@@ -238,43 +244,45 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
             </div>
           )}
           {!collapsed && (
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-4 h-4 text-slate-500 transition-all duration-200 ${
+                profileOpen ? 'rotate-180' : ''
+              }`}
+            />
           )}
         </div>
 
         {/* Profile dropdown */}
         {profileOpen && !collapsed && (
-            <div
-              className="overflow-hidden animate-fade-in"
-            >
-              <div className="pt-2 space-y-1">
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                  <User className="w-4 h-4" />
-                  Profile
-                </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                  <Bell className="w-4 h-4" />
-                  Notifications
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
-              </div>
+          <div className="overflow-hidden animate-fadeInUp">
+            <div className="pt-2 space-y-1">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all duration-200 group">
+                <User className="w-4 h-4 transition-transform group-hover:scale-110" />
+                Profile
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all duration-200 group">
+                <Bell className="w-4 h-4 transition-transform group-hover:scale-110" />
+                Notifications
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 group"
+              >
+                <LogOut className="w-4 h-4 transition-transform group-hover:scale-110" />
+                Sign Out
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
         {/* Collapsed logout */}
         {collapsed && (
           <button
             onClick={handleLogout}
             title="Sign Out"
-            className="w-full flex items-center justify-center p-2 mt-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+            className="w-full flex items-center justify-center p-2.5 mt-2 rounded-lg text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 group"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-5 h-5 transition-transform group-hover:scale-110" />
           </button>
         )}
       </div>

@@ -1,0 +1,3256 @@
+'use client'
+
+import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/lib/store'
+import toast from 'react-hot-toast'
+import {
+  Upload, Calendar, Tag, Info,
+  ChevronLeft, Loader2, CheckCircle2, Trash2, Plus,
+} from 'lucide-react'
+import Link from 'next/link'
+
+const ACHIEVEMENT_CATEGORIES = [
+  { id: 1, label: 'Newsletter Archive' },
+  { id: 2, label: 'E-Content Developed' },
+  { id: 3, label: 'Events Attended' },
+  { id: 4, label: 'Events Organized' },
+  { id: 5, label: 'External Examiner' },
+  { id: 6, label: 'Faculty Journal Reviewer' },
+  { id: 7, label: 'Guest Lecture Delivered' },
+  { id: 8, label: 'International Visit' },
+  { id: 9, label: 'Notable Achievement/Awards' },
+  { id: 10, label: 'Paper Presentation' },
+  { id: 11, label: 'Resource Person' },
+  { id: 12, label: 'Online Course' },
+]
+
+const SPECIAL_LAB_NAMES = ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5']
+const EVENT_TYPES = ['Conference', 'Workshop', 'Seminar', 'Training', 'Webinar']
+const GUEST_LECTURE_EVENT_TYPES = [
+  'Certification course',
+  'Conference',
+  'Faculty Exchange Programme',
+  'FDP',
+  'Guest Lecture',
+  'One credit course',
+  'School',
+  'Seminar',
+  'STTP',
+  'Training',
+  'Webinar',
+  'Workshop',
+  'Hands-on Training',
+  'Value Added course'
+]
+const ORGANIZER_TYPES = ['BIT', 'Industry', 'Foreign Institute', 'Others', 'Institute']
+const EVENT_LEVELS = ['International', 'National', 'State', 'Local']
+const SECTORS = ['Private', 'Government', 'Non-Profit']
+const EVENT_MODES = ['Online', 'Offline', 'Hybrid']
+const CONDUCT_MODES = ['Online', 'Offline']
+const DURATION_UNITS = ['MONTHS', 'WEEKS', 'HOURS', 'DAYS']
+const SPONSORSHIP_TYPES = ['Fully Sponsored', 'Partially Sponsored', 'Self-Sponsored']
+const EVENT_OUTCOMES = ['Certificate Received', 'Award/Recognition', 'Knowledge Gained', 'Networking']
+const ORG_TYPES = ['BIT', 'Industry', 'Foreign Institute', 'Others', 'Institute']
+const AUDIENCE_TYPES = ['Students', 'Faculty', 'Engineering Trainee', 'Others']
+
+const DEPARTMENTS = [
+  'Aeronautical Engineering',
+  'Agricultural Engineering',
+  'Artificial Intelligence and Data Science',
+  'Artificial Intelligence and Machine Learning',
+  'Automobile Engineering',
+  'Biomedical Engineering',
+  'Biotechnology',
+  'Chemistry',
+  'Civil Engineering',
+  'Computer Applications - CT',
+  'Computer Science & Engineering',
+  'Computer Science and Business Systems',
+  'Computer Science and Design',
+  'Computer Technology',
+  'Dean Office',
+  'Electrical and Electronics Engineering',
+  'Electronics and Communication Engineering',
+  'Electronics and Instrumentation Engineering',
+  'Fashion Technology',
+  'Food Technology',
+  'General Engineering',
+  'Humanities',
+  'Industrial Safety Engineering',
+  'Information Science and Engineering',
+  'Information Technology',
+  'Library',
+  'Master of Business Applications',
+  'Mathematics',
+  'Mechanical Engineering',
+  'Mechatronics Engineering',
+  'Physical Education',
+  'Physics',
+  'School of Management Studies',
+  'Sports',
+  'Technology Business Incubators',
+  'Textile Technology',
+  'Training and Placement',
+  'Yoga',
+]
+
+const ROLES = ['Convener', 'Co-Convener', 'Co-ordinator', 'Organizing Secretary']
+const EVENT_CATEGORIES = [
+  'Awareness of Trends in Technology',
+  'IPR',
+  'Research Methodology',
+  'Entrepreneurship',
+  'Placement',
+  'Technical Skill Development',
+  'Life Skill',
+  'Soft Skill',
+  'Communication Skill',
+]
+const JOINTLY_ORGANIZED = ['None', 'Other institute in India', 'Foreign university', 'Industry', 'Technical society']
+const GUEST_INSTITUTION_TYPES = ['International', 'National (Within TamilNadu)', 'National (Outside TamilNadu)']
+
+// Online Course constants
+const ONLINE_COURSE_ORGANIZERS = ['Private', 'Government']
+const ONLINE_COURSE_LEVELS = ['State', 'National', 'International']
+const ONLINE_COURSE_DURATIONS = ['1 Week', '2 Weeks', '1 Month', '2 Months', '3 Months', '6 Months', '1 Year']
+const ONLINE_COURSE_CATEGORIES = ['Proctored-Exam', 'Self-paced with final assessment', 'Self-paced without final assessment']
+const ONLINE_SPONSORSHIP_TYPES = ['SELF', 'BIT', 'Funding_Agency']
+const ONLINE_CLAIMED_FOR_OPTIONS = ['FAP', 'Competency', 'Not_Applicable']
+
+// Paper Presentation constants
+const PAPER_PRESENTATION_EVENT_MODES = ['Online', 'Offline']
+const PAPER_PRESENTATION_ORGANIZERS = ['BIT', 'Industry', 'Foreign Institute', 'Others', 'Institute']
+const PAPER_PRESENTATION_LEVELS = ['International', 'National']
+const PAPER_PRESENTATION_SPONSORSHIP = ['SELF', 'BIT', 'Funding agency', 'Others']
+const YES_NO_OPTIONS = ['Yes', 'No']
+const STUDENT_OPTIONS = ['Student 1', 'Student 2', 'Student 3', 'Student 4', 'Student 5', 'NA']
+
+// Comprehensive Faculty List
+const FACULTY_LIST = [
+  'AARTHI N', 'ABDUL AZEEZ N', 'ABHIJEET KUMAR', 'ABHINANDH K A', 'ABHINAYA N',
+  'ABHISHEK VATS', 'ABINAYA M', 'ABINAYA R', 'ABIRAMI A', 'ABIRAMI M',
+  'ABISHA MARTIN', 'ABRAHAM BENJAMIN SAMUEL', 'ADHINARAYANAN B', 'AISHWARIYA M R', 'AISWARYA V',
+  'AJAI A', 'AJAY B', 'AJIN R NAIR', 'AKALYADEVI K', 'AKSHAYA R',
+  'ALAMELU M', 'ALEX STANLEY RAJA T', 'AMARKARTHIK A', 'AMIRTHAVALLI K', 'AMMU V',
+  'ANAND A', 'ANANDAKUMAR K', 'ANANDAN P', 'ANANDHA BABU G', 'ANANDHA MOORTHY A',
+  'ANANDHAKUMAR R', 'ANANTHA ESWARAN N', 'ANANTHAN S', 'ANANTHI D', 'ANANTHI P',
+  'ANBAZHAKAN K', 'ANBURAJ M', 'ANDRIL ALAGUSABAI', 'ANITHA E', 'ANITHA R',
+  'ANNAPOORANI B T', 'ANTONYRAJ J M', 'ANUGEETHA SHINE', 'ANUJA S', 'ANUPAMA RANI',
+  'ANUSHA SELES S', 'ARAVINDHAN C', 'ARCHANA J', 'ARIFFA BEGUM S', 'ARIVU Y',
+  'ARTHUR VASANTH J', 'ARULMANI S', 'ARULMURUGAN L', 'ARUN CHENDHURAN R', 'ARUN JAYAKAR S',
+  'ARUN KUMAR D', 'ARUN KUMAR R', 'ARUN SHALIN L V', 'ARUNASREE TNA', 'ASHFORN HERMINA J M',
+  'ASHOK J', 'ASHOK KUMAR A', 'ASHOKAN S', 'ASHOKKUMAR R', 'ASHRA SINDHIKKAA M',
+  'ASHWATHI R', 'ASHWIN RAJ S', 'ASLIN JERUSHA D', 'ASWIN JAYA SURYA M J', 'ATHIRA AJITH',
+  'ATHIRAJA A', 'BALAGANESH P', 'BALAJI M', 'BALAJI S', 'BALAKRISHNAN K',
+  'BALAKRISHNARAJA R', 'BALAMURUGAN E', 'BALAMURUGAN R', 'BALAMURUGAN V T', 'BALASAMY K',
+  'BALAVIGNESH S', 'BARANIDHARAN V', 'BASILEA CATHERINE J', 'BASKARAN P', 'BAZILA BANU A',
+  'BENITA GRACIA THANGAM J', 'BHARANI KUMAR R', 'BHARANI N', 'BHARANI PRIYA A', 'BHARATH KUMAR T',
+  'BHARATHI A', 'BHARATHIRAJA M', 'BHUVANESH N', 'BHUVANESWARI S', 'BIJU J',
+  'BINDHU J', 'BOOPATHI C', 'BOOPATHIRAJA K P', 'BUVANESH P', 'CAROLINE CYNTHIA P',
+  'CAROLINE VINNETIA S', 'CHANDRAMOHAN N', 'CHANDRAPRABHA K', 'CHANDRASEKARAN M', 'CHANDRU K S',
+  'CHELLADURAI V', 'CHINNADURRAI CL', 'CHITRADEVI T N', 'CHOZHARAJAN P', 'DANIEL MADAN RAJA S',
+  'DANIEL RAJ A', 'DAPHNE MEDONA J', 'DAVID WINSTER PRAVEENRAJ D', 'DEEPA D', 'DEEPA PRIYA B S',
+  'DEEPA R', 'DEEPA SUMATHI M', 'DEEPA UNNIKRISHNAN', 'DEEPAK O P', 'DEEPANKUMAR S',
+  'DEEPHA V', 'DEEPIKA J', 'DEEPIKA R', 'DHANABALU S N', 'DHANALAKSHMI S',
+  'DHANAPAL V', 'DHANAPRIYA G', 'DHANASEKAR R', 'DHANDAPANI N', 'DHARANI S',
+  'DHAVA PERUMAL C', 'DHAYANEETHI S', 'DHEEPANCHAKKRAVARTHY A', 'DHINESH S K', 'DHIVYA DHARSHINI U',
+  'DHIVYA K T', 'DHIVYA P', 'DHIVYABHARATHI S', 'DINESH D', 'DINESH KUMAR L',
+  'DINESH P S', 'DIVAKAR R', 'DIVYA P', 'DIVYA S', 'DIVYABARATHI P',
+  'DURGADEVI S', 'EASUBATHAM ARMSTRONG ANAND J', 'EDAMAKANTI RAMANJI REDDY', 'ELANGO S', 'ELAVARASI T',
+  'ESAKKI MADURA E', 'ESWARAMOORTHY V', 'EUGENE BERNA I', 'EZHIL G', 'EZHIL R',
+  'FREDDY CHRIS M', 'GANAGAVALLI K', 'GANESH BABU C', 'GAYATHIRI B', 'GAYATHIRI DEVI S',
+  'GAYATHIRI N R', 'GAYATHRI D', 'GAYATHRI G M', 'GAYATHRI K', 'GAYATHRI PRIYADARSHINI R',
+  'GAYATHRI R', 'GAYATHRI S', 'GAYATHRIDEVI M', 'GAYATRI A', 'GEETHAMANI R',
+  'GNANAPRAKASH V', 'GNANASUNDAR V M', 'GOKUL K', 'GOKUL L S', 'GOKUL M S',
+  'GOKULNATH B V', 'GOLDVIN SUGIRTHA DHAS B', 'GOMATHI M', 'GOMATHI R', 'GOPAL R',
+  'GOPALAKRISHNAN B', 'GOPALAKRISHNAN M', 'GOPI G', 'GOPIKA N P', 'GOPIKA RAM P',
+  'GOWRI SHANKAR M', 'GOWRISHANKAR L', 'GOWTHAM RAJ G', 'GOWTHAMI P', 'GOWTHAMI S',
+  'GUNALAN K', 'GUNASEKARAN M', 'GUNAVARDINI V', 'GURU VIMAL KUMAR M', 'HANUMANTH RAMJI K S',
+  'HARI BALAJI M', 'HARI PRIYA R', 'HARI PRIYA T', 'HARIKUMAR R', 'HARIPRASAD V',
+  'HARIPRIYA K K', 'HARISH KUMAAR P', 'HARITHA J', 'HARWINDER SINGH', 'HEMA PRIYA D',
+  'HEMALATHA B', 'HEMALATHA K', 'IKRAM N', 'INDHU BHASHINI V', 'INDHUMATHI K',
+  'INDIRANI A', 'INDIRANI C', 'INDU RANI B', 'JACKSON J', 'JANAGI R',
+  'JANANI G', 'JANANI T', 'JANARTHANAN M', 'JAYA BRINDHA G', 'JAYA K',
+  'JAYAKUMAR K', 'JAYAKUMAR N', 'JAYANTHI V', 'JAYARAMAN A', 'JAYASANKARI J S',
+  'JAYASUDHA S', 'JEEVANANTHAM V', 'JEEVITHA G R', 'JEEVITHA S V', 'JEGADHEESWARAN S',
+  'JESIN BENETO A', 'JEYANTH B', 'JEYARAMAN R', 'JEYAUTHMIGHA R K', 'JEYAVEL KARTHICK P',
+  'JISHIN JAYAN T', 'JOHN CLEMENT SUNDER A', 'JONATHAN CARUN JAYASECARAN', 'JOSEPH SILVESTER K', 'JOTHIMANI S',
+  'JYOTI V JETHE', 'KALAISELVAN S', 'KALAIVANI E', 'KALAIVANI R', 'KALAIYARASI M',
+  'KALIDASAN B', 'KALIL RAHIMAN M', 'KALIMUTHU M', 'KALPANA R', 'KAMAL BASHA K',
+  'KAMALA SHARADHA R', 'KAMALI D', 'KAMALRAJ D', 'KAMATCHI KANNAN V', 'KANCHANADEVI P',
+  'KANIMOZHI A', 'KANIMOZHI T', 'KANNAN K P', 'KANTHIMATHI N', 'KARTHICK K N',
+  'KARTHICK P', 'KARTHIGA SHENBAGAM N', 'KARTHIGA M', 'KARTHIK S', 'KARTHIKA M',
+  'KARTHIKA M S', 'KARTHIKA S', 'KARTHIKAMANI R', 'KARTHIKEYAN G', 'KARTHIKEYAN S',
+  'KARUNYAH AMIRTHADHARSHINI N', 'KARUPPUSAMY M', 'KARUPPUSAMY S', 'KASINIYA K', 'KASTHURI S',
+  'KAVITHA A', 'KAVITHA C', 'KAVITHA R', 'KAVITHA S', 'KAVITHA V',
+  'KAVIYAADHARSHANI D', 'KAVYA G S', 'KAYALVIZHI B', 'KEERTHANA K', 'KEERTHI S NAMBIAR',
+  'KIRUPA SANKAR M', 'KIRUTHIGA R', 'KIRUTHIKA M', 'KIRUTHIKA S', 'KIRUTHIKA V R',
+  'KODIESWARI A', 'KOTHAI A', 'KOUSHIK LAYEK', 'KRISHNA PRIYA G', 'KRISHNAKUMAR S',
+  'KRISHNAMMAL N', 'KRISHNAMOORTHY V', 'KRISHNARAJ R', 'KUMAR R', 'KUMARESAN G',
+  'KUMARESAN K', 'KUMARESAN T', 'LAKSHMANAN D', 'LAKSHMANAPRAKASH S', 'LAKSHMI NARAYANA M MOHAN',
+  'LATHA S', 'LAVANYA C', 'LEEBAN MOSES M', 'LEELAVATHI R', 'LIKHIL GOPALAN',
+  'LIMSA S', 'LINO L', 'LOGANAYAGAN S', 'LOGESWARI S', 'LOKESWARI P',
+  'LUBNA YASMEEN R', 'MADHESWARAN S', 'MADHUMATHI S', 'MADHUMITHA A', 'MADHUMITHA J',
+  'MAGESH KUMAR B', 'MAGESWARAN J', 'MAHESH KUMAR S', 'MAHESH S', 'MAHESHKUMAR K',
+  'MAHESWARI K T', 'MAHIMA P', 'MAHUDESWARAN A', 'MALATHI BALASUBRAMANIYAN', 'MALATHI M',
+  'MALATHI MAHALINGAM', 'MALATHI T', 'MANIGANDAN S', 'MANIMEGALAI S', 'MANISHA G',
+  'MANIVANNAN C', 'MANIVANNAN S', 'MANJU M', 'MANJUNATH N V', 'MANOCHITRA A S',
+  'MANOJKUMAR P', 'MANONMANI S', 'MANORANJITHAM R', 'MANU RAJU', 'MARAGATHAM D S',
+  'MARIAAMUTHA R', 'MATHANKUMAR P', 'MATHISELVAN G', 'MATHU PRIYA J', 'MEENAKSHI DHANALAKSHMI M',
+  'MEGALINGAM @ MURUGAN A', 'MEGAVARTHINI K K', 'MEKALA N', 'MEKALA R', 'MENAHA R',
+  'MERCY P', 'MILINTHA MARY T P', 'MOHAMED IRSATH M', 'MOHAMED ISMAIL A', 'MOHAMMED ABUBACKER SIDDIQ A',
+  'MOHAN BHARATHI C', 'MOHAN KUMAR V', 'MOHANAMBAL K', 'MOHANAPRIYA K', 'MOHANAPRIYA V',
+  'MOHANRAJ A', 'MOHEMMED YOUSUF', 'MOUNIKA S', 'MUNEESWARI ALIAS SURYA S', 'MUNIRATHINAM T',
+  'MURALI KRISHNAN M', 'MURUGAKANI S', 'MURUGAN K', 'MURUGAPPAN S', 'MURUGESAN P',
+  'MUTHU KUMAR T', 'MUTHUKUMAR K', 'MUTHUKUMAR P', 'MUTHUKUMARAVEL K', 'MUTHUMEENA S',
+  'MYTHILI G M', 'MYTHILI S', 'NAGAMANI T', 'NAGARAJAN P', 'NAGARAJAN S',
+  'NALIFABEGAM J', 'NANDAGOPAL M', 'NANDAKUMAR K', 'NANDHAGOPAL M', 'NANDHAKUMAR A',
+  'NANDHINI A P', 'NANDHINI B', 'NANDHINI K M', 'NANDHINI N', 'NANDHINI S S',
+  'NARENDRA ILAYA PALLAVAN P', 'NARESH KUMAR M', 'NATARAJ N', 'NATARAJ R V', 'NAVANEETH KUMAR K',
+  'NAVEEN GEORGE', 'NAVEEN P Y', 'NAVEEN R', 'NAVEEN SANKAR A', 'NAVEENA S',
+  'NAVEENYA B P', 'NIJANDHAN K', 'NIKITHA M', 'NILAVU NIZA A', 'NIMKAR AMEY SANJAY',
+  'NIRMAL KUMAR R', 'NIRMALA S', 'NIRMALADEVI J', 'NIRMALAKUMARI K', 'NIRMALAN R',
+  'NISHA DEVI K', 'NISHANTHINI S', 'NISHANTHINI V', 'NITHIN P', 'NITHIYA PRIYA B T',
+  'NITHYA BALA SUNDARI S', 'NITHYA G', 'NITHYA M', 'NITHYA R', 'NITHYA S',
+  'NITHYANANTHAM S', 'NITHYAPRAKASH V', 'NITHYAPRIYA S', 'NIVEATHITHA S', 'NIVEDHA S',
+  'NIVEDITA V S', 'NIVESH KUMAR K', 'NIVETHA G', 'NIVETHA R', 'NIVETHALAKSHMI S',
+  'OORAPPAN G M', 'PAARIVALLAL RA', 'PACHAMUTHU P', 'PADMASHREE A', 'PALANISAMY A M',
+  'PALANISAMY C', 'PANDIARAJ A', 'PANDIYAN M', 'PARASURAMAN P', 'PARIMALA M',
+  'PARKAVI S', 'PARTHASARATHI P', 'PARVATHY V', 'PAVANADITYA BADIDA', 'PAVITHRA G',
+  'PAVITHRA MKS', 'PAVITHRA R', 'PAVITHRA SHEN G T', 'PAWEL P', 'PAYAL DUTTA',
+  'PAZHANIRAJA N', 'PERARASI T', 'PHILO SUMI', 'PIDATHALA SAHITYA', 'PONGALI SATHYA PRABU N',
+  'PONMURUGAN M', 'PONNARMADHA S', 'PONNILA P', 'POOJA A S', 'POOJA HARI',
+  'POOJITHA P', 'POOMANI K', 'POONGODI C', 'POORNIMA A', 'POORNIMASRE J',
+  'POUSIA S', 'PRABAKAR S J', 'PRABAKARAN P', 'PRABANAND S C', 'PRABHA DEVI D',
+  'PRABHAKARAN V', 'PRABHAVATHI K', 'PRABHU P S', 'PRABHU V', 'PRADEEP A D',
+  'PRADEESH E L', 'PRAKASH E', 'PRAKASH K', 'PRAKASH K B', 'PRAKASH M',
+  'PRAKASH S', 'PRAKASH S P', 'PRAMANIK R', 'PRASANTH A', 'PRASATH M S',
+  'PRATHAP M R', 'PRATHEEBHA G', 'PRAVEEN KUMAR D', 'PRAVEEN S M', 'PRAVEEN V',
+  'PRAVEENA R', 'PRAVIN M C', 'PRAVIN SAVARIDASS M', 'PREETHA R', 'PREETHA V',
+  'PREETHAM SRIDAR S', 'PREETHI D', 'PREETHIMATHI L', 'PREMA R', 'PREMALATHA K',
+  'PREMKUMAR C', 'PRIYA A', 'PRIYA J', 'PRIYA L', 'PRIYA R',
+  'PRIYADARSHINI K', 'PRIYADHARSHINI M', 'PRIYADHARSHINI S', 'PRIYADHARSHNI S', 'PRIYADHARSINI A',
+  'PRIYANGA M A', 'PRIYANKA B', 'PRIYANKA S', 'PUJAA SAKTHY M R K', 'PUNITHA V',
+  'PURUSOTHAMAN P', 'PUSHPAVALLI M', 'QUALITHA BEGUM Z', 'RAGAMATHI S', 'RAGAVI M',
+  'RAGHAVENDRA PRABHU S', 'RAGHUL S', 'RAGHUNATH M', 'RAGHURAMAN S', 'RAGUNATH D',
+  'RAJ KUMAR V S', 'RAJA SEKAR K', 'RAJA SEKAR S', 'RAJA T', 'RAJAKUMAR K',
+  'RAJAKUMAR P', 'RAJALASHMI K', 'RAJANAND KUMAR R', 'RAJASEETHARAMA S', 'RAJASEKAR L',
+  'RAJASEKAR S S', 'RAJENDRAN M', 'RAJESH KANNA P', 'RAJESH KUMAR S', 'RAJESH T',
+  'RAJESHKUMAR G', 'RAJIEV R', 'RAJKUMAR M', 'RAJU C', 'RAMACHANDRA RAJU K',
+  'RAMAKRISHNAN A', 'RAMASAMI S', 'RAMESH C', 'RAMESH KUMAR T', 'RAMESH M',
+  'RAMESH R', 'RAMESHKUMAR A', 'RAMESWARI R', 'RAMKUMAR R', 'RAMYA E',
+  'RAMYA K', 'RAMYA M', 'RAMYA P', 'RAMYA R', 'RAMYA R S',
+  'RANGANATHAN A', 'RANGARAJ K', 'RANJITH G', 'RANJITHAM M', 'RASHEEDHA A',
+  'RATHNA S', 'RAVI KUMAR M', 'RAVIKUMAR R', 'REENA CATHERINE J', 'RENUGA DEVI S',
+  'RENUKA K', 'RENUKA P', 'RESHMI T S', 'REVATHI V M', 'RISHIKESH N',
+  'ROHINI D', 'ROHINI P', 'RUPASHINI P R', 'SAAHINA S', 'SABARMATHI K R',
+  'SABEENA BEGAM S', 'SADASIVAM K', 'SADHASIVAM N', 'SAGUNTHALA DEVI P', 'SAJAN P PHILIP',
+  'SAKTHI SURIYA RAJ J S', 'SAKTHISHARMILA P', 'SAKTHISHOBANA K', 'SAKTHIVEL MURUGAN E', 'SAKTHIYA RAM S',
+  'SAMPOORNAM K P', 'SAMSONRAJ C', 'SAMYUKTHA V', 'SANCHITA MUKHERJEE', 'SANDHIYADEVI P',
+  'SANDHYARANI R', 'SANGARAVADIVEL P', 'SANGAVI N', 'SANGEETHA K', 'SANGEETHA R',
+  'SANGEETHAA SN', 'SANJOY DEB', 'SANKARANANTH S', 'SANNASI CHAKRAVARTHY S R', 'SANTHIYA B',
+  'SANTHOSH KUMAR E', 'SANTHOSH KUMAR K V', 'SANTHOSH KUMAR S', 'SANTHOSH N', 'SARAH HELAN SATHYA A',
+  'SARAN KUMAR A', 'SARANGAN K', 'SARANYA D', 'SARANYA D V', 'SARANYA K',
+  'SARANYA M K', 'SARANYA N', 'SARANYA S', 'SARASWATHI C', 'SARATHKUMAR S R',
+  'SARAVANA KUMAR R', 'SARAVANA MOORTHI P', 'SARAVANAKUMAR K', 'SARAVANAKUMAR P', 'SARAVANAKUMAR R',
+  'SARAVANAN B', 'SARAVANAN K', 'SARAVANAN S', 'SARULATHA R', 'SASIKALA D',
+  'SASIKUMAR C', 'SASITHRA S', 'SASSON TAFFWIN MOSES S', 'SATHEESH KUMAR T', 'SATHEESH N P',
+  'SATHEESHKUMAR S', 'SATHESHKUMAR K', 'SATHIS KUMAR K', 'SATHISH KUMAR G', 'SATHISH KUMAR R',
+  'SATHISH S', 'SATHISH V', 'SATHISHKANNAN R', 'SATHISHKUMAR C', 'SATHISHKUMAR P',
+  'SATHISHKUMAR S', 'SATHIYA B', 'SATHIYAMURTHI P', 'SATHIYANARAYANAN T', 'SATHYAKUMAR N',
+  'SATHYAMOORTHY J', 'SATHYARAJ S', 'SAVEETHA R', 'SELVABHARATHI P', 'SELVAKUMAR K',
+  'SELVAKUMAR M', 'SELVAMUTHUKUMARAN D', 'SELVI S', 'SENGOTTUVELAN M', 'SENTHAMARAI M',
+  'SENTHIL K', 'SENTHIL KUMAR J', 'SENTHIL KUMAR K L', 'SENTHIL KUMAR N', 'SENTHIL T',
+  'SENTHILKUMAR G', 'SENTHILKUMAR P', 'SENTHILNATHAN S', 'SHANGARA NARAYANEE N P', 'SHANKAR N',
+  'SHANKARI V', 'SHANMUGA PRAKASH R', 'SHANMUGA PRIYA R', 'SHANMUGA SUNDARI I', 'SHANMUGAPRIYA V',
+  'SHARMILA A', 'SHARON CHRIS HEPZEBAH P', 'SHINY JENNIFER R', 'SHOBANA K B', 'SHOBIKA S T',
+  'SHOUKATH ALI K', 'SHREE LALEITHA G', 'SHRI THARANYAA J P', 'SHUBHAM JOSHI', 'SHYAMALAPRASANNA A',
+  'SHYAMSUNDAR S', 'SIBI JOHN A', 'SIDDHARTHAN B', 'SINDHUJA S', 'SINDHUJAA N',
+  'SINDUJA M E', 'SISILI T', 'SIVA G', 'SIVABALAKRISHNAN R', 'SIVAKUMAR K',
+  'SIVARAHINI K', 'SIVARAJ G', 'SIVARAMAN P', 'SNEHA B J', 'SNEHA K',
+  'SNEKHA A R', 'SOBIYAA P', 'SOLANKE KRISHNA RUSTUMRAO', 'SOMASUNDARAM K', 'SOUNDARA B',
+  'SOUNDARIYA R S', 'SOUNDARYA B', 'SOUNDRAPANDIAN E', 'SOWMMIYA S', 'SOWMYA C M',
+  'SOWMYA P', 'SOWMYHA S', 'SREENIVEATHA P', 'SRI VIGNA HEMA V', 'SRI VINITHA V',
+  'SRINITYA G', 'SRINIVASAN M', 'SRIPRIYANKA S', 'SRIRAM S', 'SRITHA P',
+  'STEEPHAN AMALRAJ J', 'STEPHEN SAGAYARAJ A', 'SUBBULAKSHMI M', 'SUBHAPRIYA P', 'SUBHARATHNA N',
+  'SUBHASHREE P', 'SUBRAJA T', 'SUBRAMANIAN K', 'SUBRAMANIYAN C', 'SUBRATA DAS',
+  'SUDEV DUTTA', 'SUDHA R', 'SUDHA T', 'SUDHAHAR S', 'SUDHEER KHAN S',
+  'SUDHIR KUMAR V', 'SUGANESH S', 'SUGANYA DEVI C R', 'SUGANYA G', 'SUGANYA K S',
+  'SUGUNA R', 'SUJITHRA S', 'SUNDAR RAJ M', 'SUNDAR S', 'SUNDARA MURTHY S',
+  'SUNDARAM S', 'SUNDARAMAHALINGAM A', 'SUNDARRAJU G', 'SUPRIYA U', 'SURESH CHALUVADI',
+  'SURESH G', 'SURESH KUMAR J', 'SURESH N S', 'SURESH R', 'SURESHKUMAR M',
+  'SURESHKUMAR S', 'SURIYA V', 'SUSEELA D', 'SUSEENDRAN S', 'SUVETHA C',
+  'SWATHI G', 'SWATHYPRIYADHARSINI P', 'SWEETY PRASANNA KIRUBA G', 'SYAMA R', 'SYED ALTHAF S',
+  'TAJDEEN A', 'TAMILARASAN V D', 'TAMILARASI R', 'TAMILSELVAN A', 'TAMILSELVAN S',
+  'TAMILSELVI P', 'TAMILSELVI S', 'TAMILTHENDRAL M', 'THAMARAI SELVAN V', 'THAMILARASAN P',
+  'THANGA PARVATHI B', 'THANGATAMILSELVIS S', 'THAPASYA PANKAJ', 'THARSANEE R M', 'THIRUMOORTHY M',
+  'THIRUMURUGAN V', 'THULASIMANI T', 'UDAYKUMAR BABUBHAI ACHARYA', 'UMA MAHESWARI S', 'UMAMAGESWARI D',
+  'UMAMAHESWARI M', 'USHA K S', 'UVARAJA V C', 'VAANATHI S', 'VADIVEL VIVEK V',
+  'VADIVELU P', 'VAIDEESWARAN V', 'VAIDHYANATHAN B', 'VAIRAVEL K S', 'VAISHNAVI M',
+  'VAISHNAVI N', 'VANEESWARI N', 'VANITHA K', 'VARSHA JOSEPHINE V', 'VASUDEVAN M',
+  'VEERAKUMAR S', 'VELLINGIRI A', 'VELMURUGAN S', 'VELNATH R', 'VENKATESAN R',
+  'VENKATESHKUMAR U', 'VIDHYA K', 'VIDHYA S', 'VIGNESH KUMAR S', 'VIGNESH PRABU V',
+  'VIGNESH S', 'VIGNESHWARAN S', 'VIJAY FRANKLIN J', 'VIJAYAKRISHNAN S', 'VIJAYAKUMAR V',
+  'VIJAYAKUMAR V N', 'VIJAYANAND P S', 'VIMAL ARASAN A', 'VIMALRAJ V', 'VINIT KUMAR JAIN',
+  'VINODHINI R T', 'VINOTH KUMAR J', 'VINOTH KUMAR N', 'VINOTH M', 'VINOTHINI B',
+  'VINOTHINI V R', 'VINOTHKUMAR N', 'VINU KUMAR S M', 'VISHNU SAJAN', 'VISWANATHAN G',
+  'VISWANATHAN V', 'VIVEK KUMAR P', 'VIVEKANANDAN J', 'YAMUNA S', 'YUVALATHA S',
+  'YUVARAJ D', 'YUVARAJ K', 'NA'
+]
+
+interface EventsAttendedData {
+  taskId: string
+  specialLabsInvolved: string
+  specialLabName?: string
+  eventType: string
+  organizerType: string
+  eventLevel: string
+  eventTitle: string
+  organizationSector: string
+  eventOrganizer: string
+  eventMode: string
+  eventDuration: string
+  eventDurationValue: string
+  eventDate: string
+  endDate: string
+  durationInDays: string
+  otherOrganizerName?: string
+  sponsorshipType: string
+  eventOutcome: string
+  certificateProof?: File
+  certificatePreview?: string
+  geotagPhotos?: File
+  geotagPreview?: string
+}
+
+interface InternalFacultyMember {
+  id: string
+  name: string
+  role: string
+}
+
+interface StudentMember {
+  id: string
+  name: string
+}
+
+interface GuestSpeaker {
+  id: string
+  type: string
+  name: string
+  designation: string
+  email: string
+  contact: string
+  organization: string
+}
+
+interface EventsOrganisedData {
+  taskId: string
+  facultyName: string
+  facultyRole: string
+  claimedDepartment: string
+  specialLabsInvolved: string
+  iicEvent: string
+  iicEventUpload: string
+  iicBipId: string
+  deptAssociation: string
+  rAndD: string
+  technicalSociety: string
+  mouOutcome: string
+  mouBipId: string
+  irpOutcome: string
+  irpBipId: string
+  coeOrganized: string
+  coeBipId: string
+  islOrganized: string
+  islBipId: string
+  internalFaculty: InternalFacultyMember[]
+  students: StudentMember[]
+  eventName: string
+  eventType: string
+  eventCategory: string
+  programType: string
+  eventMode: string
+  startDate: string
+  endDate: string
+  eventDuration: string
+  eventLevel: string
+  jointlyOrganizedWith: string
+  internalStudentParticipants: string
+  internalFacultyParticipants: string
+  externalStudentParticipants: string
+  externalFacultyParticipants: string
+  guestSpeakerType: string
+  alumniGuestSpeaker: string
+  guestSpeakers: GuestSpeaker[]
+  registrationAmount: string
+  sponsorshipAmount: string
+  managementAmount: string
+  fundingAgency: string
+  totalRevenue: string
+  proofFiles?: File[]
+  proofFilePreviews?: string[]
+}
+
+interface GuestLectureDeliveredData {
+  taskId: string
+  faculty: string
+  specialLabsInvolved: string
+  specialLabName?: string
+  eventType: string
+  topic: string
+  modeOfConduct: string
+  eventLevel: string
+  eventName: string
+  fromDate: string
+  toDate: string
+  noOfDays: string
+  typeOfOrganization: string
+  noOfParticipants: string
+  typeOfAudienceCovered: string
+  documentProof?: File
+  documentProofPreview?: string
+  apexProof?: File
+  apexProofPreview?: string
+  samplePhotographs?: File
+  samplePhotographsPreview?: string
+  iqacVerification: string
+}
+
+interface OnlineCourseData {
+  taskId: string
+  courseName: string
+  typeOfOrganizer: string
+  organizationName: string
+  organizationAddress: string
+  levelOfEvent: string
+  duration: string
+  startDate: string
+  endDate: string
+  courseCategory: string
+  gradeObtained: string
+  typeOfSponsorship: string
+  claimedFor: string
+  certificateProof?: File
+  certificateProofPreview?: string
+  iqacVerification: string
+}
+
+interface PaperPresentationData {
+  faculty: string
+  taskId: string
+  specialLabsInvolved: string
+  specialLabName?: string
+  otherAuthorsFromBIT: string
+  firstAuthor?: string
+  secondAuthor?: string
+  thirdAuthor?: string
+  fourthAuthor?: string
+  fifthAuthor?: string
+  externalFacultyInvolved: string
+  externalFaculty1?: string
+  externalFaculty1Institution?: string
+  externalFaculty2?: string
+  externalFaculty2Institution?: string
+  externalFaculty3?: string
+  externalFaculty3Institution?: string
+  industrialPersonInvolved: string
+  industrialPerson1?: string
+  industrialPerson1Industry?: string
+  industrialPerson2?: string
+  industrialPerson2Industry?: string
+  industrialPerson3?: string
+  industrialPerson3Industry?: string
+  internationalCollaboration: string
+  internationalInstituteName?: string
+  conferenceTitle: string
+  eventMode: string
+  eventOrganizer: string
+  eventLevel: string
+  paperTitle: string
+  eventStartDate: string
+  eventEndDate: string
+  eventDurationDays: string
+  paperPublishedInProceedings: string
+  pageFrom?: string
+  pageTo?: string
+  typeOfSponsorship: string
+  studentsInvolved: string
+  firstStudent?: string
+  firstStudentYear?: string
+  secondStudent?: string
+  secondStudentYear?: string
+  thirdStudent?: string
+  thirdStudentYear?: string
+  fourthStudent?: string
+  fourthStudentYear?: string
+  fifthStudent?: string
+  fifthStudentYear?: string
+  registrationAmount: string
+  documentProof?: File
+  documentProofPreview?: string
+  awardPrizeReceived: string
+  awardProof?: File
+  awardProofPreview?: string
+  iqacVerification: string
+}
+
+interface Achievement {
+  id: string
+  category: string
+  title: string
+  description: string
+  date: string
+  image?: File
+  imagePreview?: string
+  eventsAttendedData?: EventsAttendedData
+  eventsOrganisedData?: EventsOrganisedData
+  guestLectureDeliveredData?: GuestLectureDeliveredData
+  onlineCourseData?: OnlineCourseData
+  paperPresentationData?: PaperPresentationData
+}
+
+export default function SubmitAchievementsPage() {
+  const router = useRouter()
+  const { user } = useAuthStore()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [achievements, setAchievements] = useState<Achievement[]>([
+    {
+      id: '1',
+      category: '',
+      title: '',
+      description: '',
+      date: '',
+    },
+  ])
+
+  const handleAddMore = () => {
+    setAchievements([
+      ...achievements,
+      {
+        id: Date.now().toString(),
+        category: '',
+        title: '',
+        description: '',
+        date: '',
+      },
+    ])
+  }
+
+  const handleRemove = (id: string) => {
+    if (achievements.length > 1) {
+      setAchievements(achievements.filter(a => a.id !== id))
+      toast.success('Achievement removed')
+    } else {
+      toast.error('You must have at least one achievement')
+    }
+  }
+
+  const handleAchievementChange = (
+    id: string,
+    field: string,
+    value: string | File
+  ) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === id) {
+        if (field === 'image' && value instanceof File) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAchievements(prev =>
+              prev.map(item =>
+                item.id === id
+                  ? {
+                      ...item,
+                      image: value,
+                      imagePreview: reader.result as string,
+                    }
+                  : item
+              )
+            )
+          }
+          reader.readAsDataURL(value)
+          return a
+        }
+        return { ...a, [field]: value }
+      }
+      return a
+    }))
+  }
+
+  const handleEventDataChange = (
+    achievementId: string,
+    field: string,
+    value: string | File
+  ) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsAttendedData || {
+          taskId: '',
+          specialLabsInvolved: '',
+          eventType: '',
+          organizerType: '',
+          eventLevel: '',
+          eventTitle: '',
+          organizationSector: '',
+          eventOrganizer: '',
+          eventMode: '',
+          eventDuration: '',
+          eventDurationValue: '',
+          eventDate: '',
+          endDate: '',
+          durationInDays: '',
+          sponsorshipType: '',
+          eventOutcome: '',
+        }
+
+        if ((field === 'certificateProof' || field === 'geotagPhotos') && value instanceof File) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAchievements(prev =>
+              prev.map(item =>
+                item.id === achievementId
+                  ? {
+                      ...item,
+                      eventsAttendedData: {
+                        ...eventData,
+                        [field]: value,
+                        [field === 'certificateProof' ? 'certificatePreview' : 'geotagPreview']: reader.result as string,
+                      },
+                    }
+                  : item
+              )
+            )
+          }
+          reader.readAsDataURL(value)
+          return a
+        }
+
+        return {
+          ...a,
+          eventsAttendedData: { ...eventData, [field]: value },
+        }
+      }
+      return a
+    }))
+  }
+
+  const handleEventsOrganisedChange = (
+    achievementId: string,
+    field: string,
+    value: string | File
+  ) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData || {
+          taskId: '',
+          facultyName: '',
+          facultyRole: '',
+          claimedDepartment: '',
+          specialLabsInvolved: '',
+          iicEvent: '',
+          iicEventUpload: '',
+          iicBipId: '',
+          deptAssociation: '',
+          rAndD: '',
+          technicalSociety: '',
+          mouOutcome: '',
+          mouBipId: '',
+          irpOutcome: '',
+          irpBipId: '',
+          coeOrganized: '',
+          coeBipId: '',
+          islOrganized: '',
+          islBipId: '',
+          internalFaculty: [],
+          students: [],
+          eventName: '',
+          eventType: '',
+          eventCategory: '',
+          programType: '',
+          eventMode: '',
+          startDate: '',
+          endDate: '',
+          eventDuration: '',
+          eventLevel: '',
+          jointlyOrganizedWith: '',
+          internalStudentParticipants: '',
+          internalFacultyParticipants: '',
+          externalStudentParticipants: '',
+          externalFacultyParticipants: '',
+          guestSpeakerType: '',
+          alumniGuestSpeaker: '',
+          guestSpeakers: [],
+          registrationAmount: '',
+          sponsorshipAmount: '',
+          managementAmount: '',
+          fundingAgency: '',
+          totalRevenue: '',
+          proofFiles: [],
+          proofFilePreviews: [],
+        }
+
+        if (field === 'proofFiles' && value instanceof File) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAchievements(prev =>
+              prev.map(item =>
+                item.id === achievementId
+                  ? {
+                      ...item,
+                      eventsOrganisedData: {
+                        ...eventData,
+                        proofFiles: [...(eventData.proofFiles || []), value],
+                        proofFilePreviews: [...(eventData.proofFilePreviews || []), reader.result as string],
+                      },
+                    }
+                  : item
+              )
+            )
+          }
+          reader.readAsDataURL(value)
+          return a
+        }
+
+        return {
+          ...a,
+          eventsOrganisedData: { ...eventData, [field]: value },
+        }
+      }
+      return a
+    }))
+  }
+
+  const addInternalFacultyMember = (achievementId: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            internalFaculty: [...eventData.internalFaculty, { id: Date.now().toString(), name: '', role: '' }],
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const removeInternalFacultyMember = (achievementId: string, memberId: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            internalFaculty: eventData.internalFaculty.filter(f => f.id !== memberId),
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const updateInternalFacultyMember = (achievementId: string, memberId: string, field: string, value: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            internalFaculty: eventData.internalFaculty.map(f =>
+              f.id === memberId ? { ...f, [field]: value } : f
+            ),
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const addStudentMember = (achievementId: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            students: [...eventData.students, { id: Date.now().toString(), name: '' }],
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const removeStudentMember = (achievementId: string, studentId: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            students: eventData.students.filter(s => s.id !== studentId),
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const updateStudentMember = (achievementId: string, studentId: string, name: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            students: eventData.students.map(s =>
+              s.id === studentId ? { ...s, name } : s
+            ),
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const addGuestSpeaker = (achievementId: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            guestSpeakers: [...eventData.guestSpeakers, {
+              id: Date.now().toString(),
+              type: '',
+              name: '',
+              designation: '',
+              email: '',
+              contact: '',
+              organization: '',
+            }],
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const removeGuestSpeaker = (achievementId: string, speakerId: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            guestSpeakers: eventData.guestSpeakers.filter(g => g.id !== speakerId),
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const updateGuestSpeaker = (achievementId: string, speakerId: string, field: string, value: string) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            guestSpeakers: eventData.guestSpeakers.map(g =>
+              g.id === speakerId ? { ...g, [field]: value } : g
+            ),
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const removeProofFile = (achievementId: string, index: number) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const eventData = a.eventsOrganisedData
+        if (!eventData) return a
+        return {
+          ...a,
+          eventsOrganisedData: {
+            ...eventData,
+            proofFiles: eventData.proofFiles?.filter((_, i) => i !== index) || [],
+            proofFilePreviews: eventData.proofFilePreviews?.filter((_, i) => i !== index) || [],
+          },
+        }
+      }
+      return a
+    }))
+  }
+
+  const handleGuestLectureChange = (
+    achievementId: string,
+    field: string,
+    value: string | File
+  ) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const lectureData = a.guestLectureDeliveredData || {
+          taskId: '',
+          faculty: '',
+          specialLabsInvolved: '',
+          eventType: '',
+          topic: '',
+          modeOfConduct: '',
+          eventLevel: '',
+          eventName: '',
+          fromDate: '',
+          toDate: '',
+          noOfDays: '',
+          typeOfOrganization: '',
+          noOfParticipants: '',
+          typeOfAudienceCovered: '',
+          iqacVerification: '',
+        }
+
+        if ((field === 'documentProof' || field === 'apexProof' || field === 'samplePhotographs') && value instanceof File) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAchievements(prev =>
+              prev.map(item =>
+                item.id === achievementId
+                  ? {
+                      ...item,
+                      guestLectureDeliveredData: {
+                        ...lectureData,
+                        [field]: value,
+                        [field === 'documentProof' ? 'documentProofPreview' : 
+                         field === 'apexProof' ? 'apexProofPreview' : 
+                         'samplePhotographsPreview']: reader.result as string,
+                      },
+                    }
+                  : item
+              )
+            )
+          }
+          reader.readAsDataURL(value)
+          return a
+        }
+
+        return {
+          ...a,
+          guestLectureDeliveredData: { ...lectureData, [field]: value },
+        }
+      }
+      return a
+    }))
+  }
+
+  const handleOnlineCourseChange = (
+    achievementId: string,
+    field: string,
+    value: string | File
+  ) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const courseData = a.onlineCourseData || {
+          taskId: '',
+          courseName: '',
+          typeOfOrganizer: '',
+          organizationName: '',
+          organizationAddress: '',
+          levelOfEvent: '',
+          duration: '',
+          startDate: '',
+          endDate: '',
+          courseCategory: '',
+          gradeObtained: '',
+          typeOfSponsorship: '',
+          claimedFor: '',
+          iqacVerification: '',
+        }
+
+        if (field === 'certificateProof' && value instanceof File) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAchievements(prev =>
+              prev.map(item =>
+                item.id === achievementId
+                  ? {
+                      ...item,
+                      onlineCourseData: {
+                        ...courseData,
+                        [field]: value,
+                        certificateProofPreview: reader.result as string,
+                      },
+                    }
+                  : item
+              )
+            )
+          }
+          reader.readAsDataURL(value)
+          return a
+        }
+
+        return {
+          ...a,
+          onlineCourseData: { ...courseData, [field]: value },
+        }
+      }
+      return a
+    }))
+  }
+
+  const handlePaperPresentationChange = (
+    achievementId: string,
+    field: string,
+    value: string | File
+  ) => {
+    setAchievements(achievements.map(a => {
+      if (a.id === achievementId) {
+        const papData = a.paperPresentationData || {
+          faculty: '',
+          taskId: '',
+          specialLabsInvolved: '',
+          otherAuthorsFromBIT: '',
+          externalFacultyInvolved: '',
+          industrialPersonInvolved: '',
+          internationalCollaboration: '',
+          conferenceTitle: '',
+          eventMode: '',
+          eventOrganizer: '',
+          eventLevel: '',
+          paperTitle: '',
+          eventStartDate: '',
+          eventEndDate: '',
+          eventDurationDays: '',
+          paperPublishedInProceedings: '',
+          typeOfSponsorship: '',
+          studentsInvolved: '',
+          registrationAmount: '',
+          awardPrizeReceived: '',
+          iqacVerification: '',
+        }
+
+        if ((field === 'documentProof' || field === 'awardProof') && value instanceof File) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAchievements(prev =>
+              prev.map(item =>
+                item.id === achievementId
+                  ? {
+                      ...item,
+                      paperPresentationData: {
+                        ...papData,
+                        [field]: value,
+                        [field === 'documentProof' ? 'documentProofPreview' : 'awardProofPreview']: reader.result as string,
+                      },
+                    }
+                  : item
+              )
+            )
+          }
+          reader.readAsDataURL(value)
+          return a
+        }
+
+        return {
+          ...a,
+          paperPresentationData: { ...papData, [field]: value },
+        }
+      }
+      return a
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    for (const achievement of achievements) {
+      if (!achievement.category || !achievement.title || !achievement.date) {
+        toast.error('Please fill in all required basic fields')
+        return
+      }
+
+      if (achievement.category === 'Events Attended') {
+        const data = achievement.eventsAttendedData
+        if (!data || !data.taskId || !data.eventType || !data.organizerType || !data.eventLevel ||
+          !data.eventTitle || !data.organizationSector || !data.eventOrganizer || !data.eventMode ||
+          !data.eventDuration || !data.eventDurationValue || !data.eventDate || !data.endDate ||
+          !data.durationInDays || !data.sponsorshipType || !data.eventOutcome ||
+          !data.certificateProof || !data.geotagPhotos) {
+          toast.error('Please fill in all required fields for Events Attended')
+          return
+        }
+      }
+
+      if (achievement.category === 'Events Organized') {
+        const data = achievement.eventsOrganisedData
+        if (!data || !data.taskId || !data.facultyName || !data.facultyRole || !data.claimedDepartment ||
+          !data.eventName || !data.eventType || !data.eventCategory || !data.programType ||
+          !data.eventMode || !data.startDate || !data.endDate || !data.eventLevel) {
+          toast.error('Please fill in all required fields for Events Organized')
+          return
+        }
+      }
+
+      if (achievement.category === 'Guest Lecture Delivered') {
+        const data = achievement.guestLectureDeliveredData
+        if (!data || !data.taskId || !data.faculty || !data.specialLabsInvolved || !data.eventType ||
+          !data.topic || !data.modeOfConduct || !data.eventLevel || !data.eventName ||
+          !data.fromDate || !data.toDate || !data.noOfDays || !data.typeOfOrganization ||
+          !data.noOfParticipants || !data.typeOfAudienceCovered || !data.documentProof || 
+          !data.samplePhotographs || !data.iqacVerification) {
+          toast.error('Please fill in all required fields for Guest Lecture Delivered')
+          return
+        }
+      }
+
+      if (achievement.category === 'Online Course') {
+        const data = achievement.onlineCourseData
+        if (!data || !data.taskId || !data.courseName || !data.typeOfOrganizer || !data.organizationName ||
+          !data.organizationAddress || !data.levelOfEvent || !data.duration || !data.startDate ||
+          !data.endDate || !data.courseCategory || !data.gradeObtained || !data.typeOfSponsorship ||
+          !data.claimedFor || !data.certificateProof || !data.iqacVerification) {
+          toast.error('Please fill in all required fields for Online Course')
+          return
+        }
+      }
+
+      if (achievement.category === 'Paper Presentation') {
+        const data = achievement.paperPresentationData
+        if (!data || !data.faculty || !data.taskId || !data.specialLabsInvolved || !data.otherAuthorsFromBIT ||
+          !data.externalFacultyInvolved || !data.industrialPersonInvolved || !data.internationalCollaboration ||
+          !data.conferenceTitle || !data.eventMode || !data.eventOrganizer || !data.eventLevel ||
+          !data.paperTitle || !data.eventStartDate || !data.eventEndDate || !data.eventDurationDays ||
+          !data.paperPublishedInProceedings || !data.typeOfSponsorship || !data.studentsInvolved ||
+          !data.documentProof || !data.awardPrizeReceived || !data.iqacVerification) {
+          toast.error('Please fill in all required fields for Paper Presentation')
+          return
+        }
+      }
+    }
+
+    setIsSubmitting(true)
+    await new Promise(r => setTimeout(r, 1200))
+    toast.success('Achievements submitted for verification!')
+    setIsSubmitting(false)
+    router.push('/dashboard')
+  }
+
+  return (
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors">
+        <ChevronLeft className="w-4 h-4" />
+        Back to Dashboard
+      </Link>
+
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900">Submit Achievements</h1>
+        <p className="text-sm text-slate-500 mt-1">Add your achievements with supporting evidence. You can add multiple achievements in different categories.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {achievements.map((achievement, idx) => (
+          <div key={achievement.id} className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-slate-800">Achievement #{idx + 1}</h2>
+              {achievements.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemove(achievement.id)}
+                  className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Category *</label>
+              <select
+                value={achievement.category}
+                onChange={(e) => handleAchievementChange(achievement.id, 'category', e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                required
+              >
+                <option value="">Select a category…</option>
+                {ACHIEVEMENT_CATEGORIES.map(cat => (
+                  <option key={cat.id} value={cat.label}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Events Attended Form */}
+            {achievement.category === 'Events Attended' && (
+              <div className="form-section-primary">
+                <h3 className="font-semibold text-slate-800">Event Details</h3>
+
+                {/* Task ID */}
+                <div>
+                  <label className="form-label">Task ID *</label>
+                  <input
+                    type="text"
+                    value={achievement.eventsAttendedData?.taskId || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'taskId', e.target.value)}
+                    placeholder="Enter task ID"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Special Labs Involved */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Special Labs Involved *</label>
+                    <select
+                      value={achievement.eventsAttendedData?.specialLabsInvolved || ''}
+                      onChange={(e) => handleEventDataChange(achievement.id, 'specialLabsInvolved', e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      required
+                    >
+                      <option value="">Choose an option</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+
+                  {achievement.eventsAttendedData?.specialLabsInvolved === 'Yes' && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Special Lab Name *</label>
+                      <select
+                        value={achievement.eventsAttendedData?.specialLabName || ''}
+                        onChange={(e) => handleEventDataChange(achievement.id, 'specialLabName', e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      >
+                        <option value="">Choose lab</option>
+                        {SPECIAL_LAB_NAMES.map(lab => (
+                          <option key={lab} value={lab}>{lab}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Type */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Event Type *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.eventType || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'eventType', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Click to choose</option>
+                    {EVENT_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Organizer Type */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Organizer Type *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.organizerType || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'organizerType', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Choose an option</option>
+                    {ORGANIZER_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Level */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Event Level *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.eventLevel || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'eventLevel', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Choose an option</option>
+                    {EVENT_LEVELS.map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Title */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Event Title *</label>
+                  <input
+                    type="text"
+                    value={achievement.eventsAttendedData?.eventTitle || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'eventTitle', e.target.value)}
+                    placeholder="Enter event title"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Organization Sector */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Organization Sector *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.organizationSector || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'organizationSector', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Choose an option</option>
+                    {SECTORS.map(sector => (
+                      <option key={sector} value={sector}>{sector}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Organizer */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Event Organizer *</label>
+                  <input
+                    type="text"
+                    value={achievement.eventsAttendedData?.eventOrganizer || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'eventOrganizer', e.target.value)}
+                    placeholder="Enter event organizer name"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Event Mode */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Event Mode *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.eventMode || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'eventMode', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Choose an option</option>
+                    {EVENT_MODES.map(mode => (
+                      <option key={mode} value={mode}>{mode}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Duration */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Event Duration Unit *</label>
+                    <select
+                      value={achievement.eventsAttendedData?.eventDuration || ''}
+                      onChange={(e) => handleEventDataChange(achievement.id, 'eventDuration', e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      required
+                    >
+                      <option value="">Choose an option</option>
+                      {DURATION_UNITS.map(unit => (
+                        <option key={unit} value={unit}>{unit}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Duration Value *</label>
+                    <input
+                      type="number"
+                      value={achievement.eventsAttendedData?.eventDurationValue || ''}
+                      onChange={(e) => handleEventDataChange(achievement.id, 'eventDurationValue', e.target.value)}
+                      placeholder="e.g., 5"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Event Date & End Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Event Date *</label>
+                    <input
+                      type="date"
+                      value={achievement.eventsAttendedData?.eventDate || ''}
+                      onChange={(e) => handleEventDataChange(achievement.id, 'eventDate', e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">End Date *</label>
+                    <input
+                      type="date"
+                      value={achievement.eventsAttendedData?.endDate || ''}
+                      onChange={(e) => handleEventDataChange(achievement.id, 'endDate', e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Duration in Days */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Duration (in days) *</label>
+                  <input
+                    type="number"
+                    value={achievement.eventsAttendedData?.durationInDays || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'durationInDays', e.target.value)}
+                    placeholder="e.g., 3"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Other Organizer Name */}
+                {achievement.eventsAttendedData?.organizerType === 'Others' && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Other Organizer Name *</label>
+                    <input
+                      type="text"
+                      value={achievement.eventsAttendedData?.otherOrganizerName || ''}
+                      onChange={(e) => handleEventDataChange(achievement.id, 'otherOrganizerName', e.target.value)}
+                      placeholder="Specify other organizer"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    />
+                  </div>
+                )}
+
+                {/* Sponsorship Type */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Type of Sponsorship *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.sponsorshipType || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'sponsorshipType', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Click to choose</option>
+                    {SPONSORSHIP_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Outcome */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Outcome of the attended event *</label>
+                  <select
+                    value={achievement.eventsAttendedData?.eventOutcome || ''}
+                    onChange={(e) => handleEventDataChange(achievement.id, 'eventOutcome', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  >
+                    <option value="">Click to choose</option>
+                    {EVENT_OUTCOMES.map(outcome => (
+                      <option key={outcome} value={outcome}>{outcome}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Certificate Proof */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">Certificate Proof *</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleEventDataChange(achievement.id, 'certificateProof', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`cert-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`cert-${achievement.id}`}
+                      className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      {achievement.eventsAttendedData?.certificatePreview ? (
+                        <div className="text-center">
+                          <p className="text-sm text-slate-600">{achievement.eventsAttendedData.certificateProof?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Geotag Photos */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">Upload Geotag Photos *</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleEventDataChange(achievement.id, 'geotagPhotos', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`geotag-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`geotag-${achievement.id}`}
+                      className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      {achievement.eventsAttendedData?.geotagPreview ? (
+                        <div className="text-center">
+                          <img src={achievement.eventsAttendedData.geotagPreview} alt="Geotag" className="max-h-24 mx-auto mb-2 rounded" />
+                          <p className="text-sm text-slate-600">{achievement.eventsAttendedData.geotagPhotos?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Events Organized Form */}
+            {achievement.category === 'Events Organized' && (
+              <div className="space-y-5 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 className="font-semibold text-slate-800">Events Organized Details</h3>
+
+                {/* Faculty Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Task ID *</label>
+                    <input type="text" value={achievement.eventsOrganisedData?.taskId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'taskId', e.target.value)} placeholder="Enter task ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Name of the Faculty *</label>
+                    <input type="text" value={achievement.eventsOrganisedData?.facultyName || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'facultyName', e.target.value)} placeholder="Enter faculty name" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Role *</label>
+                    <select value={achievement.eventsOrganisedData?.facultyRole || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'facultyRole', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                      <option value="">Choose an option</option>
+                      {ROLES.map(role => (<option key={role} value={role}>{role}</option>))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Claimed Department *</label>
+                    <select value={achievement.eventsOrganisedData?.claimedDepartment || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'claimedDepartment', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                      <option value="">—</option>
+                      {DEPARTMENTS.map(dept => (<option key={dept} value={dept}>{dept}</option>))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Special Labs Involved</label>
+                  <select value={achievement.eventsOrganisedData?.specialLabsInvolved || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'specialLabsInvolved', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                    <option value="">Choose an option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+
+                {/* Event Classifications */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-4">Event Classifications</h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Whether this event comes under IIC</label>
+                      <select value={achievement.eventsOrganisedData?.iicEvent || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'iicEvent', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    {achievement.eventsOrganisedData?.iicEvent === 'Yes' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Is this event upload under IIC</label>
+                        <select value={achievement.eventsOrganisedData?.iicEventUpload || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'iicEventUpload', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                          <option value="">Choose an option</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {achievement.eventsOrganisedData?.iicEventUpload === 'Yes' && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">IIC BIP ID</label>
+                      <input type="text" value={achievement.eventsOrganisedData?.iicBipId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'iicBipId', e.target.value)} placeholder="Enter BIP ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Is this event belongs to Department Association</label>
+                      <select value={achievement.eventsOrganisedData?.deptAssociation || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'deptAssociation', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Is this event organized by R & D</label>
+                      <select value={achievement.eventsOrganisedData?.rAndD || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'rAndD', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Is this event involved under Technical Society</label>
+                    <select value={achievement.eventsOrganisedData?.technicalSociety || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'technicalSociety', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all mb-4">
+                      <option value="">Choose an option</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Is this event an outcome of MoU</label>
+                      <select value={achievement.eventsOrganisedData?.mouOutcome || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'mouOutcome', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    {achievement.eventsOrganisedData?.mouOutcome === 'Yes' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">BIP ID of MoU entry</label>
+                        <input type="text" value={achievement.eventsOrganisedData?.mouBipId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'mouBipId', e.target.value)} placeholder="Enter BIP ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Is this event an outcome of an IRP visit</label>
+                      <select value={achievement.eventsOrganisedData?.irpOutcome || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'irpOutcome', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    {achievement.eventsOrganisedData?.irpOutcome === 'Yes' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">BIP ID of IRP Visits</label>
+                        <input type="text" value={achievement.eventsOrganisedData?.irpBipId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'irpBipId', e.target.value)} placeholder="Enter BIP ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Is this event organized through the Centre of Excellence</label>
+                      <select value={achievement.eventsOrganisedData?.coeOrganized || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'coeOrganized', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    {achievement.eventsOrganisedData?.coeOrganized === 'Yes' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">OWI Centre Of Excellence BIP ID</label>
+                        <input type="text" value={achievement.eventsOrganisedData?.coeBipId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'coeBipId', e.target.value)} placeholder="Enter BIP ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Is this event organized through Industry Supported Laboratories</label>
+                      <select value={achievement.eventsOrganisedData?.islOrganized || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'islOrganized', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    {achievement.eventsOrganisedData?.islOrganized === 'Yes' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">BIP ID of CoE entry</label>
+                        <input type="text" value={achievement.eventsOrganisedData?.islBipId || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'islBipId', e.target.value)} placeholder="Enter BIP ID" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Internal Faculty Members */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-3">Internal Faculty Members</h4>
+                  <div className="space-y-3">
+                    {achievement.eventsOrganisedData?.internalFaculty.map((faculty, idx) => (
+                      <div key={faculty.id} className="p-3 bg-white rounded border border-slate-300 grid grid-cols-3 gap-2">
+                        <input type="text" value={faculty.name} onChange={(e) => updateInternalFacultyMember(achievement.id, faculty.id, 'name', e.target.value)} placeholder="Faculty name" className="px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <select value={faculty.role} onChange={(e) => updateInternalFacultyMember(achievement.id, faculty.id, 'role', e.target.value)} className="px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                          <option value="">Role</option>
+                          {ROLES.map(role => (<option key={role} value={role}>{role}</option>))}
+                        </select>
+                        <button type="button" onClick={() => removeInternalFacultyMember(achievement.id, faculty.id)} className="p-2 hover:bg-red-50 rounded text-red-600">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => addInternalFacultyMember(achievement.id)} className="mt-2 flex items-center gap-2 px-3 py-2 border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 rounded text-sm font-medium">
+                    <Plus className="w-4 h-4" />
+                    Add Faculty Member
+                  </button>
+                </div>
+
+                {/* Student Members */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-3">Student Members</h4>
+                  <div className="space-y-2">
+                    {achievement.eventsOrganisedData?.students.map((student, idx) => (
+                      <div key={student.id} className="flex items-center gap-2">
+                        <input type="text" value={student.name} onChange={(e) => updateStudentMember(achievement.id, student.id, e.target.value)} placeholder={`Student ${idx + 1} name`} className="flex-1 px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <button type="button" onClick={() => removeStudentMember(achievement.id, student.id)} className="p-2 hover:bg-red-50 rounded text-red-600">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => addStudentMember(achievement.id)} className="mt-2 flex items-center gap-2 px-3 py-2 border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 rounded text-sm font-medium">
+                    <Plus className="w-4 h-4" />
+                    Add Student Member
+                  </button>
+                </div>
+
+                {/* Event Details */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-4">Event Details</h4>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Event Name *</label>
+                    <input type="text" value={achievement.eventsOrganisedData?.eventName || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventName', e.target.value)} placeholder="Enter event name" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Type of Program *</label>
+                      <select value={achievement.eventsOrganisedData?.programType || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'programType', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                        <option value="">Choose an option</option>
+                        <option value="Academic">Academic</option>
+                        <option value="Non academic">Non academic</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Event Type *</label>
+                      <select value={achievement.eventsOrganisedData?.eventType || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventType', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                        <option value="">Click to choose</option>
+                        {EVENT_TYPES.map(type => (<option key={type} value={type}>{type}</option>))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Event Category *</label>
+                      <select value={achievement.eventsOrganisedData?.eventCategory || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventCategory', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                        <option value="">Choose an option</option>
+                        {EVENT_CATEGORIES.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Event Mode *</label>
+                      <select value={achievement.eventsOrganisedData?.eventMode || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventMode', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                        <option value="">Choose an option</option>
+                        {EVENT_MODES.map(mode => (<option key={mode} value={mode}>{mode}</option>))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Event Level *</label>
+                      <select value={achievement.eventsOrganisedData?.eventLevel || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventLevel', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required>
+                        <option value="">Choose an option</option>
+                        <option value="International">International</option>
+                        <option value="National">National</option>
+                        <option value="State">State</option>
+                        <option value="Institute (BIT)">Institute (BIT)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Jointly organized with</label>
+                      <select value={achievement.eventsOrganisedData?.jointlyOrganizedWith || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'jointlyOrganizedWith', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        {JOINTLY_ORGANIZED.map(org => (<option key={org} value={org}>{org}</option>))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Start Date *</label>
+                      <input type="date" value={achievement.eventsOrganisedData?.startDate || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'startDate', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">End Date *</label>
+                      <input type="date" value={achievement.eventsOrganisedData?.endDate || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'endDate', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Event Duration (In Days)</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.eventDuration || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'eventDuration', e.target.value)} placeholder="e.g., 3" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Internal Participants (Student)</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.internalStudentParticipants || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'internalStudentParticipants', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Internal Participants (Faculty)</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.internalFacultyParticipants || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'internalFacultyParticipants', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">External Participants (Student)</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.externalStudentParticipants || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'externalStudentParticipants', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">External Participants (Faculty)</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.externalFacultyParticipants || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'externalFacultyParticipants', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Guest Speakers */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-4">Guest Speakers</h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Invited Guest or Notable Speaker</label>
+                      <select value={achievement.eventsOrganisedData?.guestSpeakerType || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'guestSpeakerType', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Academic">Academic</option>
+                        <option value="Industry">Industry</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Whether the resource person, an alumni of BIT</label>
+                      <select value={achievement.eventsOrganisedData?.alumniGuestSpeaker || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'alumniGuestSpeaker', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {achievement.eventsOrganisedData?.guestSpeakers.map((guest, idx) => (
+                      <div key={guest.id} className="p-3 bg-white rounded border border-slate-300 space-y-2">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-slate-700">Guest Speaker {idx + 1}</span>
+                          <button type="button" onClick={() => removeGuestSpeaker(achievement.id, guest.id)} className="p-1 hover:bg-red-50 rounded text-red-600">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <select value={guest.type} onChange={(e) => updateGuestSpeaker(achievement.id, guest.id, 'type', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                          <option value="">Type of Institution</option>
+                          {GUEST_INSTITUTION_TYPES.map(type => (<option key={type} value={type}>{type}</option>))}
+                        </select>
+                        <input type="text" value={guest.name} onChange={(e) => updateGuestSpeaker(achievement.id, guest.id, 'name', e.target.value)} placeholder="Guest name" className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="text" value={guest.designation} onChange={(e) => updateGuestSpeaker(achievement.id, guest.id, 'designation', e.target.value)} placeholder="Designation" className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="email" value={guest.email} onChange={(e) => updateGuestSpeaker(achievement.id, guest.id, 'email', e.target.value)} placeholder="Email ID" className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="tel" value={guest.contact} onChange={(e) => updateGuestSpeaker(achievement.id, guest.id, 'contact', e.target.value)} placeholder="Contact No" className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="text" value={guest.organization} onChange={(e) => updateGuestSpeaker(achievement.id, guest.id, 'organization', e.target.value)} placeholder="Organization Details" className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {achievement.eventsOrganisedData && achievement.eventsOrganisedData.guestSpeakers.length < 5 && (
+                    <button type="button" onClick={() => addGuestSpeaker(achievement.id)} className="mt-2 flex items-center gap-2 px-3 py-2 border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 rounded text-sm font-medium">
+                      <Plus className="w-4 h-4" />
+                      Add Guest Speaker
+                    </button>
+                  )}
+                </div>
+
+                {/* Financial Information */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-4">Financial Information</h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Registration Amount</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.registrationAmount || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'registrationAmount', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Total Sponsored Amount</label>
+                      <input type="number" value={achievement.eventsOrganisedData?.sponsorshipAmount || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'sponsorshipAmount', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Amount Received From Management</label>
+                      <select value={achievement.eventsOrganisedData?.managementAmount || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'managementAmount', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Sponsorship from Funding agency</label>
+                      <select value={achievement.eventsOrganisedData?.fundingAgency || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'fundingAgency', e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <option value="">Choose an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Total Revenue Generated</label>
+                    <input type="number" value={achievement.eventsOrganisedData?.totalRevenue || ''} onChange={(e) => handleEventsOrganisedChange(achievement.id, 'totalRevenue', e.target.value)} placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                  </div>
+                </div>
+
+                {/* Document Upload */}
+                <div className="pt-4 border-t border-blue-300">
+                  <h4 className="font-medium text-slate-800 mb-3">Supporting Documents</h4>
+                  <p className="text-xs text-slate-600 mb-3">Upload: 1.Approval letter, 2.Brochure/Poster/Invitation, 3.Attendance sheet, 4.Photos (atleast 3), 5.Feedback</p>
+                  
+                  <div>
+                    <input type="file" multiple accept="image/*,.pdf,.doc,.docx" onChange={(e) => { if (e.target.files) Array.from(e.target.files).forEach(file => handleEventsOrganisedChange(achievement.id, 'proofFiles', file)) }} className="hidden" id={`proof-${achievement.id}`} />
+                    <label htmlFor={`proof-${achievement.id}`} className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
+                      <div className="text-center">
+                        <Upload className="w-6 h-6 mx-auto text-slate-400 mb-2" />
+                        <p className="text-sm font-medium text-slate-600">Drop file or click to choose</p>
+                        <p className="text-xs text-slate-500 mt-1">Images, PDF, Word Documents</p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {achievement.eventsOrganisedData?.proofFilePreviews && achievement.eventsOrganisedData.proofFilePreviews.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {achievement.eventsOrganisedData.proofFilePreviews.map((_, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
+                          <span className="text-sm text-slate-700">{achievement.eventsOrganisedData?.proofFiles?.[idx]?.name}</span>
+                          <button type="button" onClick={() => removeProofFile(achievement.id, idx)} className="p-1 hover:bg-red-50 rounded text-red-600">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Guest Lecture Delivered Form */}
+            {achievement.category === 'Guest Lecture Delivered' && (
+              <div className="form-section-primary">
+                <h3 className="font-semibold text-slate-800">Guest Lecture Details</h3>
+
+                {/* Task ID and Faculty Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="form-label">Task ID *</label>
+                    <input
+                      type="text"
+                      value={achievement.guestLectureDeliveredData?.taskId || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'taskId', e.target.value)}
+                      placeholder="Task ID"
+                      className="form-input"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Faculty *</label>
+                    <select
+                      value={achievement.guestLectureDeliveredData?.faculty || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'faculty', e.target.value)}
+                      className="form-select"
+                      required
+                    >
+                      <option value="">Click to choose</option>
+                      {FACULTY_LIST.map(faculty => (
+                        <option key={faculty} value={faculty}>{faculty}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Special Labs Involved */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="form-label">Special Labs Involved *</label>
+                    <select
+                      value={achievement.guestLectureDeliveredData?.specialLabsInvolved || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'specialLabsInvolved', e.target.value)}
+                      className="form-select"
+                      required
+                    >
+                      <option value="">Yes or no</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+
+                  {achievement.guestLectureDeliveredData?.specialLabsInvolved === 'Yes' && (
+                    <div>
+                      <label className="form-label">Special Lab *</label>
+                      <select
+                        value={achievement.guestLectureDeliveredData?.specialLabName || ''}
+                        onChange={(e) => handleGuestLectureChange(achievement.id, 'specialLabName', e.target.value)}
+                        className="form-select"
+                      >
+                        <option value="">Click to choose</option>
+                        {SPECIAL_LAB_NAMES.map(lab => (
+                          <option key={lab} value={lab}>{lab}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Type */}
+                <div>
+                  <label className="form-label">Event Type *</label>
+                  <select
+                    value={achievement.guestLectureDeliveredData?.eventType || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'eventType', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Choose an option</option>
+                    {GUEST_LECTURE_EVENT_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Topic */}
+                <div>
+                  <label className="form-label">Topic *</label>
+                  <input
+                    type="text"
+                    value={achievement.guestLectureDeliveredData?.topic || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'topic', e.target.value)}
+                    placeholder="Topic"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Mode of Conduct */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="form-label">Mode of Conduct *</label>
+                    <select
+                      value={achievement.guestLectureDeliveredData?.modeOfConduct || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'modeOfConduct', e.target.value)}
+                      className="form-select"
+                      required
+                    >
+                      <option value="">Online / Offline</option>
+                      {CONDUCT_MODES.map(mode => (
+                        <option key={mode} value={mode}>{mode}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Event Level *</label>
+                    <select
+                      value={achievement.guestLectureDeliveredData?.eventLevel || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'eventLevel', e.target.value)}
+                      className="form-select"
+                      required
+                    >
+                      <option value="">Choose an option</option>
+                      <option value="International">International</option>
+                      <option value="National">National</option>
+                      <option value="State">State</option>
+                      <option value="Institute">Institute</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Name of the Event */}
+                <div>
+                  <label className="form-label">Name of the Event *</label>
+                  <input
+                    type="text"
+                    value={achievement.guestLectureDeliveredData?.eventName || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'eventName', e.target.value)}
+                    placeholder="Name of the Event"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* From Date and To Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="form-label">From Date *</label>
+                    <input
+                      type="date"
+                      value={achievement.guestLectureDeliveredData?.fromDate || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'fromDate', e.target.value)}
+                      className="form-input"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">To Date *</label>
+                    <input
+                      type="date"
+                      value={achievement.guestLectureDeliveredData?.toDate || ''}
+                      onChange={(e) => handleGuestLectureChange(achievement.id, 'toDate', e.target.value)}
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* No of Days */}
+                <div>
+                  <label className="form-label">No of Days *</label>
+                  <input
+                    type="number"
+                    value={achievement.guestLectureDeliveredData?.noOfDays || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'noOfDays', e.target.value)}
+                    placeholder="No of Days"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Type of Organization */}
+                <div>
+                  <label className="form-label">Type of Organization *</label>
+                  <select
+                    value={achievement.guestLectureDeliveredData?.typeOfOrganization || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'typeOfOrganization', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">BIT</option>
+                    {ORG_TYPES.map(org => (
+                      <option key={org} value={org}>{org}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* No of Participants Attended */}
+                <div>
+                  <label className="form-label">No of participants attended *</label>
+                  <input
+                    type="number"
+                    value={achievement.guestLectureDeliveredData?.noOfParticipants || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'noOfParticipants', e.target.value)}
+                    placeholder="No of participants attended"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Type of Audience Covered */}
+                <div>
+                  <label className="form-label">Type of Audience Covered *</label>
+                  <select
+                    value={achievement.guestLectureDeliveredData?.typeOfAudienceCovered || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'typeOfAudienceCovered', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Students</option>
+                    {AUDIENCE_TYPES.map(audience => (
+                      <option key={audience} value={audience}>{audience}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Document Proof */}
+                <div>
+                  <label className="form-label mb-3">
+                    Document Proof (1. Request Letter / Mail Copy, 2. Confirmation Letter / Appreciation Letter, 3. Brochure) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleGuestLectureChange(achievement.id, 'documentProof', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`doc-proof-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`doc-proof-${achievement.id}`}
+                      className="file-upload-area"
+                    >
+                      {achievement.guestLectureDeliveredData?.documentProofPreview ? (
+                        <div className="text-center">
+                          <p className="text-sm text-slate-600">{achievement.guestLectureDeliveredData.documentProof?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Apex Proof */}
+                <div>
+                  <label className="form-label mb-3">Apex Proof</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleGuestLectureChange(achievement.id, 'apexProof', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`apex-proof-${achievement.id}`}
+                    />
+                    <label
+                      htmlFor={`apex-proof-${achievement.id}`}
+                      className="file-upload-area"
+                    >
+                      {achievement.guestLectureDeliveredData?.apexProofPreview ? (
+                        <div className="text-center">
+                          <p className="text-sm text-slate-600">{achievement.guestLectureDeliveredData.apexProof?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Sample Photographs */}
+                <div>
+                  <label className="form-label mb-3">
+                    Sample Photographs (If online, screenshot is required. If offline, photograph is required) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleGuestLectureChange(achievement.id, 'samplePhotographs', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`photos-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`photos-${achievement.id}`}
+                      className="file-upload-area"
+                    >
+                      {achievement.guestLectureDeliveredData?.samplePhotographsPreview ? (
+                        <div className="text-center">
+                          <img src={achievement.guestLectureDeliveredData.samplePhotographsPreview} alt="Sample" className="max-h-24 mx-auto mb-2 rounded" />
+                          <p className="text-sm text-slate-600">{achievement.guestLectureDeliveredData.samplePhotographs?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* IQAC Verification */}
+                <div>
+                  <label className="form-label">IQAC Verification *</label>
+                  <input
+                    type="text"
+                    value={achievement.guestLectureDeliveredData?.iqacVerification || ''}
+                    onChange={(e) => handleGuestLectureChange(achievement.id, 'iqacVerification', e.target.value)}
+                    placeholder="CS10111-GL-08.06.2021"
+                    className="form-input"
+                    required
+                  />
+                  <p className="text-xs text-slate-500 mt-1">* Please specify the Proof name only in the following format: CS10111-GL-08.06.2021</p>
+                </div>
+              </div>
+            )}
+
+            {/* Online Course Form Section */}
+            {achievement.category === 'Online Course' && (
+              <div className="form-section-primary space-y-4">
+                {/* Task ID */}
+                <div>
+                  <label className="form-label">Task ID *</label>
+                  <input
+                    type="text"
+                    value={achievement.onlineCourseData?.taskId || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'taskId', e.target.value)}
+                    placeholder="Enter Task ID"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Course Name */}
+                <div>
+                  <label className="form-label">Course Name *</label>
+                  <input
+                    type="text"
+                    value={achievement.onlineCourseData?.courseName || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'courseName', e.target.value)}
+                    placeholder="Enter Course Name"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Type of Organizer */}
+                <div>
+                  <label className="form-label">Type of Organizer *</label>
+                  <select
+                    value={achievement.onlineCourseData?.typeOfOrganizer || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'typeOfOrganizer', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Organizer Type</option>
+                    {ONLINE_COURSE_ORGANIZERS.map(org => (
+                      <option key={org} value={org}>{org}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Organization Name */}
+                <div>
+                  <label className="form-label">Organization Name *</label>
+                  <input
+                    type="text"
+                    value={achievement.onlineCourseData?.organizationName || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'organizationName', e.target.value)}
+                    placeholder="Enter Organization Name"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Organization Address */}
+                <div>
+                  <label className="form-label">Organization Address *</label>
+                  <input
+                    type="text"
+                    value={achievement.onlineCourseData?.organizationAddress || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'organizationAddress', e.target.value)}
+                    placeholder="Enter Organization Address"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Level of Event */}
+                <div>
+                  <label className="form-label">Level of Event *</label>
+                  <select
+                    value={achievement.onlineCourseData?.levelOfEvent || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'levelOfEvent', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Event Level</option>
+                    {ONLINE_COURSE_LEVELS.map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Duration */}
+                <div>
+                  <label className="form-label">Duration *</label>
+                  <select
+                    value={achievement.onlineCourseData?.duration || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'duration', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Duration</option>
+                    {ONLINE_COURSE_DURATIONS.map(duration => (
+                      <option key={duration} value={duration}>{duration}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Start Date */}
+                <div>
+                  <label className="form-label">Start Date *</label>
+                  <input
+                    type="date"
+                    value={achievement.onlineCourseData?.startDate || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'startDate', e.target.value)}
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* End Date */}
+                <div>
+                  <label className="form-label">End Date *</label>
+                  <input
+                    type="date"
+                    value={achievement.onlineCourseData?.endDate || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'endDate', e.target.value)}
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Course Category */}
+                <div>
+                  <label className="form-label">Course Category *</label>
+                  <select
+                    value={achievement.onlineCourseData?.courseCategory || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'courseCategory', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Course Category</option>
+                    {ONLINE_COURSE_CATEGORIES.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Grade Obtained */}
+                <div>
+                  <label className="form-label">Grade Obtained *</label>
+                  <input
+                    type="text"
+                    value={achievement.onlineCourseData?.gradeObtained || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'gradeObtained', e.target.value)}
+                    placeholder="Enter Grade (e.g., A, 95%)"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Type of Sponsorship */}
+                <div>
+                  <label className="form-label">Type of Sponsorship *</label>
+                  <select
+                    value={achievement.onlineCourseData?.typeOfSponsorship || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'typeOfSponsorship', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Sponsorship Type</option>
+                    {ONLINE_SPONSORSHIP_TYPES.map(sponsorship => (
+                      <option key={sponsorship} value={sponsorship}>{sponsorship}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Claimed For */}
+                <div>
+                  <label className="form-label">Claimed For *</label>
+                  <select
+                    value={achievement.onlineCourseData?.claimedFor || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'claimedFor', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Claimed For Option</option>
+                    {ONLINE_CLAIMED_FOR_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Certificate Proof Upload */}
+                <div>
+                  <label className="form-label mb-3">Certificate Proof Upload *</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleOnlineCourseChange(achievement.id, 'certificateProof', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`cert-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`cert-${achievement.id}`}
+                      className="file-upload-area"
+                    >
+                      {achievement.onlineCourseData?.certificateProofPreview ? (
+                        <div className="text-center">
+                          <p className="text-sm text-slate-600">{achievement.onlineCourseData.certificateProof?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* IQAC Verification */}
+                <div>
+                  <label className="form-label">IQAC Verification *</label>
+                  <input
+                    type="text"
+                    value={achievement.onlineCourseData?.iqacVerification || ''}
+                    onChange={(e) => handleOnlineCourseChange(achievement.id, 'iqacVerification', e.target.value)}
+                    placeholder="OC12345-COURSERA-15.10.2023"
+                    className="form-input"
+                    required
+                  />
+                  <p className="text-xs text-slate-500 mt-1">* Please specify the Proof name in the following format: OC12345-COURSERA-15.10.2023</p>
+                </div>
+              </div>
+            )}
+
+            {/* Paper Presentation Form Section */}
+            {achievement.category === 'Paper Presentation' && (
+              <div className="form-section-primary space-y-4">
+                {/* Faculty */}
+                <div>
+                  <label className="form-label">Faculty *</label>
+                  <select
+                    value={achievement.paperPresentationData?.faculty || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'faculty', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Faculty</option>
+                    {FACULTY_LIST.map(faculty => (
+                      <option key={faculty} value={faculty}>{faculty}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Task ID */}
+                <div>
+                  <label className="form-label">Task ID *</label>
+                  <input
+                    type="text"
+                    value={achievement.paperPresentationData?.taskId || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'taskId', e.target.value)}
+                    placeholder="Enter Task ID"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Special Labs Involved */}
+                <div>
+                  <label className="form-label">Special Labs Involved *</label>
+                  <select
+                    value={achievement.paperPresentationData?.specialLabsInvolved || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'specialLabsInvolved', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Special Lab Name - Conditional */}
+                {achievement.paperPresentationData?.specialLabsInvolved === 'Yes' && (
+                  <div>
+                    <label className="form-label">Special Lab Name *</label>
+                    <select
+                      value={achievement.paperPresentationData?.specialLabName || ''}
+                      onChange={(e) => handlePaperPresentationChange(achievement.id, 'specialLabName', e.target.value)}
+                      className="form-select"
+                    >
+                      <option value="">Select Special Lab</option>
+                      {SPECIAL_LAB_NAMES.map(lab => (
+                        <option key={lab} value={lab}>{lab}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Other Authors from BIT */}
+                <div>
+                  <label className="form-label">Other Authors from BIT *</label>
+                  <select
+                    value={achievement.paperPresentationData?.otherAuthorsFromBIT || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'otherAuthorsFromBIT', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Authors from BIT - Conditional */}
+                {achievement.paperPresentationData?.otherAuthorsFromBIT === 'Yes' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    {['first', 'second', 'third', 'fourth', 'fifth'].map((position, idx) => (
+                      <div key={position}>
+                        <label className="form-label">{position.charAt(0).toUpperCase() + position.slice(1)} Author *</label>
+                        <select
+                          value={achievement.paperPresentationData?.[`${position}Author` as keyof PaperPresentationData] as string || ''}
+                          onChange={(e) => handlePaperPresentationChange(achievement.id, `${position}Author`, e.target.value)}
+                          className="form-select"
+                        >
+                          <option value="">Select Faculty</option>
+                          {FACULTY_LIST.map(faculty => (
+                            <option key={faculty} value={faculty}>{faculty}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* External Faculty Involved */}
+                <div>
+                  <label className="form-label">Faculty Member from Other Institute *</label>
+                  <select
+                    value={achievement.paperPresentationData?.externalFacultyInvolved || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'externalFacultyInvolved', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* External Faculty Details - Conditional */}
+                {achievement.paperPresentationData?.externalFacultyInvolved === 'Yes' && (
+                  <div className="space-y-3 border-l-4 border-blue-400 pl-4">
+                    {[1, 2, 3].map(num => (
+                      <div key={num} className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="form-label">External Faculty {num} (Name) *</label>
+                          <input
+                            type="text"
+                            value={achievement.paperPresentationData?.[`externalFaculty${num}` as keyof PaperPresentationData] as string || ''}
+                            onChange={(e) => handlePaperPresentationChange(achievement.id, `externalFaculty${num}`, e.target.value)}
+                            placeholder={`Faculty ${num} Name`}
+                            className="form-input"
+                          />
+                        </div>
+                        <div>
+                          <label className="form-label">Institution *</label>
+                          <input
+                            type="text"
+                            value={achievement.paperPresentationData?.[`externalFaculty${num}Institution` as keyof PaperPresentationData] as string || ''}
+                            onChange={(e) => handlePaperPresentationChange(achievement.id, `externalFaculty${num}Institution`, e.target.value)}
+                            placeholder="Institution Name"
+                            className="form-input"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Industrial Person Involved */}
+                <div>
+                  <label className="form-label">Whether Industrial Person Involved *</label>
+                  <select
+                    value={achievement.paperPresentationData?.industrialPersonInvolved || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'industrialPersonInvolved', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Industrial Person Details - Conditional */}
+                {achievement.paperPresentationData?.industrialPersonInvolved === 'Yes' && (
+                  <div className="space-y-3 border-l-4 border-amber-400 pl-4">
+                    {[1, 2, 3].map(num => (
+                      <div key={num} className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="form-label">Person {num} Name *</label>
+                          <input
+                            type="text"
+                            value={achievement.paperPresentationData?.[`industrialPerson${num}` as keyof PaperPresentationData] as string || ''}
+                            onChange={(e) => handlePaperPresentationChange(achievement.id, `industrialPerson${num}`, e.target.value)}
+                            placeholder={`Person ${num} Name`}
+                            className="form-input"
+                          />
+                        </div>
+                        <div>
+                          <label className="form-label">Industry Name *</label>
+                          <input
+                            type="text"
+                            value={achievement.paperPresentationData?.[`industrialPerson${num}Industry` as keyof PaperPresentationData] as string || ''}
+                            onChange={(e) => handlePaperPresentationChange(achievement.id, `industrialPerson${num}Industry`, e.target.value)}
+                            placeholder="Industry Name"
+                            className="form-input"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* International Collaboration */}
+                <div>
+                  <label className="form-label">Collaboration with any International Institute / University *</label>
+                  <select
+                    value={achievement.paperPresentationData?.internationalCollaboration || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'internationalCollaboration', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* International Institute Name - Conditional */}
+                {achievement.paperPresentationData?.internationalCollaboration === 'Yes' && (
+                  <div>
+                    <label className="form-label">Name of International Institute / University *</label>
+                    <input
+                      type="text"
+                      value={achievement.paperPresentationData?.internationalInstituteName || ''}
+                      onChange={(e) => handlePaperPresentationChange(achievement.id, 'internationalInstituteName', e.target.value)}
+                      placeholder="Enter Institute/University Name"
+                      className="form-input"
+                    />
+                  </div>
+                )}
+
+                {/* Conference Title */}
+                <div>
+                  <label className="form-label">Name of Conference *</label>
+                  <input
+                    type="text"
+                    value={achievement.paperPresentationData?.conferenceTitle || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'conferenceTitle', e.target.value)}
+                    placeholder="Enter Conference Title"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Event Mode */}
+                <div>
+                  <label className="form-label">Event Mode *</label>
+                  <select
+                    value={achievement.paperPresentationData?.eventMode || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'eventMode', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Event Mode</option>
+                    {PAPER_PRESENTATION_EVENT_MODES.map(mode => (
+                      <option key={mode} value={mode}>{mode}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Organizer */}
+                <div>
+                  <label className="form-label">Event Organizer *</label>
+                  <select
+                    value={achievement.paperPresentationData?.eventOrganizer || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'eventOrganizer', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Event Organizer</option>
+                    {PAPER_PRESENTATION_ORGANIZERS.map(organizer => (
+                      <option key={organizer} value={organizer}>{organizer}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Event Level */}
+                <div>
+                  <label className="form-label">Event Level *</label>
+                  <select
+                    value={achievement.paperPresentationData?.eventLevel || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'eventLevel', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Event Level</option>
+                    {PAPER_PRESENTATION_LEVELS.map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Paper Title */}
+                <div>
+                  <label className="form-label">Paper Title *</label>
+                  <input
+                    type="text"
+                    value={achievement.paperPresentationData?.paperTitle || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'paperTitle', e.target.value)}
+                    placeholder="Enter Paper Title"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Event Start Date */}
+                <div>
+                  <label className="form-label">Event Start Date *</label>
+                  <input
+                    type="date"
+                    value={achievement.paperPresentationData?.eventStartDate || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'eventStartDate', e.target.value)}
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Event End Date */}
+                <div>
+                  <label className="form-label">Event End Date *</label>
+                  <input
+                    type="date"
+                    value={achievement.paperPresentationData?.eventEndDate || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'eventEndDate', e.target.value)}
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Event Duration */}
+                <div>
+                  <label className="form-label">Event Duration (Days) *</label>
+                  <input
+                    type="number"
+                    value={achievement.paperPresentationData?.eventDurationDays || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'eventDurationDays', e.target.value)}
+                    placeholder="Enter the duration in days"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                {/* Paper Published in Proceedings */}
+                <div>
+                  <label className="form-label">Paper Published in Conference Proceedings *</label>
+                  <select
+                    value={achievement.paperPresentationData?.paperPublishedInProceedings || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'paperPublishedInProceedings', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Page From & Page To - Conditional */}
+                {achievement.paperPresentationData?.paperPublishedInProceedings === 'Yes' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="form-label">Page From *</label>
+                      <input
+                        type="text"
+                        value={achievement.paperPresentationData?.pageFrom || ''}
+                        onChange={(e) => handlePaperPresentationChange(achievement.id, 'pageFrom', e.target.value)}
+                        placeholder="From Page Number"
+                        className="form-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Page To *</label>
+                      <input
+                        type="text"
+                        value={achievement.paperPresentationData?.pageTo || ''}
+                        onChange={(e) => handlePaperPresentationChange(achievement.id, 'pageTo', e.target.value)}
+                        placeholder="To Page Number"
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Type of Sponsorship */}
+                <div>
+                  <label className="form-label">Type of Sponsorship *</label>
+                  <select
+                    value={achievement.paperPresentationData?.typeOfSponsorship || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'typeOfSponsorship', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Sponsorship Type</option>
+                    {PAPER_PRESENTATION_SPONSORSHIP.map(sponsorship => (
+                      <option key={sponsorship} value={sponsorship}>{sponsorship}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Students Involved */}
+                <div>
+                  <label className="form-label">Students Involved *</label>
+                  <select
+                    value={achievement.paperPresentationData?.studentsInvolved || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'studentsInvolved', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Students Details - Conditional */}
+                {achievement.paperPresentationData?.studentsInvolved === 'Yes' && (
+                  <div className="space-y-3 border-l-4 border-emerald-400 pl-4">
+                    {['first', 'second', 'third', 'fourth', 'fifth'].map((position, idx) => (
+                      <div key={position} className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="form-label">{position.charAt(0).toUpperCase() + position.slice(1)} Student *</label>
+                          <select
+                            value={achievement.paperPresentationData?.[`${position}Student` as keyof PaperPresentationData] as string || ''}
+                            onChange={(e) => handlePaperPresentationChange(achievement.id, `${position}Student`, e.target.value)}
+                            className="form-select"
+                          >
+                            <option value="">Select Student</option>
+                            {STUDENT_OPTIONS.map(student => (
+                              <option key={student} value={student}>{student}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="form-label">Year of Study *</label>
+                          <select
+                            value={achievement.paperPresentationData?.[`${position}StudentYear` as keyof PaperPresentationData] as string || ''}
+                            onChange={(e) => handlePaperPresentationChange(achievement.id, `${position}StudentYear`, e.target.value)}
+                            className="form-select"
+                          >
+                            <option value="">Select Year</option>
+                            {['1st Year', '2nd Year', '3rd Year', '4th Year'].map(year => (
+                              <option key={year} value={year}>{year}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Registration Amount */}
+                <div>
+                  <label className="form-label">Registration Amount (in Rs.)</label>
+                  <input
+                    type="number"
+                    value={achievement.paperPresentationData?.registrationAmount || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'registrationAmount', e.target.value)}
+                    placeholder="Enter Registration Amount"
+                    className="form-input"
+                  />
+                </div>
+
+                {/* Document Proof */}
+                <div>
+                  <label className="form-label mb-3">Document Proof (Certificate & Proceeding page if applicable) *</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handlePaperPresentationChange(achievement.id, 'documentProof', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`doc-proof-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`doc-proof-${achievement.id}`}
+                      className="file-upload-area"
+                    >
+                      {achievement.paperPresentationData?.documentProofPreview ? (
+                        <div className="text-center">
+                          <p className="text-sm text-slate-600">{achievement.paperPresentationData.documentProof?.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Choose File</p>
+                          <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Award / Prize Received */}
+                <div>
+                  <label className="form-label">Award / Cash / Prize Received *</label>
+                  <select
+                    value={achievement.paperPresentationData?.awardPrizeReceived || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'awardPrizeReceived', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    {YES_NO_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Award Proof - Conditional */}
+                {achievement.paperPresentationData?.awardPrizeReceived === 'Yes' && (
+                  <div>
+                    <label className="form-label mb-3">Award Proof *</label>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) {
+                            handlePaperPresentationChange(achievement.id, 'awardProof', e.target.files[0])
+                          }
+                        }}
+                        className="hidden"
+                        id={`award-${achievement.id}`}
+                      />
+                      <label
+                        htmlFor={`award-${achievement.id}`}
+                        className="file-upload-area"
+                      >
+                        {achievement.paperPresentationData?.awardProofPreview ? (
+                          <div className="text-center">
+                            <p className="text-sm text-slate-600">{achievement.paperPresentationData.awardProof?.name}</p>
+                            <p className="text-xs text-slate-500 mt-1">Click to change</p>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                            <p className="text-sm font-medium text-slate-600">Choose File</p>
+                            <p className="text-xs text-slate-500 mt-1">Drop file or click to choose</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* IQAC Verification */}
+                <div>
+                  <label className="form-label">IQAC Verification *</label>
+                  <input
+                    type="text"
+                    value={achievement.paperPresentationData?.iqacVerification || ''}
+                    onChange={(e) => handlePaperPresentationChange(achievement.id, 'iqacVerification', e.target.value)}
+                    placeholder="CS10111-PP-08.06.2021"
+                    className="form-input"
+                    required
+                  />
+                  <p className="text-xs text-slate-500 mt-1">* Please specify the Proof name only in the following format: CS10111-PP-08.06.2021</p>
+                </div>
+              </div>
+            )}
+
+            {/* Generic Fields (for non-Events Attended, non-Events Organized, non-Guest Lecture, non-Online Course, and non-Paper Presentation) */}
+            {achievement.category !== 'Events Attended' && achievement.category !== 'Events Organized' && achievement.category !== 'Guest Lecture Delivered' && achievement.category !== 'Online Course' && achievement.category !== 'Paper Presentation' && (
+              <>
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Title *</label>
+                  <input
+                    type="text"
+                    value={achievement.title}
+                    onChange={(e) => handleAchievementChange(achievement.id, 'title', e.target.value)}
+                    placeholder="Enter achievement title"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                  <textarea
+                    value={achievement.description}
+                    onChange={(e) => handleAchievementChange(achievement.id, 'description', e.target.value)}
+                    placeholder="Add any additional details about this achievement"
+                    rows={3}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                  />
+                </div>
+
+                {/* Date */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Date *</label>
+                  <input
+                    type="date"
+                    value={achievement.date}
+                    onChange={(e) => handleAchievementChange(achievement.id, 'date', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">Evidence Image *</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleAchievementChange(achievement.id, 'image', e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                      id={`file-${achievement.id}`}
+                      required
+                    />
+                    <label
+                      htmlFor={`file-${achievement.id}`}
+                      className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      {achievement.imagePreview ? (
+                        <div className="text-center">
+                          <img src={achievement.imagePreview} alt="Preview" className="max-h-32 mx-auto mb-2 rounded" />
+                          <p className="text-sm text-slate-600">Click to change image</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                          <p className="text-sm font-medium text-slate-600">Click to upload or drag and drop</p>
+                          <p className="text-xs text-slate-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+
+        {/* Add More Button */}
+        <button
+          type="button"
+          onClick={handleAddMore}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          Add Another Achievement
+        </button>
+
+        {/* Submit Button */}
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                Submit Achievements
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
