@@ -113,9 +113,9 @@ function KpiCard({ label, value, gradient, borderColor }: {
   borderColor: string
 }) {
   return (
-    <div className={`${gradient} border ${borderColor} rounded-xl p-6 text-center`}>
-      <p className="text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-4xl font-black" style={MONO_FONT}>{value}</p>
+    <div className={`${gradient} border ${borderColor} rounded-xl p-4 sm:p-6 text-center`}>
+      <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-2xl sm:text-4xl font-black" style={MONO_FONT}>{value}</p>
     </div>
   )
 }
@@ -128,9 +128,9 @@ function StatCard({ label, value, extra, borderAccent }: {
   borderAccent: string
 }) {
   return (
-    <div className={`bg-white rounded-xl border border-slate-200 p-5 border-l-4 ${borderAccent}`}>
-      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-      <p className="text-3xl font-bold text-slate-900 mt-1" style={MONO_FONT}>{value}</p>
+    <div className={`bg-white rounded-xl border border-slate-200 p-4 sm:p-5 border-l-4 ${borderAccent}`}>
+      <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
+      <p className="text-xl sm:text-3xl font-bold text-slate-900 mt-1" style={MONO_FONT}>{value}</p>
       {extra && <div className="mt-1">{extra}</div>}
     </div>
   )
@@ -186,19 +186,19 @@ export default function DepartmentPage() {
   })
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
 
       {/* ================================================================
          SECTION 1: HEADER
          ================================================================ */}
       <header>
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0">
             {stats.departmentShort}
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{stats.departmentName}</h1>
-            <p className="text-sm text-slate-500">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{stats.departmentName}</h1>
+            <p className="text-xs sm:text-sm text-slate-500 truncate">
               DDP Indicator &amp; Department Analytics {isDeanUser ? '\u00b7 Dean View' : `\u00b7 HOD: ${user?.name}`}
             </p>
           </div>
@@ -206,20 +206,22 @@ export default function DepartmentPage() {
 
         {/* Dean department selector */}
         {isDeanUser && (
-          <div className="mt-4 inline-flex items-center bg-slate-100 rounded-full p-1 gap-0.5">
-            {DEPT_OPTIONS.map(d => (
-              <button
-                key={d.id}
-                onClick={() => setSelectedDeptId(d.id)}
-                className={`relative px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selectedDeptId === d.id
-                    ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                {d.short}
-              </button>
-            ))}
+          <div className="mt-4 overflow-x-auto pb-1">
+            <div className="inline-flex items-center bg-slate-100 rounded-full p-1 gap-0.5 min-w-max">
+              {DEPT_OPTIONS.map(d => (
+                <button
+                  key={d.id}
+                  onClick={() => setSelectedDeptId(d.id)}
+                  className={`relative px-4 sm:px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                    selectedDeptId === d.id
+                      ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {d.short}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </header>
@@ -696,27 +698,21 @@ export default function DepartmentPage() {
           </div>
           <div className="divide-y divide-slate-50">
             {(deptFaculty.length > 0 ? deptFaculty : facultyMembers.filter(f => f.department === stats.departmentShort)).map(f => (
-              <div key={f.id} className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors">
-                <div className="col-span-4 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {f.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              <div key={f.id} className="flex items-center gap-3 px-4 sm:px-5 py-4 hover:bg-slate-50/50 transition-colors">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                  {f.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
+                  <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                    <span className="text-[11px] text-slate-400 truncate">{f.designation}</span>
+                    <span className="text-[10px] text-slate-300 hidden sm:inline">·</span>
+                    <span className="text-[11px] text-slate-400 hidden sm:inline">{f.activitiesCount} activities</span>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{f.email}</p>
-                  </div>
                 </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-slate-600 truncate">{f.designation}</p>
-                </div>
-                <div className="col-span-2 text-center">
-                  <span className="text-sm font-semibold text-slate-700" style={MONO_FONT}>{f.activitiesCount}</span>
-                </div>
-                <div className="col-span-2 text-center">
+                <div className="flex-shrink-0 text-right">
                   <span className="text-sm font-bold text-slate-800" style={MONO_FONT}>{f.totalPoints}</span>
-                </div>
-                <div className="col-span-2 text-center">
-                  <span className="text-xs text-slate-400">{f.joinedDate}</span>
+                  <p className="text-[10px] text-slate-400">pts</p>
                 </div>
               </div>
             ))}

@@ -138,7 +138,7 @@ function VerificationCard({
     <ActivityDetailDialog activity={activity} open={showDetail} onClose={() => setShowDetail(false)} />
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-sm transition-all duration-200">
       {/* Main row */}
-      <div className="p-5">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-semibold text-slate-900 mb-1">{activity.title}</h3>
@@ -184,7 +184,7 @@ function VerificationCard({
 
       {/* Rejection form */}
       {showRejectForm && (
-        <div className="px-5 pb-5 border-t border-slate-100 animate-fade-in">
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-slate-100 animate-fade-in">
           <div className="pt-4">
             <label className="block text-sm font-medium text-slate-700 mb-2">Reason for Rejection *</label>
             <textarea
@@ -245,11 +245,11 @@ export default function VerificationPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-blue-600" />
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
           Verification Queue
         </h1>
         <p className="text-sm text-slate-500 mt-1">Review and approve faculty activity submissions</p>

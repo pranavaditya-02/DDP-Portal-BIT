@@ -48,11 +48,11 @@ export default function LeaderboardPage() {
   const rest = filtered.slice(3)
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-yellow-500" />
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
           Faculty Leaderboard
         </h1>
         <p className="text-sm text-slate-500 mt-1">Top performers ranked by achievement points</p>

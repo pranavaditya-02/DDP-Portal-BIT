@@ -28,12 +28,14 @@ export function ChartCard({ title, subtitle, children, className = '' }: {
   title: string; subtitle?: string; children: React.ReactNode; className?: string
 }) {
   return (
-    <div className={`bg-white rounded-xl border border-slate-200 p-5 ${className}`}>
+    <div className={`bg-white rounded-xl border border-slate-200 p-4 sm:p-5 ${className}`}>
       <div className="mb-4">
         <h3 className="font-semibold text-slate-900 text-sm">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-slate-500 mt-0.5 truncate">{subtitle}</p>}
       </div>
-      {children}
+      <div className="w-full overflow-hidden">
+        {children}
+      </div>
     </div>
   )
 }

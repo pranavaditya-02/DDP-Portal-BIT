@@ -128,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
         md:translate-x-0`}
     >
       {/* Header / Logo */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
+      <div className={`flex items-center h-16 border-b border-slate-800 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
         <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
           <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-lg">F</span>
@@ -173,7 +173,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
+                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
+                      collapsed ? 'justify-center px-2' : 'px-3'
+                    } ${
                       active
                         ? 'bg-blue-600/20 text-blue-400'
                         : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -225,7 +227,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
 
         {/* User Info */}
         <div
-          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+          className={`flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`}
           onClick={() => setProfileOpen(!profileOpen)}
         >
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-sm font-bold">

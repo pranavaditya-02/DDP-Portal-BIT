@@ -80,11 +80,11 @@ export default function ActivitiesPage() {
   }), [])
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">My Activities</h1>
           <p className="text-sm text-slate-500 mt-1">Track and manage your faculty achievements</p>
         </div>
         <Link
@@ -159,7 +159,7 @@ export default function ActivitiesPage() {
           filtered.map((act) => (
             <div
               key={act.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all duration-200"
+              className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 hover:shadow-sm hover:border-slate-300 transition-all duration-200"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">

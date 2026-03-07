@@ -120,23 +120,23 @@ export default function SubmitActionPlanPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       {/* Back link */}
-      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors">
+      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-4 sm:mb-6 transition-colors">
         <ChevronLeft className="w-4 h-4" />
         Back to Dashboard
       </Link>
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Submit Action Plan</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Submit Action Plan</h1>
         <p className="text-sm text-slate-500 mt-1">Define your action plans across different categories. Each plan should have supporting documentation.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Action Plans List */}
         {plans.map((plan, idx) => (
-          <div key={plan.id} className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+          <div key={plan.id} className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-slate-800">Action Plan #{idx + 1}</h2>
               {plans.length > 1 && (

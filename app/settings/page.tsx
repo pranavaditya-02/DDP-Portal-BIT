@@ -13,7 +13,7 @@ function SettingSection({ title, description, icon: Icon, children }: {
   title: string; description: string; icon: React.ElementType; children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6">
+    <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
           <Icon className="w-4 h-4" />
@@ -73,11 +73,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <Settings className="w-6 h-6 text-slate-600" />
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-slate-600" />
           Settings
         </h1>
         <p className="text-sm text-slate-500 mt-1">Manage your account preferences and system settings</p>
@@ -156,7 +156,7 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Language</label>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} className="input-base">

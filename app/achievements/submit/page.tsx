@@ -632,20 +632,20 @@ export default function SubmitAchievementsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
-      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+      <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-4 sm:mb-6 transition-colors">
         <ChevronLeft className="w-4 h-4" />
         Back to Dashboard
       </Link>
 
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Submit Achievements</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Submit Achievements</h1>
         <p className="text-sm text-slate-500 mt-1">Add your achievements with supporting evidence. You can add multiple achievements in different categories.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {achievements.map((achievement, idx) => (
-          <div key={achievement.id} className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+          <div key={achievement.id} className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-slate-800">Achievement #{idx + 1}</h2>
               {achievements.length > 1 && (
@@ -1200,7 +1200,7 @@ export default function SubmitAchievementsPage() {
                   <h4 className="font-medium text-slate-800 mb-3">Internal Faculty Members</h4>
                   <div className="space-y-3">
                     {achievement.eventsOrganisedData?.internalFaculty.map((faculty, idx) => (
-                      <div key={faculty.id} className="p-3 bg-white rounded border border-slate-300 grid grid-cols-3 gap-2">
+                      <div key={faculty.id} className="p-3 bg-white rounded border border-slate-300 grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <input type="text" value={faculty.name} onChange={(e) => updateInternalFacultyMember(achievement.id, faculty.id, 'name', e.target.value)} placeholder="Faculty name" className="px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
                         <select value={faculty.role} onChange={(e) => updateInternalFacultyMember(achievement.id, faculty.id, 'role', e.target.value)} className="px-3 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                           <option value="">Role</option>
