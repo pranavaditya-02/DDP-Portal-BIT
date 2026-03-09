@@ -234,8 +234,6 @@ export default function RolesPage() {
     toast.success(`Role duplicated as "${role.name} (Copy)"`)
   }
 
-  const totalUsers = rolesList.reduce((s, r) => s + r.usersCount, 0)
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
       {/* Page header */}
@@ -248,20 +246,7 @@ export default function RolesPage() {
       </div>
 
       <div className="space-y-6 animate-fade-in">
-        {/* Role Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { label: 'Total Roles', value: rolesList.length, color: 'text-blue-600' },
-            { label: 'System Roles', value: rolesList.filter(r => r.isSystem).length, color: 'text-emerald-600' },
-            { label: 'Custom Roles', value: rolesList.filter(r => !r.isSystem).length, color: 'text-purple-600' },
-            { label: 'Users Assigned', value: totalUsers, color: 'text-amber-600' },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4">
-              <p className="text-xs text-slate-500">{s.label}</p>
-              <p className={`text-xl font-bold ${s.color}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</p>
-            </div>
-          ))}
-        </div>
+
 
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -284,14 +269,12 @@ export default function RolesPage() {
                   <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Role Name</th>
                   <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Description</th>
                   <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Resources</th>
-                  <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Users</th>
-                  <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Type</th>
                   <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-12 text-slate-400"><Shield className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No roles found</p></td></tr>
+                  <tr><td colSpan={5} className="text-center py-12 text-slate-400"><Shield className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No roles found</p></td></tr>
                 ) : (
                   filtered.map((role, idx) => (
                     <React.Fragment key={role.id}>
@@ -316,12 +299,6 @@ export default function RolesPage() {
                             {expandedRow === role.id ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                           </button>
                         </td>
-                        <td className="px-5 py-4 text-center"><span className="text-sm text-slate-600">{role.usersCount}</span></td>
-                        <td className="px-5 py-4 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${role.isSystem ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
-                            {role.isSystem ? 'System' : 'Custom'}
-                          </span>
-                        </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-center gap-2">
                             <button onClick={() => setEditingRole(role)} title="Edit role" className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><Edit3 className="w-4 h-4" /></button>
@@ -331,7 +308,7 @@ export default function RolesPage() {
                         </td>
                       </tr>
                       {expandedRow === role.id && (
-                        <tr><td colSpan={7} className="px-5 py-3 bg-slate-50/80">
+                        <tr><td colSpan={5} className="px-5 py-3 bg-slate-50/80">
                           <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Assigned Resources ({role.resources.length})</p>
                           <div className="flex flex-wrap gap-2">
                             {role.resources.map(resId => {

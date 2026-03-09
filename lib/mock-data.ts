@@ -270,6 +270,42 @@ export const recentNotifications = [
   { id: 5, message: 'System maintenance scheduled for Feb 15', time: '3 days ago', type: 'info' as const },
 ]
 
+// ---- Users (for User Management) ----
+export interface SystemUser {
+  id: number
+  facultyId: string
+  name: string
+  email: string
+  department: string
+  designation: string
+  role: string
+  status: 'active' | 'inactive'
+  joinedDate: string
+}
+
+export const systemUsers: SystemUser[] = [
+  { id: 1, facultyId: 'BIT-CSE-001', name: 'Dr. Priya Sharma', email: 'priya@bit.edu', department: 'CSE', designation: 'Associate Professor', role: 'faculty', status: 'active', joinedDate: '2018-06-15' },
+  { id: 2, facultyId: 'BIT-CSE-002', name: 'Dr. Rajesh Kumar', email: 'rajesh@bit.edu', department: 'CSE', designation: 'Professor & HOD', role: 'hod', status: 'active', joinedDate: '2015-08-01' },
+  { id: 3, facultyId: 'BIT-CSE-003', name: 'Prof. Anitha Devi', email: 'anitha@bit.edu', department: 'CSE', designation: 'Assistant Professor', role: 'faculty', status: 'active', joinedDate: '2020-01-10' },
+  { id: 4, facultyId: 'BIT-ECE-001', name: 'Dr. Suresh Babu', email: 'suresh@bit.edu', department: 'ECE', designation: 'Associate Professor', role: 'faculty', status: 'active', joinedDate: '2016-03-20' },
+  { id: 5, facultyId: 'BIT-CSE-004', name: 'Dr. Ramesh', email: 'ramesh@bit.edu', department: 'CSE', designation: 'Professor', role: 'faculty', status: 'active', joinedDate: '2012-07-01' },
+  { id: 6, facultyId: 'BIT-IT-001', name: 'Prof. Karthik R', email: 'karthik@bit.edu', department: 'IT', designation: 'Assistant Professor', role: 'faculty', status: 'active', joinedDate: '2021-06-15' },
+  { id: 7, facultyId: 'BIT-CSE-005', name: 'Dr. Lakshmi Priya', email: 'lakshmi@bit.edu', department: 'CSE', designation: 'Associate Professor', role: 'faculty', status: 'active', joinedDate: '2019-01-05' },
+  { id: 8, facultyId: 'BIT-ECE-002', name: 'Dr. Arun Kumar', email: 'arun@bit.edu', department: 'ECE', designation: 'Professor', role: 'hod', status: 'active', joinedDate: '2014-08-20' },
+  { id: 9, facultyId: 'BIT-EEE-001', name: 'Prof. Divya S', email: 'divya@bit.edu', department: 'EEE', designation: 'Assistant Professor', role: 'faculty', status: 'inactive', joinedDate: '2022-01-10' },
+  { id: 10, facultyId: 'BIT-CSE-006', name: 'Dr. Ramesh B', email: 'rameshb@bit.edu', department: 'CSE', designation: 'Associate Professor', role: 'verification', status: 'active', joinedDate: '2017-03-01' },
+  { id: 11, facultyId: 'BIT-IT-002', name: 'Prof. Sathya N', email: 'sathya@bit.edu', department: 'IT', designation: 'Assistant Professor', role: 'faculty', status: 'active', joinedDate: '2020-07-15' },
+  { id: 12, facultyId: 'BIT-MECH-001', name: 'Dr. Venkat K', email: 'venkat@bit.edu', department: 'MECH', designation: 'Professor', role: 'hod', status: 'active', joinedDate: '2013-06-01' },
+  { id: 13, facultyId: 'BIT-EEE-002', name: 'Dr. Meena V', email: 'meena@bit.edu', department: 'EEE', designation: 'Professor & HOD', role: 'hod', status: 'active', joinedDate: '2011-08-15' },
+  { id: 14, facultyId: 'BIT-CIVIL-001', name: 'Prof. Ajay S', email: 'ajay@bit.edu', department: 'CIVIL', designation: 'Assistant Professor', role: 'faculty', status: 'inactive', joinedDate: '2023-01-05' },
+  { id: 15, facultyId: 'BIT-IT-003', name: 'Dr. Nalini R', email: 'nalini@bit.edu', department: 'IT', designation: 'Associate Professor', role: 'verification', status: 'active', joinedDate: '2016-06-20' },
+  { id: 16, facultyId: 'BIT-MECH-002', name: 'Dr. Chandran M', email: 'chandran@bit.edu', department: 'MECH', designation: 'Associate Professor', role: 'faculty', status: 'active', joinedDate: '2018-03-10' },
+  { id: 17, facultyId: 'BIT-ECE-003', name: 'Dr. Saranya P', email: 'saranya@bit.edu', department: 'ECE', designation: 'Assistant Professor', role: 'faculty', status: 'active', joinedDate: '2021-07-01' },
+  { id: 18, facultyId: 'BIT-ADM-001', name: 'Admin User', email: 'admin@bit.edu', department: 'Admin', designation: 'System Administrator', role: 'maintenance', status: 'active', joinedDate: '2010-01-01' },
+  { id: 19, facultyId: 'BIT-CIVIL-002', name: 'Dr. Pradeep N', email: 'pradeep@bit.edu', department: 'CIVIL', designation: 'Professor & HOD', role: 'hod', status: 'active', joinedDate: '2014-09-01' },
+  { id: 20, facultyId: 'BIT-IT-004', name: 'Prof. Revathi K', email: 'revathi@bit.edu', department: 'IT', designation: 'Assistant Professor', role: 'faculty', status: 'active', joinedDate: '2022-07-20' },
+]
+
 // ---- Leaderboard ----
 export const leaderboard = [
   { rank: 1, name: 'Dr. Ramesh', department: 'CSE', points: 510, activities: 28, badge: 'gold' },

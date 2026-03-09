@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useAuthStore } from '@/lib/store'
 import { useRoles } from '@/hooks/useRoles'
 import {
-  facultyMembers, monthlyTrends,
+  monthlyTrends,
   approvalFunnelData, leaderboard,
   getPersonalizedHodData,
   facultyKpiData, departmentTargets, deptPerformanceIndex,
@@ -24,6 +24,7 @@ import {
   ChevronDown, BarChart3, TrendingUp, Trophy, Award, Zap,
 } from 'lucide-react'
 import Link from 'next/link'
+import LeaderboardWidget from '@/components/LeaderboardWidget'
 
 /* ================================================================
    CONSTANTS & HELPERS
@@ -646,78 +647,17 @@ export default function DepartmentPage() {
       <section>
         <SectionDivider icon={Trophy} title="Team & Leaderboard" subtitle="Top performers and full faculty roster" />
 
-        {/* Top performers */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-slate-900 text-sm">Top Performers</h3>
-              <p className="text-xs text-slate-500">{stats.departmentName}</p>
-            </div>
-            <Link href="/leaderboard" className="text-xs font-medium text-blue-600 hover:text-blue-700">View All &rarr;</Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {(deptLeaderboard.length > 0 ? deptLeaderboard : leaderboard).slice(0, 5).map(f => (
-              <div key={f.rank} className="flex items-center gap-3 bg-slate-50 rounded-lg p-3">
-                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                  f.rank === 1 ? 'bg-yellow-100 text-yellow-700' :
-                  f.rank === 2 ? 'bg-slate-100 text-slate-600' :
-                  f.rank === 3 ? 'bg-orange-100 text-orange-700' :
-                  'bg-slate-50 text-slate-500'
-                }`}>{f.rank}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
-                  <p className="text-[11px] text-slate-400">{f.activities} activities</p>
-                </div>
-                <span className="text-sm font-bold text-slate-700" style={MONO_FONT}>{f.points}</span>
-              </div>
-            ))}
-          </div>
+        <div className="flex items-center justify-end mb-4">
+          <Link href="/leaderboard" className="text-xs font-medium text-blue-600 hover:text-blue-700">
+            View Full Leaderboard &rarr;
+          </Link>
         </div>
 
-        {/* Faculty list */}
-        <div className="bg-white rounded-xl border border-slate-200">
-          <div className="p-5 border-b border-slate-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-slate-900 text-sm">Faculty Members</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {deptFaculty.length > 0 ? deptFaculty.length : facultyMembers.filter(f => f.department === stats.departmentShort).length} members in {stats.departmentShort}
-                </p>
-              </div>
-              <Link href="/leaderboard" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                View Leaderboard &rarr;
-              </Link>
-            </div>
-          </div>
-          <div className="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide border-b border-slate-50">
-            <div className="col-span-4">Name</div>
-            <div className="col-span-2">Designation</div>
-            <div className="col-span-2 text-center">Activities</div>
-            <div className="col-span-2 text-center">Points</div>
-            <div className="col-span-2 text-center">Joined</div>
-          </div>
-          <div className="divide-y divide-slate-50">
-            {(deptFaculty.length > 0 ? deptFaculty : facultyMembers.filter(f => f.department === stats.departmentShort)).map(f => (
-              <div key={f.id} className="flex items-center gap-3 px-4 sm:px-5 py-4 hover:bg-slate-50/50 transition-colors">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {f.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
-                  <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                    <span className="text-[11px] text-slate-400 truncate">{f.designation}</span>
-                    <span className="text-[10px] text-slate-300 hidden sm:inline">·</span>
-                    <span className="text-[11px] text-slate-400 hidden sm:inline">{f.activitiesCount} activities</span>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 text-right">
-                  <span className="text-sm font-bold text-slate-800" style={MONO_FONT}>{f.totalPoints}</span>
-                  <p className="text-[10px] text-slate-400">pts</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <LeaderboardWidget
+          data={(deptLeaderboard.length > 0 ? deptLeaderboard : leaderboard)}
+          title={`${stats.departmentShort} Rankings`}
+          showDepartment={false}
+        />
       </section>
     </div>
   )

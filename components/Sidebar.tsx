@@ -14,11 +14,11 @@ import {
   GraduationCap,
   ShieldCheck,
   Shield,
+  Users,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Bell,
-  Settings,
   User,
   ChevronDown,
   Award,
@@ -95,8 +95,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
       title: 'Management',
       items: [
         { label: 'Verification Queue', href: '/verification', icon: ShieldCheck, show: isVerification(), badge: 7 },
+        { label: 'User Management', href: '/users', icon: Users, show: isMaintenance() },
         { label: 'Role Management', href: '/roles', icon: Shield, show: isMaintenance() },
-        { label: 'Settings', href: '/settings', icon: Settings, show: isMaintenance() },
       ],
     },
   ]
