@@ -11,6 +11,7 @@ import {
   ddpJournalDeptBreakdown, ddpMonthlyTrend,
   ddpCategoryAchievementRates, ddpHeatmapData, getDDPInsights,
 } from '@/lib/ddp-data'
+import { useRealData } from '@/hooks/useRealData'
 import {
   ChartCard, TrendAreaChart, ComparisonBarChart, DonutChart,
   MultiLineChart, ComposedBarLineChart, MultiRadarChart,
@@ -185,6 +186,7 @@ function InsightCard({ label, title, detail, gradient, borderColor, iconBg, icon
    ================================================================ */
 
 export default function CollegePage() {
+  const { collegeStats: realCollegeStats, deptRankings: realDeptRankings, activityBreakdown: realActivityBreakdown } = useRealData()
   const [selectedActivity, setSelectedActivity] = useState(ACTIVITY_OPTIONS[0])
   const [showAllIndexing, setShowAllIndexing] = useState(false)
   const [showAllJournal, setShowAllJournal] = useState(false)
@@ -258,37 +260,7 @@ export default function CollegePage() {
         </div>
       </header>
 
-      {/* ================================================================
-         SECTION 2: KEY INSIGHTS
-         ================================================================ */}
-      <section>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <InsightCard
-            label="#1 Department" title={insights.topDept.shortName}
-            detail={`Index: ${insights.topDept.normalizedBonus.toFixed(3)} \u00b7 ${insights.topDept.achieved}/${insights.topDept.totalTarget}`}
-            gradient="bg-gradient-to-br from-yellow-50 to-amber-50 text-yellow-800"
-            borderColor="border-yellow-200" iconBg="bg-yellow-100" icon={Trophy} iconColor="text-yellow-600"
-          />
-          <InsightCard
-            label="Needs Attention" title={insights.bottomDept.shortName}
-            detail={`Index: ${insights.bottomDept.normalizedBonus.toFixed(3)} \u00b7 Rank #${insights.bottomDept.rank}`}
-            gradient="bg-gradient-to-br from-red-50 to-orange-50 text-red-800"
-            borderColor="border-red-200" iconBg="bg-red-100" icon={AlertTriangle} iconColor="text-red-600"
-          />
-          <InsightCard
-            label="Best Performing Activity" title={insights.bestPerforming[0].activityName.slice(0, 30)}
-            detail={`${Math.round((insights.bestPerforming[0].proposedAchieved / insights.bestPerforming[0].proposedTarget) * 100)}% achieved`}
-            gradient="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-800"
-            borderColor="border-emerald-200" iconBg="bg-emerald-100" icon={CheckCircle2} iconColor="text-emerald-600"
-          />
-          <InsightCard
-            label="Biggest Gap Activity" title={insights.biggestGaps[0].activityName.slice(0, 30)}
-            detail={`${insights.biggestGaps[0].pending} pending of ${insights.biggestGaps[0].proposedTarget}`}
-            gradient="bg-gradient-to-br from-purple-50 to-violet-50 text-purple-800"
-            borderColor="border-purple-200" iconBg="bg-purple-100" icon={ShieldAlert} iconColor="text-purple-600"
-          />
-        </div>
-      </section>
+      
 
       {/* ================================================================
          SECTION 3: INSTITUTIONAL OVERVIEW
@@ -300,6 +272,98 @@ export default function CollegePage() {
           <StatCard label="Total Faculty" value={deanStats.totalFaculty} subtitle="Across all departments" icon={Users} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
           <StatCard label="Activities" value={deanStats.totalActivities} subtitle={`${deanStats.totalPending} pending`} icon={Activity} iconBg="bg-purple-50" iconColor="text-purple-600" />
           <StatCard label="Research Output" value={deanStats.researchOutput} subtitle={`${deanStats.patentsFiled} patents filed`} icon={GraduationCap} iconBg="bg-amber-50" iconColor="text-amber-600" />
+        </div>
+      </section>
+
+      {/* ================================================================
+         SECTION 3.5: REAL ACTIVITY BREAKDOWN (from CSV data)
+         ================================================================ */}
+      <section>
+        <SectionDivider icon={Activity} title="Approved Activity Breakdown" subtitle="Real data from BIP system — 12,063 approved activities across 8 categories" />
+
+        {/* Summary KPIs */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+          <KpiCard
+            label="Total Approved"
+            value={realCollegeStats.totalActivities.toLocaleString()}
+            note={`${realCollegeStats.totalDepartments} departments`}
+            gradient="bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700"
+            borderColor="border-blue-200"
+          />
+          <KpiCard
+            label="Events & FDP"
+            value={(realCollegeStats.eventsAttended + realCollegeStats.eventsOrganized).toLocaleString()}
+            note="attended + organized"
+            gradient="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700"
+            borderColor="border-emerald-200"
+          />
+          <KpiCard
+            label="Online Courses"
+            value={realCollegeStats.onlineCourses.toLocaleString()}
+            note="NPTEL / SWAYAM / MOOC"
+            gradient="bg-gradient-to-br from-violet-50 to-purple-50 text-violet-700"
+            borderColor="border-violet-200"
+          />
+          <KpiCard
+            label="Patents"
+            value={realCollegeStats.totalPatents}
+            note="filed · published · granted"
+            gradient="bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700"
+            borderColor="border-amber-200"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Activity category progress bars */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-1">Activity Category Totals</h3>
+            <p className="text-xs text-slate-500 mb-4">Approved records per activity type</p>
+            <div className="space-y-3">
+              {realActivityBreakdown.map(a => {
+                const pct = Math.round((a.count / realCollegeStats.totalActivities) * 100)
+                return (
+                  <div key={a.name}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-slate-700">{a.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-400">{pct}%</span>
+                        <span className="text-xs font-bold text-slate-800 font-mono w-14 text-right">{a.count.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2">
+                      <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: a.color }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Top departments by activity count */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-1">Top Departments by Activity Volume</h3>
+            <p className="text-xs text-slate-500 mb-4">Total approved activities per department</p>
+            <div className="space-y-2">
+              {realDeptRankings.slice(0, 10).map((d, i) => {
+                const maxTotal = realDeptRankings[0].total
+                const pct = Math.round((d.total / maxTotal) * 100)
+                return (
+                  <div key={d.shortCode} className="flex items-center gap-3">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
+                      i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-slate-200 text-slate-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-slate-50 text-slate-500'
+                    }`}>{i + 1}</span>
+                    <span className="text-[11px] font-semibold text-slate-700 w-10 flex-shrink-0">{d.shortCode}</span>
+                    <div className="flex-1">
+                      <div className="w-full bg-slate-100 rounded-full h-2">
+                        <div className="h-2 rounded-full bg-blue-500" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 font-mono w-12 text-right">{d.total.toLocaleString()}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -739,15 +803,6 @@ export default function CollegePage() {
           </ChartCard>
         </div>
       </section>
-
-      {/* ================================================================
-         FOOTER
-         ================================================================ */}
-      <footer className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-center">
-        <p className="text-xs text-slate-500">
-          DDP Indicator Dashboard &middot; Data Period: 2025-06-01 to 2026-05-31 &middot; Last updated: Feb 11, 2026
-        </p>
-      </footer>
     </div>
   )
 }

@@ -1,0 +1,5652 @@
+﻿{
+    "AE":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "AE10035",
+                   "name":  "VADIVELU P",
+                   "points":  154,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "AE10539",
+                   "name":  "ROHINI D",
+                   "points":  78,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "AE10700",
+                   "name":  "PRASATH M S",
+                   "points":  55,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "AE10705",
+                   "name":  "ABINAYA R",
+                   "points":  52,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "AE1841",
+                   "name":  "LAKSHMANAN D",
+                   "points":  40,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "AE1737",
+                   "name":  "SIVARAJ G",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "AE1972",
+                   "name":  "SUNDARAMAHALINGAM A",
+                   "points":  22,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "AE10128",
+                   "name":  "NAVEEN R",
+                   "points":  12,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "AE10023",
+                   "name":  "HARIPRASAD V",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "AE1625",
+                   "name":  "RAMESH M",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "AG":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "AG10092",
+                   "name":  "VASUDEVAN M",
+                   "points":  187,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "AG10414",
+                   "name":  "DEEPANKUMAR S",
+                   "points":  127,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "AG10503",
+                   "name":  "CHELLADURAI V",
+                   "points":  102,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "AG10172",
+                   "name":  "VINOTH KUMAR J",
+                   "points":  64,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "AG10895",
+                   "name":  "ANANTHI D",
+                   "points":  51,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "AG11049",
+                   "name":  "PRAVEEN KUMAR D",
+                   "points":  45,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "AG10994",
+                   "name":  "MUTHUKUMARAVEL K",
+                   "points":  39,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "AG1312",
+                   "name":  "UVARAJA V C",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "AG10841",
+                   "name":  "VIGNESH S",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "AG10847",
+                   "name":  "ARCHANA J",
+                   "points":  31,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "AG11083",
+                   "name":  "RAGHUL S",
+                   "points":  22,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "AG10869",
+                   "name":  "ABHISHEK VATS",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "AG10655",
+                   "name":  "PRIYANKA B",
+                   "points":  12,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "AG10575",
+                   "name":  "SHANMUGA PRAKASH R",
+                   "points":  12,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "AG11178",
+                   "name":  "SNEKHA A R",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "AG10902",
+                   "name":  "BHARANI PRIYA A",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "AG10925",
+                   "name":  "SOLANKE KRISHNA RUSTUMRAO",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "AG10173",
+                   "name":  "RAJESH KANNA P",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "AG10751",
+                   "name":  "NIMKAR AMEY SANJAY",
+                   "points":  1,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "AIDS":  [
+                 {
+                     "rank":  1,
+                     "facultyId":  "AD11026",
+                     "name":  "CHOZHARAJAN P",
+                     "points":  190,
+                     "activities":  null,
+                     "badge":  "gold"
+                 },
+                 {
+                     "rank":  2,
+                     "facultyId":  "AD10838",
+                     "name":  "NITHYAPRIYA S",
+                     "points":  189,
+                     "activities":  null,
+                     "badge":  "silver"
+                 },
+                 {
+                     "rank":  3,
+                     "facultyId":  "AD11023",
+                     "name":  "VAANATHI S",
+                     "points":  99,
+                     "activities":  null,
+                     "badge":  "bronze"
+                 },
+                 {
+                     "rank":  4,
+                     "facultyId":  "AD10953",
+                     "name":  "RAJ KUMAR V S",
+                     "points":  95,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  5,
+                     "facultyId":  "AD10931",
+                     "name":  "BALASAMY K",
+                     "points":  88,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  6,
+                     "facultyId":  "AD10955",
+                     "name":  "ESAKKI MADURA E",
+                     "points":  62,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  7,
+                     "facultyId":  "AD11096",
+                     "name":  "SUBBULAKSHMI M",
+                     "points":  59,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  8,
+                     "facultyId":  "AD10928",
+                     "name":  "NISHA DEVI K",
+                     "points":  48,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  9,
+                     "facultyId":  "AD11016",
+                     "name":  "SATHEESHKUMAR S",
+                     "points":  45,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  10,
+                     "facultyId":  "AD11041",
+                     "name":  "ASHFORN HERMINA J M",
+                     "points":  42,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  11,
+                     "facultyId":  "AD10936",
+                     "name":  "PRABANAND S C",
+                     "points":  41,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  12,
+                     "facultyId":  "AD11009",
+                     "name":  "DIVYABARATHI P",
+                     "points":  39,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  13,
+                     "facultyId":  "AD11042",
+                     "name":  "JEEVITHA S V",
+                     "points":  36,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  14,
+                     "facultyId":  "AD10945",
+                     "name":  "SATHEESH N P",
+                     "points":  35,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  15,
+                     "facultyId":  "AD1963",
+                     "name":  "NANDHINI S S",
+                     "points":  33,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  16,
+                     "facultyId":  "AD11069",
+                     "name":  "PREMKUMAR C",
+                     "points":  32,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  17,
+                     "facultyId":  "AD11089",
+                     "name":  "RESHMI T S",
+                     "points":  30,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  18,
+                     "facultyId":  "AD11111",
+                     "name":  "SURIYA V",
+                     "points":  30,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  19,
+                     "facultyId":  "AD10053",
+                     "name":  "GAYATHIRI N R",
+                     "points":  24,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  20,
+                     "facultyId":  "AD1108",
+                     "name":  "SUNDARA MURTHY S",
+                     "points":  23,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  21,
+                     "facultyId":  "AD11068",
+                     "name":  "BENITA GRACIA THANGAM J",
+                     "points":  22,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  22,
+                     "facultyId":  "AD11104",
+                     "name":  "KALPANA R",
+                     "points":  20,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  23,
+                     "facultyId":  "AD11019",
+                     "name":  "KIRUTHIGA R",
+                     "points":  19,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  24,
+                     "facultyId":  "AD11164",
+                     "name":  "SASSON TAFFWIN MOSES S",
+                     "points":  19,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  25,
+                     "facultyId":  "AD10543",
+                     "name":  "RANJITH G",
+                     "points":  18,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  26,
+                     "facultyId":  "AD10671",
+                     "name":  "MALATHI T",
+                     "points":  17,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  27,
+                     "facultyId":  "AD11093",
+                     "name":  "LATHA S",
+                     "points":  13,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  28,
+                     "facultyId":  "AD11112",
+                     "name":  "HEMA PRIYA D",
+                     "points":  13,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  29,
+                     "facultyId":  "AD11169",
+                     "name":  "MANOCHITRA A S",
+                     "points":  11,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  30,
+                     "facultyId":  "AD11114",
+                     "name":  "MANJU M",
+                     "points":  8,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  31,
+                     "facultyId":  "AD11116",
+                     "name":  "PRIYADHARSHNI S",
+                     "points":  3,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  32,
+                     "facultyId":  "AD10910",
+                     "name":  "SANGEETHA R",
+                     "points":  2,
+                     "activities":  null,
+                     "badge":  "none"
+                 }
+             ],
+    "AIML":  [
+                 {
+                     "rank":  1,
+                     "facultyId":  "AM10795",
+                     "name":  "PADMASHREE A",
+                     "points":  144,
+                     "activities":  null,
+                     "badge":  "gold"
+                 },
+                 {
+                     "rank":  2,
+                     "facultyId":  "AM2241",
+                     "name":  "KODIESWARI A",
+                     "points":  129,
+                     "activities":  null,
+                     "badge":  "silver"
+                 },
+                 {
+                     "rank":  3,
+                     "facultyId":  "AM10971",
+                     "name":  "NITHIN P",
+                     "points":  124,
+                     "activities":  null,
+                     "badge":  "bronze"
+                 },
+                 {
+                     "rank":  4,
+                     "facultyId":  "AM10956",
+                     "name":  "KARTHIKA S",
+                     "points":  104,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  5,
+                     "facultyId":  "AM11039",
+                     "name":  "EUGENE BERNA I",
+                     "points":  103,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  6,
+                     "facultyId":  "AM10954",
+                     "name":  "HARI PRIYA R",
+                     "points":  78,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  7,
+                     "facultyId":  "AM11058",
+                     "name":  "BALAMURUGAN E",
+                     "points":  59,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  8,
+                     "facultyId":  "AM11025",
+                     "name":  "SUSEELA D",
+                     "points":  46,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  9,
+                     "facultyId":  "AM11161",
+                     "name":  "KARTHIKEYAN G",
+                     "points":  35,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  10,
+                     "facultyId":  "AM11013",
+                     "name":  "SATHESHKUMAR K",
+                     "points":  35,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  11,
+                     "facultyId":  "AM10489",
+                     "name":  "BAZILA BANU A",
+                     "points":  33,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  12,
+                     "facultyId":  "AM11054",
+                     "name":  "EZHIL R",
+                     "points":  29,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  13,
+                     "facultyId":  "AM1131",
+                     "name":  "GOPALAKRISHNAN B",
+                     "points":  24,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  14,
+                     "facultyId":  "AM11092",
+                     "name":  "KANIMOZHI A",
+                     "points":  22,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  15,
+                     "facultyId":  "AM11076",
+                     "name":  "PAVITHRA G",
+                     "points":  16,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  16,
+                     "facultyId":  "AM10929",
+                     "name":  "INDIRANI A",
+                     "points":  14,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  17,
+                     "facultyId":  "AM11052",
+                     "name":  "MOHANAPRIYA K",
+                     "points":  13,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  18,
+                     "facultyId":  "AM11166",
+                     "name":  "SARANYA M K",
+                     "points":  13,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  19,
+                     "facultyId":  "AM11113",
+                     "name":  "LOKESWARI P",
+                     "points":  12,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  20,
+                     "facultyId":  "AM11110",
+                     "name":  "SASITHRA S",
+                     "points":  8,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  21,
+                     "facultyId":  "AM11037",
+                     "name":  "ATHIRAJA A",
+                     "points":  7,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  22,
+                     "facultyId":  "AM11100",
+                     "name":  "NISHANTHINI S",
+                     "points":  5,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  23,
+                     "facultyId":  "AM10176",
+                     "name":  "SUDHA R",
+                     "points":  5,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  24,
+                     "facultyId":  "AM11095",
+                     "name":  "GAYATHRIDEVI M",
+                     "points":  3,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  25,
+                     "facultyId":  "AM11097",
+                     "name":  "NIVETHA R",
+                     "points":  1,
+                     "activities":  null,
+                     "badge":  "none"
+                 }
+             ],
+    "AU":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "AU10466",
+                   "name":  "BALAMURUGAN R",
+                   "points":  168,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "AU10611",
+                   "name":  "SARAVANAN B",
+                   "points":  88,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "AU10440",
+                   "name":  "TAMILSELVAN A",
+                   "points":  83,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "AU10645",
+                   "name":  "DHAYANEETHI S",
+                   "points":  54,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "AU10578",
+                   "name":  "SUDHIR KUMAR V",
+                   "points":  53,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "AU10572",
+                   "name":  "RAJA T",
+                   "points":  38,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "AU10720",
+                   "name":  "MATHISELVAN G",
+                   "points":  31,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "AU10059",
+                   "name":  "SANTHOSH KUMAR S",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "ME10165",
+                   "name":  "PRAKASH S",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "ME10051",
+                   "name":  "GOKUL L S",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "BM":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "BM10727",
+                   "name":  "KRISHNAKUMAR S",
+                   "points":  83,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "BM10939",
+                   "name":  "CAROLINE VINNETIA S",
+                   "points":  68,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "BM10687",
+                   "name":  "PRABHU V",
+                   "points":  50,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "BM10734",
+                   "name":  "SHARON CHRIS HEPZEBAH P",
+                   "points":  39,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "BM10982",
+                   "name":  "HEMALATHA K",
+                   "points":  37,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "BM1429",
+                   "name":  "DEEPA D",
+                   "points":  37,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "BM11071",
+                   "name":  "SYED ALTHAF S",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "BM10932",
+                   "name":  "GOWTHAMI S",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "BM10961",
+                   "name":  "GOPIKA RAM P",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "BM11066",
+                   "name":  "SAAHINA S",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "BM10937",
+                   "name":  "SUNDAR RAJ M",
+                   "points":  18,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "BM11067",
+                   "name":  "NIVETHALAKSHMI S",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "BM10853",
+                   "name":  "KAVYA G S",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "BM11176",
+                   "name":  "PRATHEEBHA G",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "BM11060",
+                   "name":  "MOHAMMED ABUBACKER SIDDIQ A",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "BM11082",
+                   "name":  "GOWTHAMI P",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "BM10947",
+                   "name":  "ABHINAYA N",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "BM11175",
+                   "name":  "SREENIVEATHA P",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "BM10962",
+                   "name":  "DEEPA UNNIKRISHNAN",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "BM10879",
+                   "name":  "RASHEEDHA A",
+                   "points":  1,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "BT":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "BT1930",
+                   "name":  "PAVITHRA MKS",
+                   "points":  103,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "BT1606",
+                   "name":  "BALAKRISHNARAJA R",
+                   "points":  93,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "BT1849",
+                   "name":  "KIRUPA SANKAR M",
+                   "points":  68,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "BT10375",
+                   "name":  "ASHWIN  RAJ S",
+                   "points":  60,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "BT1388",
+                   "name":  "KANNAN K P",
+                   "points":  57,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "BT10733",
+                   "name":  "SWATHI G",
+                   "points":  43,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "BT10978",
+                   "name":  "SAKTHISHOBANA K",
+                   "points":  40,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "BT10991",
+                   "name":  "BALAJI S",
+                   "points":  39,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "BT1477",
+                   "name":  "TAMILSELVI S",
+                   "points":  34,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "BT10708",
+                   "name":  "RAJASEETHARAMA S",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "BT10918",
+                   "name":  "DINESH KUMAR L",
+                   "points":  31,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "BT11074",
+                   "name":  "VAIDHYANATHAN B",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "BT10750",
+                   "name":  "SINDUJA M E",
+                   "points":  29,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "BT10950",
+                   "name":  "DHIVYA DHARSHINI U",
+                   "points":  29,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "BT11035",
+                   "name":  "NANDHINI N",
+                   "points":  28,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "BT10480",
+                   "name":  "PONNARMADHA S",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "BT10782",
+                   "name":  "JEYAVEL KARTHICK P",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "BT10852",
+                   "name":  "RAGAMATHI S",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "BT10948",
+                   "name":  "SHANMUGA SUNDARI I",
+                   "points":  22,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "BT10914",
+                   "name":  "ABDUL AZEEZ N",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "BT10458",
+                   "name":  "BINDHU J",
+                   "points":  16,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  22,
+                   "facultyId":  "BT10862",
+                   "name":  "ASHRA SINDHIKKAA M",
+                   "points":  16,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  23,
+                   "facultyId":  "BT11050",
+                   "name":  "VINODHINI R T",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  24,
+                   "facultyId":  "BT11134",
+                   "name":  "SARANYA S",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  25,
+                   "facultyId":  "BT10707",
+                   "name":  "MATHU PRIYA J",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  26,
+                   "facultyId":  "BT10754",
+                   "name":  "GOWTHAM RAJ G",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  27,
+                   "facultyId":  "BT10821",
+                   "name":  "MUNEESWARI ALIAS SURYA S",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  28,
+                   "facultyId":  "BT10988",
+                   "name":  "SANDHYARANI R",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  29,
+                   "facultyId":  "BT10367",
+                   "name":  "VIDHYA K",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  30,
+                   "facultyId":  "BT10373",
+                   "name":  "MALATHI BALASUBRAMANIYAN",
+                   "points":  6,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  31,
+                   "facultyId":  "BT10342",
+                   "name":  "VIMAL ARASAN A",
+                   "points":  6,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  32,
+                   "facultyId":  "BT11033",
+                   "name":  "SURESH CHALUVADI",
+                   "points":  6,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  33,
+                   "facultyId":  "BT11053",
+                   "name":  "MUTHU KUMAR T",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  34,
+                   "facultyId":  "BT1559",
+                   "name":  "SENTHAMARAI M",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  35,
+                   "facultyId":  "BT10760",
+                   "name":  "NARESH KUMAR M",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  36,
+                   "facultyId":  "BT10984",
+                   "name":  "MAHIMA P",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "CE":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "CE1797",
+                   "name":  "KARTHIGA  SHENBAGAM N",
+                   "points":  157,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "CE1703",
+                   "name":  "JAYARAMAN A",
+                   "points":  151,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "CE1859",
+                   "name":  "PREETHA V",
+                   "points":  111,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "CE1865",
+                   "name":  "GEETHAMANI R",
+                   "points":  97,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "CE1892",
+                   "name":  "LOGANAYAGAN S",
+                   "points":  81,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "CE10127",
+                   "name":  "GNANASUNDAR V M",
+                   "points":  77,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "CE10421",
+                   "name":  "RANJITHAM M",
+                   "points":  76,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "CE10418",
+                   "name":  "JEEVANANTHAM V",
+                   "points":  66,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "CE10600",
+                   "name":  "ASHWATHI R",
+                   "points":  51,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "CE10010",
+                   "name":  "MOHANRAJ A",
+                   "points":  46,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "CE10549",
+                   "name":  "VIGNESH PRABU V",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "CE1943",
+                   "name":  "JAYANTHI V",
+                   "points":  39,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "CE10783",
+                   "name":  "JEYANTH B",
+                   "points":  37,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "CE10632",
+                   "name":  "KOTHAI A",
+                   "points":  36,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "CE10438",
+                   "name":  "DHIVYABHARATHI S",
+                   "points":  34,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "CE10129",
+                   "name":  "DURGADEVI S",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "CE1926",
+                   "name":  "SATHYAKUMAR N",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "CE1864",
+                   "name":  "CHANDRAMOHAN N",
+                   "points":  23,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "CE1959",
+                   "name":  "ARAVINDHAN C",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "CE10058",
+                   "name":  "MANJUNATH N V",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "CE10537",
+                   "name":  "VELMURUGAN S",
+                   "points":  18,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  22,
+                   "facultyId":  "CE10769",
+                   "name":  "PRABHAKARAN V",
+                   "points":  17,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  23,
+                   "facultyId":  "CE10455",
+                   "name":  "DEEPAK O P",
+                   "points":  16,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  24,
+                   "facultyId":  "CE10926",
+                   "name":  "BALAGANESH P",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  25,
+                   "facultyId":  "CE1954",
+                   "name":  "RAJENDRAN M",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  26,
+                   "facultyId":  "CE10013",
+                   "name":  "KAVITHA C",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "CH":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "CH1558",
+                   "name":  "PRAVEENA R",
+                   "points":  209,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "CH1578",
+                   "name":  "KAVITHA C",
+                   "points":  117,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "CH10372",
+                   "name":  "RAMESHKUMAR A",
+                   "points":  98,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "CH1493",
+                   "name":  "SUBHAPRIYA P",
+                   "points":  96,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "CH10333",
+                   "name":  "MURALI KRISHNAN M",
+                   "points":  94,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "CH10003",
+                   "name":  "SATHISH V",
+                   "points":  90,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "CH10225",
+                   "name":  "MUTHUKUMAR P",
+                   "points":  89,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "CH10957",
+                   "name":  "DEEPHA V",
+                   "points":  85,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "CH10746",
+                   "name":  "ARULMANI S",
+                   "points":  85,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "CH1894",
+                   "name":  "MALATHI MAHALINGAM",
+                   "points":  65,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "CH10456",
+                   "name":  "MANIVANNAN C",
+                   "points":  65,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "CH10123",
+                   "name":  "PACHAMUTHU P",
+                   "points":  62,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "CH1557",
+                   "name":  "VIJAYANAND P S",
+                   "points":  33,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "CH10314",
+                   "name":  "VISWANATHAN G",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "CH11057",
+                   "name":  "KARUPPUSAMY S",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "CH1895",
+                   "name":  "VIJAYAKUMAR V",
+                   "points":  17,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "CH10667",
+                   "name":  "SAKTHISHARMILA P",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "CH11126",
+                   "name":  "JESIN BENETO A",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "CH11156",
+                   "name":  "KASTHURI S",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "CH11127",
+                   "name":  "MANIGANDAN S",
+                   "points":  6,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "CH10371",
+                   "name":  "VIMALRAJ V",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "CSBS":  [
+                 {
+                     "rank":  1,
+                     "facultyId":  "CB10890",
+                     "name":  "YUVALATHA S",
+                     "points":  191,
+                     "activities":  null,
+                     "badge":  "gold"
+                 },
+                 {
+                     "rank":  2,
+                     "facultyId":  "CB10949",
+                     "name":  "MADHUMITHA A",
+                     "points":  82,
+                     "activities":  null,
+                     "badge":  "silver"
+                 },
+                 {
+                     "rank":  3,
+                     "facultyId":  "CB10830",
+                     "name":  "NIRMALADEVI J",
+                     "points":  70,
+                     "activities":  null,
+                     "badge":  "bronze"
+                 },
+                 {
+                     "rank":  4,
+                     "facultyId":  "IT11040",
+                     "name":  "PRIYA J",
+                     "points":  58,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  5,
+                     "facultyId":  "CB10992",
+                     "name":  "SARANYA N",
+                     "points":  56,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  6,
+                     "facultyId":  "CB10905",
+                     "name":  "SHOBIKA S T",
+                     "points":  44,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  7,
+                     "facultyId":  "CB10791",
+                     "name":  "CHANDRU K S",
+                     "points":  38,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  8,
+                     "facultyId":  "CB11055",
+                     "name":  "SUBRAJA T",
+                     "points":  36,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  9,
+                     "facultyId":  "CB10934",
+                     "name":  "VINOTHKUMAR N",
+                     "points":  27,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  10,
+                     "facultyId":  "CB10669",
+                     "name":  "SUPRIYA U",
+                     "points":  26,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  11,
+                     "facultyId":  "CB10943",
+                     "name":  "SATHISH S",
+                     "points":  18,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  12,
+                     "facultyId":  "CB11145",
+                     "name":  "DIVYA S",
+                     "points":  13,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  13,
+                     "facultyId":  "CB11108",
+                     "name":  "SUDHA T",
+                     "points":  6,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  14,
+                     "facultyId":  "CB11170",
+                     "name":  "VAISHNAVI N",
+                     "points":  4,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  15,
+                     "facultyId":  "CB11107",
+                     "name":  "NAVEENYA B P",
+                     "points":  4,
+                     "activities":  null,
+                     "badge":  "none"
+                 },
+                 {
+                     "rank":  16,
+                     "facultyId":  "CB11172",
+                     "name":  "PRABAKAR S J",
+                     "points":  3,
+                     "activities":  null,
+                     "badge":  "none"
+                 }
+             ],
+    "CSD":  [
+                {
+                    "rank":  1,
+                    "facultyId":  "AD1444",
+                    "name":  "GOMATHI R",
+                    "points":  204,
+                    "activities":  null,
+                    "badge":  "gold"
+                },
+                {
+                    "rank":  2,
+                    "facultyId":  "CD11061",
+                    "name":  "PREETHIMATHI L",
+                    "points":  32,
+                    "activities":  null,
+                    "badge":  "silver"
+                },
+                {
+                    "rank":  3,
+                    "facultyId":  "CD11062",
+                    "name":  "MAHESHKUMAR K",
+                    "points":  20,
+                    "activities":  null,
+                    "badge":  "bronze"
+                },
+                {
+                    "rank":  4,
+                    "facultyId":  "CD11024",
+                    "name":  "NILAVU NIZA A",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  5,
+                    "facultyId":  "CD11091",
+                    "name":  "KASINIYA K",
+                    "points":  9,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  6,
+                    "facultyId":  "CD11177",
+                    "name":  "MADHUMATHI S",
+                    "points":  9,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  7,
+                    "facultyId":  "CD11174",
+                    "name":  "KIRUTHIKA S",
+                    "points":  5,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  8,
+                    "facultyId":  "CD11183",
+                    "name":  "INDHUMATHI K",
+                    "points":  3,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  9,
+                    "facultyId":  "CD11179",
+                    "name":  "SUBHASHREE P",
+                    "points":  2,
+                    "activities":  null,
+                    "badge":  "none"
+                }
+            ],
+    "CSE":  [
+                {
+                    "rank":  1,
+                    "facultyId":  "CS10797",
+                    "name":  "SANGEETHAA SN",
+                    "points":  283,
+                    "activities":  null,
+                    "badge":  "gold"
+                },
+                {
+                    "rank":  2,
+                    "facultyId":  "CS10906",
+                    "name":  "SARANYA K",
+                    "points":  201,
+                    "activities":  null,
+                    "badge":  "silver"
+                },
+                {
+                    "rank":  3,
+                    "facultyId":  "CS10787",
+                    "name":  "PARTHASARATHI P",
+                    "points":  200,
+                    "activities":  null,
+                    "badge":  "bronze"
+                },
+                {
+                    "rank":  4,
+                    "facultyId":  "CS10239",
+                    "name":  "KARTHIGA M",
+                    "points":  197,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  5,
+                    "facultyId":  "CS10268",
+                    "name":  "GANAGAVALLI K",
+                    "points":  167,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  6,
+                    "facultyId":  "CS10820",
+                    "name":  "RAJESH KANNA P",
+                    "points":  163,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  7,
+                    "facultyId":  "CS10521",
+                    "name":  "SARAN KUMAR A",
+                    "points":  163,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  8,
+                    "facultyId":  "CS10825",
+                    "name":  "KIRUTHIKA V R",
+                    "points":  148,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  9,
+                    "facultyId":  "CS10789",
+                    "name":  "DHIVYA P",
+                    "points":  144,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  10,
+                    "facultyId":  "CS11081",
+                    "name":  "DEEPA PRIYA B S",
+                    "points":  118,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  11,
+                    "facultyId":  "CS10025",
+                    "name":  "DINESH P S",
+                    "points":  117,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  12,
+                    "facultyId":  "CS10843",
+                    "name":  "NITHYA R",
+                    "points":  112,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  13,
+                    "facultyId":  "CS1618",
+                    "name":  "PREMALATHA K",
+                    "points":  112,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  14,
+                    "facultyId":  "CS10876",
+                    "name":  "SATHISHKANNAN R",
+                    "points":  102,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  15,
+                    "facultyId":  "CB10753",
+                    "name":  "SUGUNA R",
+                    "points":  100,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  16,
+                    "facultyId":  "CS10974",
+                    "name":  "STEEPHAN AMALRAJ J",
+                    "points":  98,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  17,
+                    "facultyId":  "CS10839",
+                    "name":  "PHILO SUMI",
+                    "points":  97,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  18,
+                    "facultyId":  "CS10449",
+                    "name":  "PRABHA DEVI D",
+                    "points":  97,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  19,
+                    "facultyId":  "CS10538",
+                    "name":  "PRAVEEN V",
+                    "points":  97,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  20,
+                    "facultyId":  "CS10798",
+                    "name":  "JOTHIMANI S",
+                    "points":  96,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  21,
+                    "facultyId":  "CS11075",
+                    "name":  "CHITRADEVI T N",
+                    "points":  95,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  22,
+                    "facultyId":  "CS11027",
+                    "name":  "SATHYAMOORTHY J",
+                    "points":  94,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  23,
+                    "facultyId":  "IS10823",
+                    "name":  "GOPAL R",
+                    "points":  90,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  24,
+                    "facultyId":  "CS10983",
+                    "name":  "KAVITHA R",
+                    "points":  86,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  25,
+                    "facultyId":  "CS10880",
+                    "name":  "KALAIVANI E",
+                    "points":  79,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  26,
+                    "facultyId":  "CS1906",
+                    "name":  "RAMYA R",
+                    "points":  77,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  27,
+                    "facultyId":  "CS10897",
+                    "name":  "VAISHNAVI M",
+                    "points":  73,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  28,
+                    "facultyId":  "CS10473",
+                    "name":  "SOUNDARIYA R S",
+                    "points":  72,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  29,
+                    "facultyId":  "CS11094",
+                    "name":  "RATHNA S",
+                    "points":  64,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  30,
+                    "facultyId":  "CS10861",
+                    "name":  "SANGAVI N",
+                    "points":  63,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  31,
+                    "facultyId":  "CS10946",
+                    "name":  "RAMASAMI S",
+                    "points":  61,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  32,
+                    "facultyId":  "CS10436",
+                    "name":  "THARSANEE R M",
+                    "points":  53,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  33,
+                    "facultyId":  "CS10894",
+                    "name":  "ANANTHI P",
+                    "points":  52,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  34,
+                    "facultyId":  "CS10804",
+                    "name":  "RUPASHINI P R",
+                    "points":  52,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  35,
+                    "facultyId":  "CS10767",
+                    "name":  "MAGESH KUMAR B",
+                    "points":  51,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  36,
+                    "facultyId":  "CS10776",
+                    "name":  "SUSEENDRAN S",
+                    "points":  50,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  37,
+                    "facultyId":  "CS11086",
+                    "name":  "GAYATHRI S",
+                    "points":  49,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  38,
+                    "facultyId":  "CS10874",
+                    "name":  "JANAGI R",
+                    "points":  43,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  39,
+                    "facultyId":  "CS10646",
+                    "name":  "PRIYANKA S",
+                    "points":  42,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  40,
+                    "facultyId":  "IT1764",
+                    "name":  "SATHIS KUMAR K",
+                    "points":  41,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  41,
+                    "facultyId":  "CS11064",
+                    "name":  "MOHANAMBAL K",
+                    "points":  39,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  42,
+                    "facultyId":  "CS10560",
+                    "name":  "SWATHYPRIYADHARSINI P",
+                    "points":  38,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  43,
+                    "facultyId":  "CS1362",
+                    "name":  "SATHISHKUMAR P",
+                    "points":  38,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  44,
+                    "facultyId":  "CS10794",
+                    "name":  "DIVYA P",
+                    "points":  35,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  45,
+                    "facultyId":  "CS10875",
+                    "name":  "MUNIRATHINAM T",
+                    "points":  34,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  46,
+                    "facultyId":  "AM10907",
+                    "name":  "RAJASEKAR S S",
+                    "points":  33,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  47,
+                    "facultyId":  "CS1767",
+                    "name":  "NAGAMANI T",
+                    "points":  33,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  48,
+                    "facultyId":  "CS10784",
+                    "name":  "YUVARAJ D",
+                    "points":  32,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  49,
+                    "facultyId":  "CS10519",
+                    "name":  "KRISHNAMOORTHY V",
+                    "points":  32,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  50,
+                    "facultyId":  "CS11084",
+                    "name":  "GUNAVARDINI V",
+                    "points":  30,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  51,
+                    "facultyId":  "CS10980",
+                    "name":  "SRIRAM S",
+                    "points":  29,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  52,
+                    "facultyId":  "CS11150",
+                    "name":  "MYTHILI G M",
+                    "points":  28,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  53,
+                    "facultyId":  "CS11088",
+                    "name":  "SATHIYA B",
+                    "points":  27,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  54,
+                    "facultyId":  "CS11101",
+                    "name":  "ALAMELU M",
+                    "points":  26,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  55,
+                    "facultyId":  "CS1110",
+                    "name":  "SASIKALA D",
+                    "points":  26,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  56,
+                    "facultyId":  "CS10878",
+                    "name":  "LAVANYA C",
+                    "points":  25,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  57,
+                    "facultyId":  "CS10958",
+                    "name":  "KUMARESAN T",
+                    "points":  22,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  58,
+                    "facultyId":  "CS11157",
+                    "name":  "GAYATHIRI DEVI S",
+                    "points":  22,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  59,
+                    "facultyId":  "CS11171",
+                    "name":  "JACKSON J",
+                    "points":  21,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  60,
+                    "facultyId":  "CS1340",
+                    "name":  "VIJAY FRANKLIN J",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  61,
+                    "facultyId":  "CS11158",
+                    "name":  "KAYALVIZHI B",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  62,
+                    "facultyId":  "CS11087",
+                    "name":  "PRIYANGA M A",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  63,
+                    "facultyId":  "CS1019",
+                    "name":  "LOGESWARI S",
+                    "points":  18,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  64,
+                    "facultyId":  "CS1945",
+                    "name":  "KANIMOZHI T",
+                    "points":  17,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  65,
+                    "facultyId":  "CS10719",
+                    "name":  "MEENAKSHI DHANALAKSHMI M",
+                    "points":  17,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  66,
+                    "facultyId":  "CS11012",
+                    "name":  "RAGUNATH D",
+                    "points":  17,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  67,
+                    "facultyId":  "CS11163",
+                    "name":  "MAHESH S",
+                    "points":  11,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  68,
+                    "facultyId":  "CS11080",
+                    "name":  "AMMU V",
+                    "points":  10,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  69,
+                    "facultyId":  "CS11162",
+                    "name":  "THANGATAMILSELVI S",
+                    "points":  7,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  70,
+                    "facultyId":  "CS10134",
+                    "name":  "SATHISH KUMAR G",
+                    "points":  2,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  71,
+                    "facultyId":  "CS10891",
+                    "name":  "HARI BALAJI M",
+                    "points":  2,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  72,
+                    "facultyId":  "CS11119",
+                    "name":  "PARKAVI S",
+                    "points":  1,
+                    "activities":  null,
+                    "badge":  "none"
+                }
+            ],
+    "CT":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "CT10965",
+                   "name":  "GUNALAN K",
+                   "points":  221,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "CT11020",
+                   "name":  "ANANDAN P",
+                   "points":  119,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "CT11030",
+                   "name":  "SAVEETHA R",
+                   "points":  92,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "CT10935",
+                   "name":  "NITHYA M",
+                   "points":  80,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "CT10933",
+                   "name":  "SWEETY PRASANNA KIRUBA G",
+                   "points":  77,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "AD10818",
+                   "name":  "ESWARAMOORTHY V",
+                   "points":  77,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "CT10814",
+                   "name":  "SUGANYA G",
+                   "points":  33,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "CT10909",
+                   "name":  "DIVAKAR R",
+                   "points":  31,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "CT10859",
+                   "name":  "SOWMYA P",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "CT10659",
+                   "name":  "THANGA PARVATHI B",
+                   "points":  17,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "CT10061",
+                   "name":  "RAMYA R",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "CT1385",
+                   "name":  "RAMESH C",
+                   "points":  11,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "CT10779",
+                   "name":  "RAMYA P",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "ECE":  [
+                {
+                    "rank":  1,
+                    "facultyId":  "EC1417",
+                    "name":  "HARIKUMAR R",
+                    "points":  260,
+                    "activities":  null,
+                    "badge":  "gold"
+                },
+                {
+                    "rank":  2,
+                    "facultyId":  "EC1226",
+                    "name":  "LAKSHMI NARAYANA M MOHAN",
+                    "points":  243,
+                    "activities":  null,
+                    "badge":  "silver"
+                },
+                {
+                    "rank":  3,
+                    "facultyId":  "EC10443",
+                    "name":  "BARANIDHARAN V",
+                    "points":  206,
+                    "activities":  null,
+                    "badge":  "bronze"
+                },
+                {
+                    "rank":  4,
+                    "facultyId":  "EC10827",
+                    "name":  "MURUGAN K",
+                    "points":  166,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  5,
+                    "facultyId":  "EC10229",
+                    "name":  "SARANYA N",
+                    "points":  156,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  6,
+                    "facultyId":  "EC10775",
+                    "name":  "MYTHILI S",
+                    "points":  154,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  7,
+                    "facultyId":  "EC10916",
+                    "name":  "KARTHIGA M",
+                    "points":  148,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  8,
+                    "facultyId":  "EC1537",
+                    "name":  "PUSHPAVALLI M",
+                    "points":  137,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  9,
+                    "facultyId":  "EC1072",
+                    "name":  "POONGODI C",
+                    "points":  134,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  10,
+                    "facultyId":  "EC10680",
+                    "name":  "PERARASI T",
+                    "points":  128,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  11,
+                    "facultyId":  "EC10692",
+                    "name":  "GAYATHRI R",
+                    "points":  117,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  12,
+                    "facultyId":  "EC10739",
+                    "name":  "ARULMURUGAN L",
+                    "points":  102,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  13,
+                    "facultyId":  "EC10774",
+                    "name":  "KRISHNARAJ R",
+                    "points":  100,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  14,
+                    "facultyId":  "EC1744",
+                    "name":  "RAMYA P",
+                    "points":  93,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  15,
+                    "facultyId":  "EC11043",
+                    "name":  "NIVETHA G",
+                    "points":  87,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  16,
+                    "facultyId":  "EC10186",
+                    "name":  "SAMPOORNAM K P",
+                    "points":  86,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  17,
+                    "facultyId":  "EC1741",
+                    "name":  "SARAVANAKUMAR P",
+                    "points":  83,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  18,
+                    "facultyId":  "EC10813",
+                    "name":  "SHARMILA A",
+                    "points":  76,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  19,
+                    "facultyId":  "EC1938",
+                    "name":  "RAMKUMAR R",
+                    "points":  74,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  20,
+                    "facultyId":  "EC10581",
+                    "name":  "TAMILSELVAN S",
+                    "points":  72,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  21,
+                    "facultyId":  "EC10811",
+                    "name":  "POUSIA S",
+                    "points":  72,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  22,
+                    "facultyId":  "EC1823",
+                    "name":  "NIRMALAKUMARI K",
+                    "points":  70,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  23,
+                    "facultyId":  "EC10005",
+                    "name":  "SANNASI CHAKRAVARTHY S R",
+                    "points":  67,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  24,
+                    "facultyId":  "EC10764",
+                    "name":  "SOUNDARYA B",
+                    "points":  67,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  25,
+                    "facultyId":  "EC10602",
+                    "name":  "KANTHIMATHI N",
+                    "points":  66,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  26,
+                    "facultyId":  "EC10678",
+                    "name":  "LEEBAN MOSES M",
+                    "points":  64,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  27,
+                    "facultyId":  "EC11021",
+                    "name":  "SATHIYAMURTHI P",
+                    "points":  64,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  28,
+                    "facultyId":  "EC1893",
+                    "name":  "ELANGO S",
+                    "points":  59,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  29,
+                    "facultyId":  "EC10675",
+                    "name":  "AJIN R NAIR",
+                    "points":  55,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  30,
+                    "facultyId":  "EC10336",
+                    "name":  "GNANAPRAKASH V",
+                    "points":  53,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  31,
+                    "facultyId":  "EC10644",
+                    "name":  "SARAVANA KUMAR R",
+                    "points":  52,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  32,
+                    "facultyId":  "EC10725",
+                    "name":  "ABINAYA M",
+                    "points":  52,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  33,
+                    "facultyId":  "EC11131",
+                    "name":  "SANKARANANTH S",
+                    "points":  51,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  34,
+                    "facultyId":  "EC10716",
+                    "name":  "SUGANYA DEVI C R",
+                    "points":  48,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  35,
+                    "facultyId":  "EC11010",
+                    "name":  "MARIAAMUTHA R",
+                    "points":  47,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  36,
+                    "facultyId":  "EC1887",
+                    "name":  "SHOUKATH ALI K",
+                    "points":  47,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  37,
+                    "facultyId":  "EC10915",
+                    "name":  "STEPHEN SAGAYARAJ A",
+                    "points":  46,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  38,
+                    "facultyId":  "EC10194",
+                    "name":  "KARTHIKEYAN S",
+                    "points":  46,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  39,
+                    "facultyId":  "EC11045",
+                    "name":  "DHANALAKSHMI S",
+                    "points":  44,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  40,
+                    "facultyId":  "EC11047",
+                    "name":  "RAMESH R",
+                    "points":  44,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  41,
+                    "facultyId":  "EC10828",
+                    "name":  "SENTHIL T",
+                    "points":  42,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  42,
+                    "facultyId":  "EC10668",
+                    "name":  "MANU RAJU",
+                    "points":  35,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  43,
+                    "facultyId":  "EC10726",
+                    "name":  "SHYAMALAPRASANNA A",
+                    "points":  33,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  44,
+                    "facultyId":  "EC11051",
+                    "name":  "SANDHIYADEVI P",
+                    "points":  30,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  45,
+                    "facultyId":  "EC11005",
+                    "name":  "SUBHARATHNA N",
+                    "points":  29,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  46,
+                    "facultyId":  "EC10972",
+                    "name":  "VELLINGIRI A",
+                    "points":  28,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  47,
+                    "facultyId":  "EC1453",
+                    "name":  "PRAKASH S P",
+                    "points":  25,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  48,
+                    "facultyId":  "EC10819",
+                    "name":  "BHARANI N",
+                    "points":  25,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  49,
+                    "facultyId":  "EC1914",
+                    "name":  "SHRI THARANYAA J P",
+                    "points":  24,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  50,
+                    "facultyId":  "EC10969",
+                    "name":  "VENKATESHKUMAR U",
+                    "points":  23,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  51,
+                    "facultyId":  "EC11044",
+                    "name":  "HARISH KUMAAR P",
+                    "points":  23,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  52,
+                    "facultyId":  "EC1911",
+                    "name":  "DANIEL RAJ A",
+                    "points":  22,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  53,
+                    "facultyId":  "EC10973",
+                    "name":  "ANNAPOORANI B T",
+                    "points":  20,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  54,
+                    "facultyId":  "EC10195",
+                    "name":  "RAJU C",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  55,
+                    "facultyId":  "EC10691",
+                    "name":  "PARVATHY V",
+                    "points":  16,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  56,
+                    "facultyId":  "EC11147",
+                    "name":  "RAGAVI M",
+                    "points":  16,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  57,
+                    "facultyId":  "EC10603",
+                    "name":  "RAJA SEKAR S",
+                    "points":  13,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  58,
+                    "facultyId":  "EC1740",
+                    "name":  "POORNIMASRE J",
+                    "points":  13,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  59,
+                    "facultyId":  "EC1912",
+                    "name":  "SAJAN P PHILIP",
+                    "points":  10,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  60,
+                    "facultyId":  "EC10567",
+                    "name":  "SURESH G",
+                    "points":  9,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  61,
+                    "facultyId":  "EC1834",
+                    "name":  "SANJOY DEB",
+                    "points":  8,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  62,
+                    "facultyId":  "EC1721",
+                    "name":  "NIRMAL KUMAR R",
+                    "points":  6,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  63,
+                    "facultyId":  "EC11192",
+                    "name":  "NALIFABEGAM J",
+                    "points":  5,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  64,
+                    "facultyId":  "EC11038",
+                    "name":  "JAYA BRINDHA G",
+                    "points":  1,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  65,
+                    "facultyId":  "EC1731",
+                    "name":  "JOHN CLEMENT SUNDER A",
+                    "points":  1,
+                    "activities":  null,
+                    "badge":  "none"
+                }
+            ],
+    "EEE":  [
+                {
+                    "rank":  1,
+                    "facultyId":  "EE1682",
+                    "name":  "MAHESWARI K T",
+                    "points":  244,
+                    "activities":  null,
+                    "badge":  "gold"
+                },
+                {
+                    "rank":  2,
+                    "facultyId":  "EE1329",
+                    "name":  "SIVARAMAN P",
+                    "points":  240,
+                    "activities":  null,
+                    "badge":  "silver"
+                },
+                {
+                    "rank":  3,
+                    "facultyId":  "EE10648",
+                    "name":  "DHEEPANCHAKKRAVARTHY A",
+                    "points":  207,
+                    "activities":  null,
+                    "badge":  "bronze"
+                },
+                {
+                    "rank":  4,
+                    "facultyId":  "EE1908",
+                    "name":  "SUNDAR S",
+                    "points":  120,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  5,
+                    "facultyId":  "EE1785",
+                    "name":  "MOHANAPRIYA V",
+                    "points":  114,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  6,
+                    "facultyId":  "EE1747",
+                    "name":  "SRITHA P",
+                    "points":  114,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  7,
+                    "facultyId":  "EE10888",
+                    "name":  "MERCY P",
+                    "points":  113,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  8,
+                    "facultyId":  "EE1325",
+                    "name":  "RAJALASHMI K",
+                    "points":  107,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  9,
+                    "facultyId":  "EE10155",
+                    "name":  "ALEX STANLEY RAJA T",
+                    "points":  91,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  10,
+                    "facultyId":  "EE1311",
+                    "name":  "SRINIVASAN M",
+                    "points":  87,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  11,
+                    "facultyId":  "EE10873",
+                    "name":  "CHINNADURRAI CL",
+                    "points":  83,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  12,
+                    "facultyId":  "EE10616",
+                    "name":  "NITHYA G",
+                    "points":  82,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  13,
+                    "facultyId":  "EE10786",
+                    "name":  "MANOJKUMAR P",
+                    "points":  67,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  14,
+                    "facultyId":  "EE10647",
+                    "name":  "SENTHIL KUMAR J",
+                    "points":  63,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  15,
+                    "facultyId":  "EE10652",
+                    "name":  "RISHIKESH N",
+                    "points":  56,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  16,
+                    "facultyId":  "EE10871",
+                    "name":  "DHIVYA K T",
+                    "points":  55,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  17,
+                    "facultyId":  "EE1700",
+                    "name":  "MANIVANNAN S",
+                    "points":  51,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  18,
+                    "facultyId":  "EE11078",
+                    "name":  "GOWRI SHANKAR M",
+                    "points":  49,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  19,
+                    "facultyId":  "EE1687",
+                    "name":  "SELVABHARATHI P",
+                    "points":  46,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  20,
+                    "facultyId":  "EE10883",
+                    "name":  "GOLDVIN SUGIRTHA DHAS B",
+                    "points":  44,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  21,
+                    "facultyId":  "EE10397",
+                    "name":  "SATHISHKUMAR S",
+                    "points":  40,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  22,
+                    "facultyId":  "EE10721",
+                    "name":  "GOPIKA N P",
+                    "points":  39,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  23,
+                    "facultyId":  "EE1695",
+                    "name":  "NANDHAKUMAR A",
+                    "points":  36,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  24,
+                    "facultyId":  "EE10052",
+                    "name":  "KAMATCHI KANNAN V",
+                    "points":  34,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  25,
+                    "facultyId":  "EE10594",
+                    "name":  "SAKTHI SURIYA RAJ J S",
+                    "points":  27,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  26,
+                    "facultyId":  "EE10759",
+                    "name":  "SATHIYANARAYANAN T",
+                    "points":  23,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  27,
+                    "facultyId":  "EE10685",
+                    "name":  "ANDRIL ALAGUSABAI",
+                    "points":  23,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  28,
+                    "facultyId":  "EE1754",
+                    "name":  "ASHOKKUMAR R",
+                    "points":  22,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  29,
+                    "facultyId":  "EE10550",
+                    "name":  "BALAVIGNESH S",
+                    "points":  22,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  30,
+                    "facultyId":  "EE10524",
+                    "name":  "VAIDEESWARAN V",
+                    "points":  22,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  31,
+                    "facultyId":  "EE10317",
+                    "name":  "ARUN CHENDHURAN R",
+                    "points":  21,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  32,
+                    "facultyId":  "EE10808",
+                    "name":  "ARTHUR VASANTH J",
+                    "points":  20,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  33,
+                    "facultyId":  "EE1437",
+                    "name":  "VEERAKUMAR S",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  34,
+                    "facultyId":  "EE10097",
+                    "name":  "SANTHOSH KUMAR K V",
+                    "points":  18,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  35,
+                    "facultyId":  "EE10710",
+                    "name":  "REENA CATHERINE J",
+                    "points":  17,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  36,
+                    "facultyId":  "EE1781",
+                    "name":  "BHUVANESWARI S",
+                    "points":  16,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  37,
+                    "facultyId":  "EE10709",
+                    "name":  "RENUKA K",
+                    "points":  10,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  38,
+                    "facultyId":  "EE1560",
+                    "name":  "SHANKAR N",
+                    "points":  9,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  39,
+                    "facultyId":  "EE10780",
+                    "name":  "NIVESH KUMAR K",
+                    "points":  6,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  40,
+                    "facultyId":  "EE10619",
+                    "name":  "MADHUMITHA J",
+                    "points":  5,
+                    "activities":  null,
+                    "badge":  "none"
+                }
+            ],
+    "EI":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "EI1276",
+                   "name":  "GANESH BABU C",
+                   "points":  384,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "EI10266",
+                   "name":  "HARITHA J",
+                   "points":  93,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "EI10459",
+                   "name":  "PRAVIN SAVARIDASS M",
+                   "points":  90,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "EI10249",
+                   "name":  "DHANASEKAR R",
+                   "points":  78,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "EI10428",
+                   "name":  "KALAIYARASI M",
+                   "points":  78,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "EI10485",
+                   "name":  "KALIMUTHU M",
+                   "points":  77,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "EI1686",
+                   "name":  "RAJASEKAR L",
+                   "points":  75,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "EI1438",
+                   "name":  "VAIRAVEL K S",
+                   "points":  70,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "EI1993",
+                   "name":  "DEEPA R",
+                   "points":  62,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "EI1996",
+                   "name":  "ARUN JAYAKAR S",
+                   "points":  54,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "EI10339",
+                   "name":  "NARENDRA ILAYA PALLAVAN P",
+                   "points":  47,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "EI11048",
+                   "name":  "KUMARESAN K",
+                   "points":  46,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "EI10403",
+                   "name":  "SAKTHIYA RAM S",
+                   "points":  42,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "EI1688",
+                   "name":  "SUDHAHAR S",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "EI10670",
+                   "name":  "PRATHAP M R",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "EI10422",
+                   "name":  "KARTHIKAMANI R",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "EI10270",
+                   "name":  "NANDHINI K M",
+                   "points":  23,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "EI1713",
+                   "name":  "RAMESWARI R",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "EI10187",
+                   "name":  "BALAMURUGAN V T",
+                   "points":  12,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "EI1994",
+                   "name":  "RAJESH T",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "EI10408",
+                   "name":  "RAMYA K",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  22,
+                   "facultyId":  "EI10629",
+                   "name":  "SNEHA K",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "FD":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "FD10866",
+                   "name":  "NITHYA BALA SUNDARI S",
+                   "points":  145,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "FD10966",
+                   "name":  "NITHIYA PRIYA B T",
+                   "points":  47,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "FD10755",
+                   "name":  "GOWRISHANKAR L",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "FD10889",
+                   "name":  "POOJITHA P",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "FD10999",
+                   "name":  "ARUNASREE TNA",
+                   "points":  41,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "FD10990",
+                   "name":  "RAMYA M",
+                   "points":  33,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "FD10967",
+                   "name":  "PUJAA SAKTHY M R K",
+                   "points":  31,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "FD10985",
+                   "name":  "SANCHITA MUKHERJEE",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "FD10959",
+                   "name":  "PIDATHALA SAHITYA",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "FD10877",
+                   "name":  "MENAHA R",
+                   "points":  20,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "FD10868",
+                   "name":  "ANUJA S",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "FD10997",
+                   "name":  "KARTHIKEYAN S",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "FD10923",
+                   "name":  "MILINTHA MARY  T P",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "FD10761",
+                   "name":  "KARUNYAH AMIRTHADHARSHINI N",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "FT":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "FT10289",
+                   "name":  "SUBRATA DAS",
+                   "points":  152,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "FT10903",
+                   "name":  "PAYAL DUTTA",
+                   "points":  70,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "FT10427",
+                   "name":  "MEKALA N",
+                   "points":  63,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "FT10781",
+                   "name":  "DHANAPRIYA G",
+                   "points":  53,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "FT10566",
+                   "name":  "THIRUMURUGAN V",
+                   "points":  53,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "FT10224",
+                   "name":  "SARANYA D V",
+                   "points":  52,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "FT10541",
+                   "name":  "SOWMMIYA S",
+                   "points":  46,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "FT10698",
+                   "name":  "VANEESWARI N",
+                   "points":  41,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "FT10809",
+                   "name":  "MOHAN BHARATHI C",
+                   "points":  41,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "FD10724",
+                   "name":  "SARANYA S",
+                   "points":  39,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "FD10865",
+                   "name":  "EDAMAKANTI RAMANJI REDDY",
+                   "points":  29,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "FT10424",
+                   "name":  "SARAVANAN K",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "FT10482",
+                   "name":  "PRIYA R",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "FT10968",
+                   "name":  "PAVITHRA SHEN G T",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "FT10474",
+                   "name":  "SHANMUGAPRIYA V",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "FT10548",
+                   "name":  "NIVEATHITHA S",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "HU":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "HU11139",
+                   "name":  "ASLIN JERUSHA D",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "HU11159",
+                   "name":  "JAYA K",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "HU11141",
+                   "name":  "EZHIL G",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "HU11125",
+                   "name":  "GAYATHRI G M",
+                   "points":  18,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "HU11151",
+                   "name":  "NITHYA S",
+                   "points":  16,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "HU11011",
+                   "name":  "AJAI A",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "HU10723",
+                   "name":  "CAROLINE CYNTHIA P",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "HU11106",
+                   "name":  "NANDHINI A P",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "HU11003",
+                   "name":  "ANANTHAN S",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "HU11072",
+                   "name":  "SARAH HELAN SATHYA A",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "HU11007",
+                   "name":  "SARATHKUMAR S R",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "HU11138",
+                   "name":  "KRISHNA PRIYA G",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "HU11004",
+                   "name":  "ANBURAJ M",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "HU11115",
+                   "name":  "KAMALI D",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "HU11085",
+                   "name":  "SAGUNTHALA DEVI P",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "HU11154",
+                   "name":  "SHYAMSUNDAR S",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "ISE":  [
+                {
+                    "rank":  1,
+                    "facultyId":  "IS11029",
+                    "name":  "BIJU J",
+                    "points":  212,
+                    "activities":  null,
+                    "badge":  "gold"
+                },
+                {
+                    "rank":  2,
+                    "facultyId":  "IS10944",
+                    "name":  "SOMASUNDARAM K",
+                    "points":  135,
+                    "activities":  null,
+                    "badge":  "silver"
+                },
+                {
+                    "rank":  3,
+                    "facultyId":  "IS10942",
+                    "name":  "MEKALA R",
+                    "points":  109,
+                    "activities":  null,
+                    "badge":  "bronze"
+                },
+                {
+                    "rank":  4,
+                    "facultyId":  "CS10963",
+                    "name":  "RAJESHKUMAR G",
+                    "points":  106,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  5,
+                    "facultyId":  "IS10829",
+                    "name":  "PANDIYAN M",
+                    "points":  106,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  6,
+                    "facultyId":  "IS10850",
+                    "name":  "POORNIMA A",
+                    "points":  84,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  7,
+                    "facultyId":  "IS1899",
+                    "name":  "ANANDAKUMAR K",
+                    "points":  34,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  8,
+                    "facultyId":  "IS10815",
+                    "name":  "PANDIARAJ A",
+                    "points":  20,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  9,
+                    "facultyId":  "IS10912",
+                    "name":  "KOUSHIK LAYEK",
+                    "points":  5,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  10,
+                    "facultyId":  "IS10993",
+                    "name":  "QUALITHA BEGUM Z",
+                    "points":  3,
+                    "activities":  null,
+                    "badge":  "none"
+                }
+            ],
+    "IT":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "IT10803",
+                   "name":  "PRIYA L",
+                   "points":  205,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "IT10845",
+                   "name":  "VENKATESAN R",
+                   "points":  202,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "AM1025",
+                   "name":  "BHARATHI A",
+                   "points":  152,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "IT10800",
+                   "name":  "SRI VIGNA HEMA V",
+                   "points":  144,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "IT10846",
+                   "name":  "SELVAKUMAR M",
+                   "points":  140,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "IT10824",
+                   "name":  "CHANDRAPRABHA K",
+                   "points":  127,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "AD10628",
+                   "name":  "ARUN KUMAR R",
+                   "points":  89,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "IT1928",
+                   "name":  "ARUN SHALIN L V",
+                   "points":  88,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "IT10831",
+                   "name":  "LAKSHMANAPRAKASH S",
+                   "points":  84,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "IT10863",
+                   "name":  "ABIRAMI A",
+                   "points":  70,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "IT1238",
+                   "name":  "DANIEL MADAN RAJA S",
+                   "points":  55,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "IT10262",
+                   "name":  "SABARMATHI K R",
+                   "points":  49,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "IT10571",
+                   "name":  "SOBIYAA P",
+                   "points":  49,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "IT10395",
+                   "name":  "SRI VINITHA V",
+                   "points":  48,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "IT11129",
+                   "name":  "NIVEDHA S",
+                   "points":  47,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "IT11124",
+                   "name":  "MUTHUMEENA S",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "IT10736",
+                   "name":  "JANANI T",
+                   "points":  43,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "IT2771",
+                   "name":  "NATARAJ N",
+                   "points":  41,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "IT10792",
+                   "name":  "YAMUNA S",
+                   "points":  40,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "IT10156",
+                   "name":  "PALANISAMY A M",
+                   "points":  38,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "IT11144",
+                   "name":  "SHANGARA NARAYANEE N P",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  22,
+                   "facultyId":  "IT10291",
+                   "name":  "BHARATHI A",
+                   "points":  31,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  23,
+                   "facultyId":  "IT10882",
+                   "name":  "SANTHIYA B",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  24,
+                   "facultyId":  "IT11160",
+                   "name":  "ELAVARASI T",
+                   "points":  27,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  25,
+                   "facultyId":  "IT1846",
+                   "name":  "NAVEENA S",
+                   "points":  26,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  26,
+                   "facultyId":  "IT10653",
+                   "name":  "PONNILA P",
+                   "points":  26,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  27,
+                   "facultyId":  "IT11132",
+                   "name":  "KAVITHA V",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  28,
+                   "facultyId":  "IT11128",
+                   "name":  "TAMILTHENDRAL M",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  29,
+                   "facultyId":  "IT10674",
+                   "name":  "KARTHIKA M S",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  30,
+                   "facultyId":  "IT10922",
+                   "name":  "GAYATHRI K",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  31,
+                   "facultyId":  "IT10941",
+                   "name":  "NIKITHA M",
+                   "points":  20,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  32,
+                   "facultyId":  "IT10921",
+                   "name":  "RENUGA DEVI S",
+                   "points":  20,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  33,
+                   "facultyId":  "IT11105",
+                   "name":  "SANTHIYA B",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  34,
+                   "facultyId":  "IT11149",
+                   "name":  "SENTHILNATHAN S",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  35,
+                   "facultyId":  "IT10689",
+                   "name":  "KALAIVANI R",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  36,
+                   "facultyId":  "IT11155",
+                   "name":  "DEEPA SUMATHI M",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  37,
+                   "facultyId":  "IT11140",
+                   "name":  "PRIYA A",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  38,
+                   "facultyId":  "IT10192",
+                   "name":  "SUGANYA K S",
+                   "points":  12,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  39,
+                   "facultyId":  "IT11121",
+                   "name":  "JOTHIMANI S",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  40,
+                   "facultyId":  "IT11173",
+                   "name":  "GAYATHRI D",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  41,
+                   "facultyId":  "IT10886",
+                   "name":  "GOKULNATH B V",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  42,
+                   "facultyId":  "IT10777",
+                   "name":  "DEEPIKA J",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  43,
+                   "facultyId":  "IT10884",
+                   "name":  "RAJAKUMAR P",
+                   "points":  9,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  44,
+                   "facultyId":  "IT11167",
+                   "name":  "SHOBANA K B",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  45,
+                   "facultyId":  "IT11148",
+                   "name":  "MOHEMMED YOUSUF",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  46,
+                   "facultyId":  "IT11142",
+                   "name":  "KEERTHANA K",
+                   "points":  6,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  47,
+                   "facultyId":  "IT11146",
+                   "name":  "INDHU BHASHINI V",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  48,
+                   "facultyId":  "IT11056",
+                   "name":  "SADHASIVAM N",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  49,
+                   "facultyId":  "IT10144",
+                   "name":  "PURUSOTHAMAN P",
+                   "points":  4,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  50,
+                   "facultyId":  "IT2078",
+                   "name":  "PRABHU P S",
+                   "points":  4,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  51,
+                   "facultyId":  "IT10054",
+                   "name":  "KAVITHA A",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  52,
+                   "facultyId":  "IT1441",
+                   "name":  "PAARIVALLAL RA",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  53,
+                   "facultyId":  "IT10247",
+                   "name":  "LEELAVATHI R",
+                   "points":  1,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  54,
+                   "facultyId":  "IT1195",
+                   "name":  "SRINITYA G",
+                   "points":  1,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "MA":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "MA1327",
+                   "name":  "THULASIMANI T",
+                   "points":  1917,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "MA1342",
+                   "name":  "VINOTHINI V R",
+                   "points":  219,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "MA1334",
+                   "name":  "PRABHAVATHI K",
+                   "points":  186,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "MA1465",
+                   "name":  "PRAKASH K",
+                   "points":  166,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "MA10202",
+                   "name":  "KARUPPUSAMY M",
+                   "points":  150,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "MA1702",
+                   "name":  "UMAMAGESWARI D",
+                   "points":  138,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "MA10119",
+                   "name":  "SARANYA D",
+                   "points":  124,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "MA1303",
+                   "name":  "INDIRANI C",
+                   "points":  97,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "MA10452",
+                   "name":  "KALAISELVAN S",
+                   "points":  95,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "MA10071",
+                   "name":  "PREETHA R",
+                   "points":  92,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "MA10763",
+                   "name":  "REVATHI V M",
+                   "points":  90,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "MA1373",
+                   "name":  "SARAVANA MOORTHI P",
+                   "points":  70,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "MA11070",
+                   "name":  "MALATHI M",
+                   "points":  70,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "MA10743",
+                   "name":  "SANGEETHA K",
+                   "points":  69,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "MA11017",
+                   "name":  "GAYATHIRI B",
+                   "points":  68,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "MA10986",
+                   "name":  "GOMATHI M",
+                   "points":  66,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "MA10518",
+                   "name":  "PRABAKARAN P",
+                   "points":  64,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "MA1566",
+                   "name":  "PARIMALA M",
+                   "points":  58,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "MA10388",
+                   "name":  "SELVI S",
+                   "points":  42,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "MA11028",
+                   "name":  "SURESH R",
+                   "points":  40,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "MA11079",
+                   "name":  "SABEENA BEGAM S",
+                   "points":  35,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  22,
+                   "facultyId":  "MA10347",
+                   "name":  "KARTHIKA M",
+                   "points":  35,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  23,
+                   "facultyId":  "MA10184",
+                   "name":  "VINOTH KUMAR N",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  24,
+                   "facultyId":  "MA10432",
+                   "name":  "ABIRAMI M",
+                   "points":  23,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  25,
+                   "facultyId":  "MA10920",
+                   "name":  "SYAMA R",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  26,
+                   "facultyId":  "MA10433",
+                   "name":  "RAMYA R",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  27,
+                   "facultyId":  "MA11181",
+                   "name":  "HEMALATHA B",
+                   "points":  17,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  28,
+                   "facultyId":  "MA11122",
+                   "name":  "AKALYADEVI K",
+                   "points":  11,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  29,
+                   "facultyId":  "MA10348",
+                   "name":  "NISHANTHINI V",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "MC":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "MC10729",
+                   "name":  "NAGARAJAN P",
+                   "points":  84,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "MC10664",
+                   "name":  "SIDDHARTHAN B",
+                   "points":  57,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "MC10298",
+                   "name":  "OORAPPAN G M",
+                   "points":  50,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "MC10450",
+                   "name":  "DHINESH S K",
+                   "points":  49,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "MC10696",
+                   "name":  "BHARATHIRAJA M",
+                   "points":  46,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "MC10412",
+                   "name":  "RAGHUNATH M",
+                   "points":  41,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "MC1939",
+                   "name":  "POOMANI K",
+                   "points":  39,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "MC10149",
+                   "name":  "SIVABALAKRISHNAN R",
+                   "points":  26,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "MC10470",
+                   "name":  "YUVARAJ K",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "MC10299",
+                   "name":  "VIGNESH S",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "MC1071",
+                   "name":  "SENTHIL KUMAR K L",
+                   "points":  24,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "MC10770",
+                   "name":  "PRAKASH M",
+                   "points":  20,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "MC1843",
+                   "name":  "SENTHILKUMAR P",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "MC10454",
+                   "name":  "MOHAMED ISMAIL A",
+                   "points":  18,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "MC1878",
+                   "name":  "JEGADHEESWARAN S",
+                   "points":  17,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "MC10306",
+                   "name":  "MEGAVARTHINI K K",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "MC10179",
+                   "name":  "NANDAKUMAR K",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "MC1901",
+                   "name":  "MEGALINGAM @ MURUGAN A",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "MC10041",
+                   "name":  "HANUMANTH RAMJI K S",
+                   "points":  5,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "ME":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "ME10313",
+                   "name":  "MUTHUKUMAR K",
+                   "points":  170,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "MC1627",
+                   "name":  "RAJIEV R",
+                   "points":  129,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "ME1819",
+                   "name":  "DINESH D",
+                   "points":  101,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "ME1543",
+                   "name":  "ANANDHA MOORTHY A",
+                   "points":  99,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "ME10098",
+                   "name":  "PRADEEP A D",
+                   "points":  96,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "ME1107",
+                   "name":  "SASIKUMAR C",
+                   "points":  95,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "ME10174",
+                   "name":  "MADHESWARAN S",
+                   "points":  94,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "ME10328",
+                   "name":  "RAMACHANDRA RAJU K",
+                   "points":  80,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "ME1880",
+                   "name":  "SURESHKUMAR M",
+                   "points":  75,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "ME10492",
+                   "name":  "PRAKASH K B",
+                   "points":  75,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "ME10699",
+                   "name":  "PRAVIN M C",
+                   "points":  68,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "ME1820",
+                   "name":  "MATHANKUMAR P",
+                   "points":  66,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "ME10255",
+                   "name":  "SELVAMUTHUKUMARAN D",
+                   "points":  63,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "ME10665",
+                   "name":  "SARAVANAN S",
+                   "points":  63,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "ME1877",
+                   "name":  "SATHISHKUMAR C",
+                   "points":  62,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "ME10151",
+                   "name":  "JAYAKUMAR N",
+                   "points":  61,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "ME1975",
+                   "name":  "TAJDEEN A",
+                   "points":  53,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "ME10673",
+                   "name":  "BOOPATHIRAJA K P",
+                   "points":  53,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "ME10273",
+                   "name":  "BHUVANESH N",
+                   "points":  52,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "ME1410",
+                   "name":  "RAMESH KUMAR T",
+                   "points":  47,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "ME1974",
+                   "name":  "SAKTHIVEL MURUGAN E",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  22,
+                   "facultyId":  "ME10233",
+                   "name":  "SUBRAMANIYAN C",
+                   "points":  41,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  23,
+                   "facultyId":  "ME1869",
+                   "name":  "VELMURUGAN S",
+                   "points":  38,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  24,
+                   "facultyId":  "ME1957",
+                   "name":  "SUNDARRAJU G",
+                   "points":  36,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  25,
+                   "facultyId":  "ME10493",
+                   "name":  "VIVEK KUMAR P",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  26,
+                   "facultyId":  "ME1093",
+                   "name":  "RAVI KUMAR M",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  27,
+                   "facultyId":  "ME10416",
+                   "name":  "KAMAL BASHA K",
+                   "points":  26,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  28,
+                   "facultyId":  "ME10081",
+                   "name":  "KUMARESAN G",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  29,
+                   "facultyId":  "ME11077",
+                   "name":  "JOSEPH SILVESTER K",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  30,
+                   "facultyId":  "ME1739",
+                   "name":  "NANDAGOPAL M",
+                   "points":  21,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  31,
+                   "facultyId":  "ME10044",
+                   "name":  "PONMURUGAN M",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  32,
+                   "facultyId":  "ME10684",
+                   "name":  "KARTHICK K N",
+                   "points":  18,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  33,
+                   "facultyId":  "ME1449",
+                   "name":  "SANGARAVADIVEL P",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  34,
+                   "facultyId":  "ME10150",
+                   "name":  "VIGNESH KUMAR S",
+                   "points":  15,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  35,
+                   "facultyId":  "ME10447",
+                   "name":  "TAMILARASAN V D",
+                   "points":  14,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  36,
+                   "facultyId":  "ME10930",
+                   "name":  "ANUGEETHA SHINE",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  37,
+                   "facultyId":  "ME11008",
+                   "name":  "ABHINANDH K A",
+                   "points":  13,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  38,
+                   "facultyId":  "ME10714",
+                   "name":  "CHANDRASEKARAN M",
+                   "points":  11,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  39,
+                   "facultyId":  "ME1335",
+                   "name":  "AMARKARTHIK A",
+                   "points":  11,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  40,
+                   "facultyId":  "ME1970",
+                   "name":  "RAMAKRISHNAN A",
+                   "points":  11,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  41,
+                   "facultyId":  "ME1946",
+                   "name":  "ARIVU Y",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  42,
+                   "facultyId":  "ME11099",
+                   "name":  "PAVANADITYA BADIDA",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  43,
+                   "facultyId":  "ME1472",
+                   "name":  "SIVAKUMAR K",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  44,
+                   "facultyId":  "ME10448",
+                   "name":  "VINU KUMAR S M",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  45,
+                   "facultyId":  "ME10864",
+                   "name":  "NAVEEN SANKAR A",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  46,
+                   "facultyId":  "ME10952",
+                   "name":  "LIKHIL GOPALAN",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "MZ":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "MC10697",
+                   "name":  "VADIVEL VIVEK V",
+                   "points":  151,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "MC10369",
+                   "name":  "NIJANDHAN K",
+                   "points":  58,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "MC10568",
+                   "name":  "BOOPATHI C",
+                   "points":  57,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "MC1884",
+                   "name":  "SANTHOSH N",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "MC10597",
+                   "name":  "RAGHAVENDRA PRABHU S",
+                   "points":  29,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "MC10757",
+                   "name":  "PRADEESH E L",
+                   "points":  26,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "PH":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "PH10218",
+                   "name":  "ASHOKAN S",
+                   "points":  174,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "PH1407",
+                   "name":  "VIJAYAKUMAR V N",
+                   "points":  172,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "PH10457",
+                   "name":  "THIRUMOORTHY M",
+                   "points":  113,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "PH10981",
+                   "name":  "SUNDARAM S",
+                   "points":  102,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "PH1653",
+                   "name":  "PONGALI SATHYA PRABU N",
+                   "points":  91,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "PH10870",
+                   "name":  "VANITHA K",
+                   "points":  85,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "PH10987",
+                   "name":  "ANANDHA BABU G",
+                   "points":  84,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "PH10204",
+                   "name":  "PARASURAMAN P",
+                   "points":  66,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "PH1889",
+                   "name":  "ROHINI P",
+                   "points":  63,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "PH10380",
+                   "name":  "SELVAKUMAR K",
+                   "points":  44,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "PH1054",
+                   "name":  "SADASIVAM K",
+                   "points":  43,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  12,
+                   "facultyId":  "PH1636",
+                   "name":  "VIVEKANANDAN J",
+                   "points":  43,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  13,
+                   "facultyId":  "PH10067",
+                   "name":  "SENTHIL K",
+                   "points":  37,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  14,
+                   "facultyId":  "PH11034",
+                   "name":  "SIVA G",
+                   "points":  30,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  15,
+                   "facultyId":  "PH11015",
+                   "name":  "GOPI G",
+                   "points":  29,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  16,
+                   "facultyId":  "PH1718",
+                   "name":  "RAJANAND KUMAR R",
+                   "points":  29,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  17,
+                   "facultyId":  "PH11153",
+                   "name":  "SANGEETHA K",
+                   "points":  19,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  18,
+                   "facultyId":  "PH11123",
+                   "name":  "ANBAZHAKAN K",
+                   "points":  8,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  19,
+                   "facultyId":  "PH10695",
+                   "name":  "NANDHAGOPAL M",
+                   "points":  7,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  20,
+                   "facultyId":  "PH11152",
+                   "name":  "PRIYADHARSINI A",
+                   "points":  3,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  21,
+                   "facultyId":  "PH11036",
+                   "name":  "BASKARAN P",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ],
+    "SMS":  [
+                {
+                    "rank":  1,
+                    "facultyId":  "SM10643",
+                    "name":  "DAVID WINSTER PRAVEENRAJ D",
+                    "points":  78,
+                    "activities":  null,
+                    "badge":  "gold"
+                },
+                {
+                    "rank":  2,
+                    "facultyId":  "SM41012",
+                    "name":  "SARASWATHI C",
+                    "points":  67,
+                    "activities":  null,
+                    "badge":  "silver"
+                },
+                {
+                    "rank":  3,
+                    "facultyId":  "SM11065",
+                    "name":  "SENTHIL KUMAR N",
+                    "points":  66,
+                    "activities":  null,
+                    "badge":  "bronze"
+                },
+                {
+                    "rank":  4,
+                    "facultyId":  "SM10346",
+                    "name":  "NANDHINI B",
+                    "points":  57,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  5,
+                    "facultyId":  "SM10887",
+                    "name":  "GOKUL K",
+                    "points":  50,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  6,
+                    "facultyId":  "SM10608",
+                    "name":  "NAGARAJAN S",
+                    "points":  45,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  7,
+                    "facultyId":  "SM11120",
+                    "name":  "VIDHYA S",
+                    "points":  42,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  8,
+                    "facultyId":  "SM10885",
+                    "name":  "FREDDY CHRIS M",
+                    "points":  25,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  9,
+                    "facultyId":  "SM10989",
+                    "name":  "VISHNU SAJAN",
+                    "points":  24,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  10,
+                    "facultyId":  "SM10250",
+                    "name":  "SISILI T",
+                    "points":  19,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  11,
+                    "facultyId":  "SM10406",
+                    "name":  "PRASANTH A",
+                    "points":  18,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  12,
+                    "facultyId":  "SM10223",
+                    "name":  "ASHOK J",
+                    "points":  14,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  13,
+                    "facultyId":  "SM1661",
+                    "name":  "MURUGAPPAN S",
+                    "points":  12,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  14,
+                    "facultyId":  "SM11118",
+                    "name":  "AISHWARIYA M R",
+                    "points":  10,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  15,
+                    "facultyId":  "SM11133",
+                    "name":  "MAGESWARAN J",
+                    "points":  8,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  16,
+                    "facultyId":  "SM11059",
+                    "name":  "BASILEA CATHERINE J",
+                    "points":  8,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  17,
+                    "facultyId":  "SM11187",
+                    "name":  "DHANABALU S N",
+                    "points":  4,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  18,
+                    "facultyId":  "SM10998",
+                    "name":  "NAVEEN P Y",
+                    "points":  4,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  19,
+                    "facultyId":  "SM10593",
+                    "name":  "ANTONYRAJ J M",
+                    "points":  3,
+                    "activities":  null,
+                    "badge":  "none"
+                },
+                {
+                    "rank":  20,
+                    "facultyId":  "SM11191",
+                    "name":  "SATHEESH KUMAR T",
+                    "points":  2,
+                    "activities":  null,
+                    "badge":  "none"
+                }
+            ],
+    "TP":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "TP10618",
+                   "name":  "AARTHI N",
+                   "points":  2,
+                   "activities":  null,
+                   "badge":  "gold"
+               }
+           ],
+    "TT":  [
+               {
+                   "rank":  1,
+                   "facultyId":  "TT10607",
+                   "name":  "JANARTHANAN M",
+                   "points":  153,
+                   "activities":  null,
+                   "badge":  "gold"
+               },
+               {
+                   "rank":  2,
+                   "facultyId":  "TT10654",
+                   "name":  "RAJESH KUMAR S",
+                   "points":  74,
+                   "activities":  null,
+                   "badge":  "silver"
+               },
+               {
+                   "rank":  3,
+                   "facultyId":  "TT10893",
+                   "name":  "SUDEV DUTTA",
+                   "points":  72,
+                   "activities":  null,
+                   "badge":  "bronze"
+               },
+               {
+                   "rank":  4,
+                   "facultyId":  "TT10979",
+                   "name":  "KAMALRAJ D",
+                   "points":  68,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  5,
+                   "facultyId":  "TT10892",
+                   "name":  "HARWINDER SINGH",
+                   "points":  36,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  6,
+                   "facultyId":  "TT10938",
+                   "name":  "MOUNIKA S",
+                   "points":  32,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  7,
+                   "facultyId":  "TT10747",
+                   "name":  "ASHOK KUMAR A",
+                   "points":  25,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  8,
+                   "facultyId":  "TT11184",
+                   "name":  "GAYATHRI R",
+                   "points":  12,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  9,
+                   "facultyId":  "TT1644",
+                   "name":  "GOPALAKRISHNAN M",
+                   "points":  10,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  10,
+                   "facultyId":  "TT10951",
+                   "name":  "SHUBHAM JOSHI",
+                   "points":  6,
+                   "activities":  null,
+                   "badge":  "none"
+               },
+               {
+                   "rank":  11,
+                   "facultyId":  "TT10264",
+                   "name":  "PUNITHA V",
+                   "points":  4,
+                   "activities":  null,
+                   "badge":  "none"
+               }
+           ]
+}

@@ -5,10 +5,11 @@ import { useAuthStore } from '@/lib/store'
 import { useRoles } from '@/hooks/useRoles'
 import {
   monthlyTrends,
-  approvalFunnelData, leaderboard,
+  approvalFunnelData,
   getPersonalizedHodData,
-  facultyKpiData, departmentTargets, deptPerformanceIndex,
+  departmentTargets, deptPerformanceIndex,
 } from '@/lib/mock-data'
+import { useRealData } from '@/hooks/useRealData'
 import {
   cseActivityIndexing, cseTotalWeightage, cseTotalIndex, cseAdditionalIndex,
   cseMonthlyDDPStatus, cseMonthlyActivities,
@@ -32,40 +33,25 @@ import LeaderboardWidget from '@/components/LeaderboardWidget'
 
 const MONO_FONT = { fontFamily: "'JetBrains Mono', monospace" }
 
+/** All departments with real data — shortCodes match realDeptMap keys directly */
 const DEPT_OPTIONS = [
-  { id: 1, short: 'CSE' },
-  { id: 2, short: 'IT' },
-  { id: 3, short: 'ECE' },
-  { id: 4, short: 'EEE' },
-  { id: 5, short: 'MECH' },
-  { id: 6, short: 'CIVIL' },
+  { id: 1,  short: 'CSE'  }, { id: 2,  short: 'ECE'  }, { id: 3,  short: 'MA'   },
+  { id: 4,  short: 'EEE'  }, { id: 5,  short: 'IT'   }, { id: 6,  short: 'ME'   },
+  { id: 7,  short: 'AIDS' }, { id: 8,  short: 'EI'   }, { id: 9,  short: 'CE'   },
+  { id: 10, short: 'CH'   }, { id: 11, short: 'PH'   }, { id: 12, short: 'AIML' },
+  { id: 13, short: 'BT'   }, { id: 14, short: 'ISE'  }, { id: 15, short: 'CT'   },
+  { id: 16, short: 'AG'   }, { id: 17, short: 'FT'   }, { id: 18, short: 'CSBS' },
+  { id: 19, short: 'MC'   }, { id: 20, short: 'AU'   }, { id: 21, short: 'SMS'  },
+  { id: 22, short: 'TT'   }, { id: 23, short: 'FD'   }, { id: 24, short: 'BM'   },
+  { id: 25, short: 'AE'   }, { id: 26, short: 'MZ'   }, { id: 27, short: 'CSD'  },
+  { id: 28, short: 'HU'   },
 ]
 
-const KPI_KEYS = ['research', 'publications', 'teaching', 'events', 'innovation', 'engagement'] as const
-
-const HEATMAP_LEGEND = [
-  { label: 'Exceeding (80+)', cls: 'bg-green-500' },
-  { label: 'Meeting (60-79)', cls: 'bg-green-300' },
-  { label: 'Approaching (40-59)', cls: 'bg-yellow-300' },
-  { label: 'Below (20-39)', cls: 'bg-orange-400' },
-  { label: 'Critical (<20)', cls: 'bg-red-500' },
-]
-
-function heatBg(v: number) {
-  if (v >= 80) return { bg: 'rgba(34,197,94,0.85)', text: '#fff' }
-  if (v >= 60) return { bg: 'rgba(134,239,172,0.7)', text: '#14532d' }
-  if (v >= 40) return { bg: 'rgba(253,224,71,0.7)', text: '#713f12' }
-  if (v >= 20) return { bg: 'rgba(251,146,60,0.8)', text: '#fff' }
-  if (v > 0) return { bg: 'rgba(239,68,68,0.85)', text: '#fff' }
-  return { bg: '#f1f5f9', text: '#94a3b8' }
-}
-
-function avgColor(v: number) {
-  if (v >= 80) return 'text-green-600'
-  if (v >= 60) return 'text-emerald-600'
-  if (v >= 40) return 'text-yellow-600'
-  if (v >= 20) return 'text-orange-600'
-  return 'text-red-600'
+function tierStyle(pts: number, avg: number) {
+  if (pts >= avg * 1.5) return { label: 'Excellent', cls: 'bg-emerald-100 text-emerald-700' }
+  if (pts >= avg)       return { label: 'Good',      cls: 'bg-blue-100 text-blue-700'    }
+  if (pts >= avg * 0.6) return { label: 'Average',   cls: 'bg-yellow-100 text-yellow-700' }
+  return                       { label: 'Needs Work', cls: 'bg-red-100 text-red-600'      }
 }
 
 function indexColor(v: number) {
@@ -81,6 +67,32 @@ function progressColor(pct: number) {
   if (pct >= 40) return '#f97316'
   return '#ef4444'
 }
+
+function facHeatBg(v: number, maxV: number) {
+  if (maxV === 0 || v === 0) return { bg: '#f1f5f9', text: '#94a3b8' }
+  const pct = v / maxV
+  if (pct >= 0.6)  return { bg: '#22c55e', text: '#fff' }
+  if (pct >= 0.35) return { bg: '#86efac', text: '#14532d' }
+  if (pct >= 0.15) return { bg: '#fde047', text: '#713f12' }
+  return                   { bg: '#fb923c', text: '#fff' }
+}
+
+const FACULTY_HEATMAP_COLS = [
+  { key: 'papers'          as const, label: 'Papers'       },
+  { key: 'patents'         as const, label: 'Patents'      },
+  { key: 'courses'         as const, label: 'Courses'      },
+  { key: 'guestLectures'   as const, label: 'Guest Lect.'  },
+  { key: 'eventsOrganized' as const, label: 'Evt Org.'     },
+  { key: 'eventsAttended'  as const, label: 'FDP/Evt Att.' },
+]
+
+const FACULTY_HEATMAP_LEGEND = [
+  { label: 'Top (≥60%)',    cls: 'bg-green-500' },
+  { label: 'High (35–59%)', cls: 'bg-green-300' },
+  { label: 'Mid (15–34%)',  cls: 'bg-yellow-300' },
+  { label: 'Low (<15%)',    cls: 'bg-orange-400' },
+  { label: 'None',          cls: 'bg-slate-100 border border-slate-200' },
+]
 
 /* ================================================================
    SUB-COMPONENTS
@@ -107,16 +119,19 @@ function SectionDivider({ icon: Icon, title, subtitle }: {
 }
 
 /** Big KPI number card */
-function KpiCard({ label, value, gradient, borderColor }: {
+function KpiCard({ label, value, note, gradient, borderColor, small }: {
   label: string
   value: string | number
+  note?: string
   gradient: string
   borderColor: string
+  small?: boolean
 }) {
   return (
     <div className={`${gradient} border ${borderColor} rounded-xl p-4 sm:p-6 text-center`}>
       <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-2xl sm:text-4xl font-black" style={MONO_FONT}>{value}</p>
+      <p className={small ? 'text-sm sm:text-base font-bold leading-snug break-words' : 'text-2xl sm:text-4xl font-black'} style={MONO_FONT}>{value}</p>
+      {note && <p className="text-[10px] mt-1 opacity-70">{note}</p>}
     </div>
   )
 }
@@ -160,6 +175,15 @@ export default function DepartmentPage() {
   const ddpRanking = ddpOverallIndexing.find(d => d.shortName === deptShort) || ddpOverallIndexing[1]
   const ddpAchievementPct = Math.round((ddpRanking.achieved / ddpRanking.totalTarget) * 100)
 
+  /* ---- Real CSV-derived dept stats ---- */
+  const { deptMap: realDeptMap, deptRankings: realDeptRankings, deptFacultyRankings: realDeptFacultyRankings } = useRealData()
+  const realCode = deptShort  // DEPT_OPTIONS now uses real shortCodes directly
+  const realDept = realDeptMap[realCode]
+  const headerDeptName = realDept?.dept || stats.departmentName
+  const headerDeptShort = realCode || stats.departmentShort
+  const deptFacultyRankings = realDeptFacultyRankings[realCode] || []
+  const deptRankPosition = realDeptRankings.findIndex(d => d.shortCode === realCode) + 1
+
   const activities = cseActivityIndexing
   const criticalActivities = activities.filter(a => a.attained === 0)
   const exceedingActivities = activities.filter(a => a.attained > a.totalTarget)
@@ -173,18 +197,35 @@ export default function DepartmentPage() {
     Events: Math.round(m.events / 10),
   }))
 
-  const critical = facultyKpiData.filter(f => {
-    const avg = KPI_KEYS.reduce((s, k) => s + f[k], 0) / KPI_KEYS.length
-    return avg < 45
+  // Faculty performance tiers derived from real dept rankings
+  const realAvgPts = realDept?.avgPoints || 1
+  const topPerformers = deptFacultyRankings.filter(f => f.points >= realAvgPts * 1.5)
+  const needsWork     = deptFacultyRankings.filter(f => f.points < realAvgPts * 0.6)
+
+  // Faculty × Domain heatmap: per-faculty domain counts (real from API or estimated from dept proportions)
+  const deptTotalActs = realDept
+    ? realDept.paperPresentations + realDept.patentFiled + realDept.patentPublished +
+      realDept.patentGranted + realDept.onlineCourses + realDept.guestLectures +
+      realDept.eventsOrganized + realDept.eventsAttended
+    : 1
+  const heatmapRows = deptFacultyRankings.map(f => {
+    const ratio = f.activities / Math.max(deptTotalActs, 1)
+    return {
+      ...f,
+      d: {
+        papers:          f.papers          ?? Math.round(ratio * (realDept?.paperPresentations ?? 0)),
+        patents:         f.patents         ?? Math.round(ratio * ((realDept?.patentFiled ?? 0) + (realDept?.patentPublished ?? 0) + (realDept?.patentGranted ?? 0))),
+        courses:         f.courses         ?? Math.round(ratio * (realDept?.onlineCourses ?? 0)),
+        guestLectures:   f.guestLectures   ?? Math.round(ratio * (realDept?.guestLectures ?? 0)),
+        eventsOrganized: f.eventsOrganized ?? Math.round(ratio * (realDept?.eventsOrganized ?? 0)),
+        eventsAttended:  f.eventsAttended  ?? Math.round(ratio * (realDept?.eventsAttended ?? 0)),
+      },
+    }
   })
-  const attention = facultyKpiData.filter(f => {
-    const avg = KPI_KEYS.reduce((s, k) => s + f[k], 0) / KPI_KEYS.length
-    return avg >= 45 && avg < 65
-  })
-  const topPerformers = facultyKpiData.filter(f => {
-    const avg = KPI_KEYS.reduce((s, k) => s + f[k], 0) / KPI_KEYS.length
-    return avg >= 85
-  })
+  const facColMaxes: Record<string, number> = {}
+  for (const c of FACULTY_HEATMAP_COLS) {
+    facColMaxes[c.key] = Math.max(1, ...heatmapRows.map(r => r.d[c.key]))
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
@@ -195,10 +236,10 @@ export default function DepartmentPage() {
       <header>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0">
-            {stats.departmentShort}
+            {headerDeptShort}
           </div>
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{stats.departmentName}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{headerDeptName}</h1>
             <p className="text-xs sm:text-sm text-slate-500 truncate">
               DDP Indicator &amp; Department Analytics {isDeanUser ? '\u00b7 Dean View' : `\u00b7 HOD: ${user?.name}`}
             </p>
@@ -245,10 +286,7 @@ export default function DepartmentPage() {
               </div>
             }
           />
-          <StatCard label="Faculty Count" borderAccent="border-l-blue-500"
-            value={perf.facultyCount}
-            extra={<p className="text-xs text-slate-400">{perf.activeFaculty}/{perf.facultyCount + 2} Active</p>}
-          />
+          
           <StatCard label="Achievements" borderAccent="border-l-emerald-500"
             value={perf.achievements}
             extra={
@@ -279,6 +317,61 @@ export default function DepartmentPage() {
           />
         </div>
       </section>
+
+      {/* ================================================================
+         SECTION 2.5: REAL ACTIVITY BREAKDOWN (from CSV data)
+         ================================================================ */}
+      {realDept && (
+        <section>
+          <SectionDivider icon={Activity} title="Approved Activity Data" subtitle="Real approved records from BIP system" />
+
+          {/* KPI strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+            <KpiCard label="Total Activities" value={realDept.total.toLocaleString()}
+              gradient="bg-gradient-to-br from-blue-50 to-cyan-50 text-blue-700" borderColor="border-blue-200" />
+            <KpiCard label="Weighted Points" value={realDept.totalPoints.toLocaleString()}
+              note={`avg ${realDept.avgPoints} / faculty`}
+              gradient="bg-gradient-to-br from-indigo-50 to-purple-50 text-indigo-700" borderColor="border-indigo-200" />
+            <KpiCard label="Faculty Active" value={realDept.uniqueFaculty}
+              gradient="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700" borderColor="border-emerald-200" />
+            <KpiCard label="Patents (F+P+G)" value={realDept.patentFiled + realDept.patentPublished + realDept.patentGranted}
+              gradient="bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-700" borderColor="border-violet-200" />
+            <KpiCard label="Top Performer" value={realDept.topPerformer}
+              note={`${realDept.topPerformerPoints} pts · ${realDept.topPerformerActivities} acts`}
+              gradient="bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700" borderColor="border-amber-200" small />
+          </div>
+
+          {/* Activity breakdown bars */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-4">Activity Category Breakdown</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+              {[
+                { label: 'Events Attended',     value: realDept.eventsAttended,    color: '#3b82f6' },
+                { label: 'Online Courses',       value: realDept.onlineCourses,     color: '#10b981' },
+                { label: 'Events Organized',     value: realDept.eventsOrganized,   color: '#8b5cf6' },
+                { label: 'Paper Presentations',  value: realDept.paperPresentations, color: '#f59e0b' },
+                { label: 'Guest Lectures',       value: realDept.guestLectures,     color: '#6366f1' },
+                { label: 'Patent Filed',         value: realDept.patentFiled,       color: '#ef4444' },
+                { label: 'Patent Published',     value: realDept.patentPublished,   color: '#ec4899' },
+                { label: 'Patent Granted',       value: realDept.patentGranted,     color: '#14b8a6' },
+              ].map(item => {
+                const pct = realDept.total > 0 ? Math.round((item.value / realDept.total) * 100) : 0
+                return (
+                  <div key={item.label}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-slate-700">{item.label}</p>
+                      <span className="text-xs font-bold text-slate-800 font-mono">{item.value.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2">
+                      <div className="h-2 rounded-full" style={{ width: `${Math.max(pct, item.value > 0 ? 2 : 0)}%`, background: item.color }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ================================================================
          SECTION 3: DDP INDEX SUMMARY
@@ -460,36 +553,6 @@ export default function DepartmentPage() {
         </div>
       </section>
 
-      {/* ================================================================
-         SECTION 6: DEPARTMENT TARGETS
-         ================================================================ */}
-      <section>
-        <SectionDivider icon={Target} title="Department Targets" subtitle="Progress towards key departmental goals" />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {departmentTargets.map(t => {
-            const pct = Math.round((t.current / t.target) * 100)
-            const displayCurrent = t.unit === 'Rs' ? (t.current / 100000).toFixed(1) + 'L' : t.current
-            const displayTarget = t.unit === 'Rs' ? (t.target / 100000).toFixed(0) + 'L' : t.target
-            return (
-              <div key={t.label} className="bg-slate-50 rounded-xl border border-slate-200 p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <h4 className="text-sm font-bold text-slate-900">{t.label}</h4>
-                  <Pencil className="w-4 h-4 text-amber-500" />
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2.5 mb-2">
-                  <div className="h-2.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(pct, 100)}%`, background: progressColor(pct) }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-slate-500">{displayCurrent} / {displayTarget} {t.unit === 'Rs' ? '' : t.unit}</p>
-                  <span className="text-sm font-bold text-slate-800" style={MONO_FONT}>{pct}%</span>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-1">Due: {t.dueDate}</p>
-              </div>
-            )
-          })}
-        </div>
-      </section>
 
       {/* ================================================================
          SECTION 7: PERFORMANCE ANALYTICS (charts)
@@ -531,133 +594,209 @@ export default function DepartmentPage() {
         </ChartCard>
       </section>
 
-      {/* ================================================================
-         SECTION 8: FACULTY PERFORMANCE (KPI Heatmap)
-         ================================================================ */}
+  
       <section>
-        <SectionDivider icon={Users} title="Faculty Performance" subtitle="Faculty vs KPI heatmap and diagnostic insights" />
+        {realDept && (
+          <>
+            {/* Faculty rankings table */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Faculty Rankings — {realCode}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">DDP-aligned weighted points · patents weighted highest</p>
+                </div>
+                <span className="text-[10px] px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 font-semibold border border-indigo-100">
+                  Dept avg: {realDept.avgPoints} pts
+                </span>
+              </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          {/* Legend */}
-          <div className="flex flex-wrap items-center gap-3 mb-4 text-[11px]">
-            {HEATMAP_LEGEND.map(l => (
-              <span key={l.label} className="flex items-center gap-1.5">
-                <span className={`w-3 h-3 rounded-sm ${l.cls}`} />
-                <span className="text-slate-600">{l.label}</span>
-              </span>
-            ))}
-          </div>
-
-          {/* Heatmap table */}
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
-            <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-              <colgroup>
-                <col style={{ width: '160px' }} />
-                {KPI_KEYS.map(k => <col key={k} style={{ width: '100px' }} />)}
-                <col style={{ width: '90px' }} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th className="text-left px-4 py-3 bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wide">Faculty</th>
-                  {KPI_KEYS.map(k => (
-                    <th key={k} className="text-center px-2 py-3 bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wide">
-                      {k.charAt(0).toUpperCase() + k.slice(1)}
-                    </th>
-                  ))}
-                  <th className="text-center px-2 py-3 bg-emerald-800 text-white text-xs font-semibold uppercase tracking-wide">Avg</th>
-                </tr>
-              </thead>
-              <tbody>
-                {facultyKpiData.map((f, idx) => {
-                  const avg = Math.round(KPI_KEYS.reduce((s, k) => s + f[k], 0) / KPI_KEYS.length)
-                  return (
-                    <tr key={f.name}>
-                      <td className={`px-4 py-0 border-b border-slate-100 font-medium text-sm text-slate-800 whitespace-nowrap ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}`}>
-                        {f.name}
-                      </td>
-                      {KPI_KEYS.map(k => {
-                        const c = heatBg(f[k])
+              {deptFacultyRankings.length > 0 ? (
+                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-emerald-700 text-white">
+                        <th className="text-center px-3 py-2.5 font-semibold w-12">Rank</th>
+                        <th className="text-left px-3 py-2.5 font-semibold w-24">Faculty ID</th>
+                        <th className="text-left px-3 py-2.5 font-semibold">Name</th>
+                        <th className="text-right px-3 py-2.5 font-semibold w-20">Points</th>
+                        <th className="text-right px-3 py-2.5 font-semibold w-20">Activities</th>
+                        <th className="text-left px-4 py-2.5 font-semibold">vs Dept Max</th>
+                        <th className="text-center px-3 py-2.5 font-semibold w-24">Tier</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {deptFacultyRankings.map((f, i) => {
+                        const topPts = deptFacultyRankings[0].points
+                        const pct = Math.round((f.points / topPts) * 100)
+                        const tier = tierStyle(f.points, realAvgPts)
                         return (
-                          <td key={k} className="p-0 border-b border-slate-100">
-                            <div className="flex items-center justify-center h-11 text-xs font-bold transition-colors"
-                              style={{ backgroundColor: c.bg, color: c.text }}>
-                              {f[k]}
+                          <tr key={f.facultyId} className={`border-b border-slate-100 hover:bg-slate-50/50 ${i % 2 === 1 ? 'bg-slate-50/40' : ''}`}>
+                            <td className="px-3 py-2.5 text-center">
+                              <span className={`w-6 h-6 inline-flex items-center justify-center rounded-full text-[10px] font-bold ${
+                                i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-slate-200 text-slate-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-slate-50 text-slate-500'
+                              }`}>{f.rank}</span>
+                            </td>
+                            <td className="px-3 py-2.5 font-mono text-slate-500 text-[11px]">{f.facultyId}</td>
+                            <td className="px-3 py-2.5 font-semibold text-[10px] text-slate-800">{f.name}</td>
+                            <td className="px-3 py-2.5 text-right font-bold font-mono text-indigo-700">{f.points.toLocaleString()}</td>
+                            <td className="px-3 py-2.5 text-right font-mono text-slate-500">{f.activities}</td>
+                            <td className="px-4 py-2.5">
+                              <div className="w-full bg-slate-100 rounded-full h-2">
+                                <div className="h-2 rounded-full" style={{ width: `${pct}%`, background: progressColor(pct) }} />
+                              </div>
+                              <p className="text-[9px] text-slate-400 mt-0.5">{pct}% of {topPts} pts</p>
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${tier.cls}`}>{tier.label}</span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 text-center py-6">No ranked faculty data for this department yet</p>
+              )}
+
+              {/* Insight cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <h4 className="text-sm font-bold text-emerald-800">Top Performers</h4>
+                  </div>
+                  {(topPerformers.length > 0 ? topPerformers : deptFacultyRankings.slice(0, 2)).map(f => (
+                    <p key={f.facultyId} className="text-xs text-emerald-700 mt-1">
+                      &bull; {f.name} &mdash; {f.points.toLocaleString()} pts
+                    </p>
+                  ))}
+                  {topPerformers.length === 0 && deptFacultyRankings.length === 0 && (
+                    <p className="text-xs text-emerald-600">No data</p>
+                  )}
+                </div>
+                <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 className="w-4 h-4 text-blue-600" />
+                    <h4 className="text-sm font-bold text-blue-800">Dept Standing</h4>
+                  </div>
+                  <p className="text-xs text-blue-700 mt-1">&bull; College Rank #{deptRankPosition} of {realDeptRankings.length}</p>
+                  <p className="text-xs text-blue-700 mt-1">&bull; Avg Points: {realDept.avgPoints} / faculty</p>
+                  <p className="text-xs text-blue-700 mt-1">&bull; Total: {realDept.totalPoints.toLocaleString()} pts</p>
+                </div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="w-4 h-4 text-amber-600" />
+                    <h4 className="text-sm font-bold text-amber-800">Activity Mix</h4>
+                  </div>
+                  {needsWork.length > 0 && (
+                    <p className="text-xs text-amber-700 mt-1 font-medium">{needsWork.length} faculty below avg threshold</p>
+                  )}
+                  <p className="text-xs text-amber-700 mt-1">&bull; Patents: {realDept.patentFiled + realDept.patentPublished + realDept.patentGranted}</p>
+                  <p className="text-xs text-amber-700 mt-1">&bull; Papers: {realDept.paperPresentations}</p>
+                  <p className="text-xs text-amber-700 mt-1">&bull; Courses: {realDept.onlineCourses}</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Placeholder when no real data for this dept */}
+        {!realDept && (
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 text-center">
+            <p className="text-sm text-slate-400">No real data available for this department</p>
+          </div>
+        )}
+
+        {/* Faculty × Activity Domain Heatmap */}
+        {heatmapRows.length > 0 && (
+          <div className="mt-6 bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-1">Faculty &times; Activity Domain Heatmap</h3>
+            <p className="text-xs text-slate-500 mb-3">{realCode} &mdash; Activity counts per faculty &middot; colour relative to top performer in each column</p>
+            <div className="flex flex-wrap items-center gap-3 mb-4 text-[11px]">
+              {FACULTY_HEATMAP_LEGEND.map(l => (
+                <span key={l.label} className="flex items-center gap-1.5">
+                  <span className={`inline-block w-3 h-3 rounded-sm ${l.cls}`} />
+                  <span className="text-slate-600">{l.label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-slate-200">
+              <table className="w-full border-collapse text-xs" style={{ minWidth: 720 }}>
+                <thead>
+                  <tr className="bg-slate-700">
+                    <th className="text-left px-3 py-2.5 text-white font-semibold sticky left-0 bg-slate-700 z-10 whitespace-nowrap">Rank &middot; Faculty</th>
+                    {FACULTY_HEATMAP_COLS.map(c => (
+                      <th key={c.key} className="text-center px-3 py-2.5 text-white font-semibold whitespace-nowrap">{c.label}</th>
+                    ))}
+                    <th className="text-right px-3 py-2.5 text-white font-semibold whitespace-nowrap">Total Pts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {heatmapRows.map((f, i) => (
+                    <tr key={f.facultyId} className="border-b border-slate-100">
+                      <td className="px-3 py-0 sticky left-0 bg-white z-10 border-r border-slate-100">
+                        <div className="h-9 flex items-center gap-2 min-w-[190px]">
+                          <span className={`w-5 h-5 inline-flex items-center justify-center rounded-full text-[9px] font-bold flex-shrink-0 ${
+                            i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-slate-200 text-slate-600' : i === 2 ? 'bg-orange-100 text-orange-600' : 'bg-slate-50 text-slate-500'
+                          }`}>{f.rank}</span>
+                          <span className="font-semibold text-[10px] text-slate-800 truncate" title={f.name}>{f.name}</span>
+                        </div>
+                      </td>
+                      {FACULTY_HEATMAP_COLS.map(c => {
+                        const v = f.d[c.key]
+                        const col = facHeatBg(v, facColMaxes[c.key])
+                        return (
+                          <td key={c.key} className="p-0">
+                            <div className="flex items-center justify-center h-9 text-xs font-bold" style={{ backgroundColor: col.bg, color: col.text }}>
+                              {v}
                             </div>
                           </td>
                         )
                       })}
-                      <td className={`px-2 py-0 border-b border-slate-100 text-center ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}`}>
-                        <span className={`text-sm font-bold ${avgColor(avg)}`} style={MONO_FONT}>{avg}</span>
+                      <td className="px-3 py-0 text-right">
+                        <div className="h-9 flex items-center justify-end font-bold font-mono text-indigo-700">{f.points.toLocaleString()}</div>
                       </td>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Insight cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-            <div className="rounded-xl border border-red-200 bg-red-50/80 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-                <h4 className="text-base font-bold text-red-800">Critical Areas</h4>
-              </div>
-              {critical.length > 0 ? critical.map(f => {
-                const lowest = KPI_KEYS.reduce((min, k) => f[k] < f[min] ? k : min, KPI_KEYS[0])
-                return (
-                  <p key={f.name} className="text-sm text-red-700 mt-1.5 leading-relaxed">
-                    &bull; {f.name} &ndash; {lowest.charAt(0).toUpperCase() + lowest.slice(1)} needs focus
-                  </p>
-                )
-              }) : <p className="text-sm text-red-600">No critical areas</p>}
-            </div>
-            <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Activity className="w-5 h-5 text-amber-600" />
-                <h4 className="text-base font-bold text-amber-800">Attention Needed</h4>
-              </div>
-              {attention.length > 0 ? attention.map(f => {
-                const lowest = KPI_KEYS.reduce((min, k) => f[k] < f[min] ? k : min, KPI_KEYS[0])
-                return (
-                  <p key={f.name} className="text-sm text-amber-700 mt-1.5 leading-relaxed">
-                    &bull; {f.name} &ndash; {lowest.charAt(0).toUpperCase() + lowest.slice(1)} score declining
-                  </p>
-                )
-              }) : <p className="text-sm text-amber-600">No concerns</p>}
-            </div>
-            <div className="rounded-xl border border-green-200 bg-green-50/80 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                <h4 className="text-base font-bold text-green-800">Top Performers</h4>
-              </div>
-              {topPerformers.length > 0 ? topPerformers.map(f => (
-                <p key={f.name} className="text-sm text-green-700 mt-1.5 leading-relaxed">
-                  &bull; {f.name} &ndash; Exceeding in all areas
-                </p>
-              )) : <p className="text-sm text-green-600">Keep pushing!</p>}
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* ================================================================
-         SECTION 9: LEADERBOARD & FACULTY LIST
+         SECTION 9: DEPARTMENT FACULTY LEADERBOARD (real data)
          ================================================================ */}
       <section>
-        <SectionDivider icon={Trophy} title="Team & Leaderboard" subtitle="Top performers and full faculty roster" />
+        <SectionDivider icon={Trophy} title="Department Leaderboard" subtitle="Faculty ranked by weighted DDP points — real BIP data" />
 
         <div className="flex items-center justify-end mb-4">
           <Link href="/leaderboard" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-            View Full Leaderboard &rarr;
+            View College-wide Leaderboard &rarr;
           </Link>
         </div>
 
-        <LeaderboardWidget
-          data={(deptLeaderboard.length > 0 ? deptLeaderboard : leaderboard)}
-          title={`${stats.departmentShort} Rankings`}
-          showDepartment={false}
-        />
+        {deptFacultyRankings.length > 0 ? (
+          <LeaderboardWidget
+            data={deptFacultyRankings.map(f => ({
+              rank: f.rank,
+              name: f.name,
+              department: realCode,
+              points: f.points,
+              activities: f.activities,
+              badge: f.badge,
+            }))}
+            title={`${realCode} — Top Faculty by Weighted Points`}
+            showDepartment={false}
+          />
+        ) : (
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 text-center">
+            <Trophy className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No ranked faculty data for {realCode}</p>
+          </div>
+        )}
       </section>
     </div>
   )

@@ -230,15 +230,15 @@ export const hodStats = {
 }
 
 export const deanStats = {
-  totalDepartments: 6,
-  totalFaculty: 198,
-  totalActivities: 1277,
+  totalDepartments: 27,
+  totalFaculty: 699,
+  totalActivities: 12063,
   totalPending: 28,
-  avgPointsCollege: 248,
+  avgPointsCollege: 448,
   topDepartment: 'CSE',
-  topDepartmentPoints: 12825,
-  researchOutput: 145,
-  patentsFiled: 12,
+  topDepartmentPoints: 1339,
+  researchOutput: 170,
+  patentsFiled: 303,
 }
 
 export const verificationStats = {
@@ -306,18 +306,18 @@ export const systemUsers: SystemUser[] = [
   { id: 20, facultyId: 'BIT-IT-004', name: 'Prof. Revathi K', email: 'revathi@bit.edu', department: 'IT', designation: 'Assistant Professor', role: 'faculty', status: 'active', joinedDate: '2022-07-20' },
 ]
 
-// ---- Leaderboard ----
+// ---- Leaderboard (weighted points: DDP-aligned scoring, NOT raw activity count) ----
 export const leaderboard = [
-  { rank: 1, name: 'Dr. Ramesh', department: 'CSE', points: 510, activities: 28, badge: 'gold' },
-  { rank: 2, name: 'Dr. Arun Kumar', department: 'ECE', points: 465, activities: 22, badge: 'gold' },
-  { rank: 3, name: 'Dr. Rajesh Kumar', department: 'CSE', points: 420, activities: 24, badge: 'silver' },
-  { rank: 4, name: 'Dr. Venkat K', department: 'MECH', points: 400, activities: 21, badge: 'silver' },
-  { rank: 5, name: 'Dr. Suresh Babu', department: 'ECE', points: 380, activities: 20, badge: 'silver' },
-  { rank: 6, name: 'Dr. Priya Sharma', department: 'CSE', points: 345, activities: 18, badge: 'bronze' },
-  { rank: 7, name: 'Dr. Ramesh B', department: 'CSE', points: 330, activities: 19, badge: 'bronze' },
-  { rank: 8, name: 'Dr. Lakshmi Priya', department: 'CSE', points: 290, activities: 16, badge: 'bronze' },
-  { rank: 9, name: 'Prof. Anitha Devi', department: 'CSE', points: 210, activities: 12, badge: 'none' },
-  { rank: 10, name: 'Prof. Sathya N', department: 'IT', points: 195, activities: 11, badge: 'none' },
+  { rank: 1,  name: 'THULASIMANI T',            department: 'MA',   points: 1917, activities: 415, badge: 'gold'   },
+  { rank: 2,  name: 'GANESH BABU C',             department: 'EI',   points: 384,  activities: 64,  badge: 'gold'   },
+  { rank: 3,  name: 'SANGEETHAA SN',             department: 'CSE',  points: 283,  activities: 50,  badge: 'silver' },
+  { rank: 4,  name: 'HARIKUMAR R',               department: 'ECE',  points: 260,  activities: 35,  badge: 'silver' },
+  { rank: 5,  name: 'MAHESWARI K T',             department: 'EEE',  points: 244,  activities: 95,  badge: 'silver' },
+  { rank: 6,  name: 'LAKSHMI NARAYANA M MOHAN',  department: 'ECE',  points: 243,  activities: 23,  badge: 'bronze' },
+  { rank: 7,  name: 'SIVARAMAN P',               department: 'EEE',  points: 240,  activities: 25,  badge: 'bronze' },
+  { rank: 8,  name: 'GUNALAN K',                 department: 'CT',   points: 221,  activities: 59,  badge: 'bronze' },
+  { rank: 9,  name: 'VINOTHINI V R',             department: 'MA',   points: 219,  activities: 82,  badge: 'none'   },
+  { rank: 10, name: 'BIJU J',                    department: 'ISE',  points: 212,  activities: 67,  badge: 'none'   },
 ]
 
 // ============================================================

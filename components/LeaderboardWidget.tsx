@@ -8,6 +8,7 @@ export interface LeaderboardEntry {
   name: string
   department: string
   points: number
+  activities?: number
   badge: string
 }
 
@@ -121,8 +122,9 @@ export default function LeaderboardWidget({
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
                     <BadgeIcon badge={f.badge} />
-                  </div>
-                </div>
+                  </div>                    {f.activities !== undefined && (
+                      <p className="text-[10px] text-slate-400">{f.activities} activities</p>
+                    )}                </div>
               </div>
               {showDepartment && (
                 <div className="col-span-4">
