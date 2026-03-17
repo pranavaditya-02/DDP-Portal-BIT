@@ -107,39 +107,41 @@ export default function LeaderboardWidget({
         </div>
 
         {/* Header */}
-        <div className={`hidden sm:grid ${showDepartment ? 'grid-cols-12' : 'grid-cols-8'} gap-4 px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide border-b border-slate-50 bg-slate-50/50`}>
+        <div className={`hidden sm:grid grid-cols-12 gap-4 px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide border-b border-slate-50 bg-slate-50/50`}>
           <div className="col-span-1 text-center">Rank</div>
-          <div className={showDepartment ? 'col-span-5' : 'col-span-5'}>Faculty</div>
-          {showDepartment && <div className="col-span-4">Department</div>}
-          <div className={`${showDepartment ? 'col-span-2' : 'col-span-2'} text-center`}>Points</div>
+          <div className={showDepartment ? 'col-span-3' : 'col-span-5'}>Faculty</div>
+          <div className="col-span-2">Faculty ID</div>
+          {showDepartment && <div className="col-span-2">Department</div>}
+          <div className="col-span-2 text-center">Activities</div>
+          <div className="col-span-2 text-center">Points</div>
         </div>
 
         {/* Rows */}
         <div className="divide-y divide-slate-50">
           {data.map((f) => (
-            <div key={`${f.facultyId || f.name}-${f.rank}`} className={`grid ${showDepartment ? 'grid-cols-12' : 'grid-cols-8'} gap-4 items-center px-5 py-4 hover:bg-slate-50/50 transition-colors`}>
+            <div key={`${f.facultyId || f.name}-${f.rank}`} className="grid grid-cols-12 gap-4 items-center px-5 py-4 hover:bg-slate-50/50 transition-colors">
               <div className="col-span-1 flex justify-center">
                 <RankBadge rank={f.rank} />
               </div>
-              <div className="col-span-5 flex items-center gap-2.5 min-w-0">
+              <div className={`${showDepartment ? 'col-span-3' : 'col-span-5'} flex items-center gap-2.5 min-w-0`}>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
                     <BadgeIcon badge={f.badge} />
                   </div>
-                  {f.facultyId && (
-                    <p className="text-[10px] text-slate-500">ID: {f.facultyId}</p>
-                  )}
-                  {f.activities !== undefined && (
-                      <p className="text-[10px] text-slate-400">{f.activities} activities</p>
-                    )}
                 </div>
               </div>
+              <div className="col-span-2">
+                <span className="text-xs text-slate-500 font-mono">{f.facultyId || '-'}</span>
+              </div>
               {showDepartment && (
-                <div className="col-span-4">
+                <div className="col-span-2">
                   <span className="text-sm text-slate-500">{f.department}</span>
                 </div>
               )}
+              <div className="col-span-2 text-center">
+                <span className="text-sm font-semibold text-slate-700" style={MONO}>{f.activities ?? 0}</span>
+              </div>
               <div className="col-span-2 text-center">
                 <span className="text-sm font-bold text-slate-800" style={MONO}>{f.points}</span>
                 <p className="text-[10px] text-slate-400">pts</p>
