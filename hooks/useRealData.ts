@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { AchievementData, LeaderboardEntry } from '@/lib/csv-loader'
 import {
   realCollegeStats,
@@ -18,16 +18,31 @@ const fallbackLeaderboard: LeaderboardEntry[] = realLeaderboard.map(e => ({
   badge: e.badge === 'none' ? '' : e.badge,
 }))
 
-export function useRealData() {
+export interface RealDataOptions {
+  dateFrom?: string // YYYY-MM-DD
+  dateTo?: string   // YYYY-MM-DD
+}
+
+export function useRealData(opts?: RealDataOptions) {
   const [data, setData] = useState<AchievementData | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const url = useMemo(() => {
+    const params = new URLSearchParams()
+    if (opts?.dateFrom) params.set('from', opts.dateFrom)
+    if (opts?.dateTo)   params.set('to',   opts.dateTo)
+    const qs = params.toString()
+    return `/api/real-data${qs ? `?${qs}` : ''}`
+  }, [opts?.dateFrom, opts?.dateTo])
+
   useEffect(() => {
-    fetch('/api/real-data')
+    setLoading(true)
+    setData(null)
+    fetch(url)
       .then(r => r.json())
       .then((d: AchievementData) => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [url])
 
   return {
     loading,

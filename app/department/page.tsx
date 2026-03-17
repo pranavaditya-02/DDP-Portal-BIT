@@ -10,6 +10,7 @@ import {
   departmentTargets, deptPerformanceIndex,
 } from '@/lib/mock-data'
 import { useRealData } from '@/hooks/useRealData'
+import DateRangePicker, { type DateRange } from '@/components/DateRangePicker'
 import {
   cseActivityIndexing, cseTotalWeightage, cseTotalIndex, cseAdditionalIndex,
   cseMonthlyDDPStatus, cseMonthlyActivities,
@@ -176,7 +177,11 @@ export default function DepartmentPage() {
   const ddpAchievementPct = Math.round((ddpRanking.achieved / ddpRanking.totalTarget) * 100)
 
   /* ---- Real CSV-derived dept stats ---- */
-  const { deptMap: realDeptMap, deptRankings: realDeptRankings, deptFacultyRankings: realDeptFacultyRankings } = useRealData()
+  const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
+  const { deptMap: realDeptMap, deptRankings: realDeptRankings, deptFacultyRankings: realDeptFacultyRankings, loading: realLoading } = useRealData({
+    dateFrom: dateRange.from || undefined,
+    dateTo:   dateRange.to   || undefined,
+  })
   const realCode = deptShort  // DEPT_OPTIONS now uses real shortCodes directly
   const realDept = realDeptMap[realCode]
   const headerDeptName = realDept?.dept || stats.departmentName
@@ -266,57 +271,20 @@ export default function DepartmentPage() {
             </div>
           </div>
         )}
+
+        {/* Date range filter */}
+        <div className="flex items-center gap-3 mt-3 px-1">
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            label="Filter activities by date"
+          />
+          {realLoading && (
+            <span className="text-xs text-slate-400 animate-pulse">Loading…</span>
+          )}
+        </div>
       </header>
 
-      {/* ================================================================
-         SECTION 2: DEPARTMENT PERFORMANCE OVERVIEW
-         ================================================================ */}
-      <section>
-        <SectionDivider icon={BarChart3} title="Department Performance" subtitle="Key metrics and performance index at a glance" />
-
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <StatCard label="Dept Performance Index" borderAccent="border-l-indigo-500"
-            value={perf.score}
-            extra={
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-0.5 text-xs font-medium text-emerald-600">
-                  <ArrowUpRight className="w-3 h-3" />{perf.trend}%
-                </span>
-                <span className="text-xs text-slate-400">Rank #{perf.rank} \u00b7 /{perf.maxScore}</span>
-              </div>
-            }
-          />
-          
-          <StatCard label="Achievements" borderAccent="border-l-emerald-500"
-            value={perf.achievements}
-            extra={
-              <span className="flex items-center gap-0.5 text-xs font-medium text-emerald-600">
-                <ArrowUpRight className="w-3 h-3" />{perf.achievementsGrowth}% YoY
-              </span>
-            }
-          />
-          <StatCard label="Pending Approvals" borderAccent="border-l-amber-500"
-            value={perf.pendingApprovals}
-            extra={
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                <span className="text-xs text-red-600 font-medium">{perf.urgentPending} Urgent</span>
-              </div>
-            }
-          />
-          <StatCard label="Target Rate" borderAccent="border-l-green-500"
-            value={`${perf.targetRate}%`}
-            extra={
-              <svg width="40" height="40" viewBox="0 0 40 40" className="mt-1">
-                <circle cx="20" cy="20" r="16" fill="none" stroke="#e2e8f0" strokeWidth="5" />
-                <circle cx="20" cy="20" r="16" fill="none" stroke="#10b981" strokeWidth="5"
-                  strokeDasharray={`${perf.targetRate * 1.005} ${100.5 - perf.targetRate * 1.005}`}
-                  strokeDashoffset="25" strokeLinecap="round" />
-              </svg>
-            }
-          />
-        </div>
-      </section>
 
       {/* ================================================================
          SECTION 2.5: REAL ACTIVITY BREAKDOWN (from CSV data)
@@ -497,63 +465,6 @@ export default function DepartmentPage() {
           </div>
         </div>
       </section>
-
-      {/* ================================================================
-         SECTION 5: MONTHLY DDP ATTAINMENT
-         ================================================================ */}
-      <section>
-        <SectionDivider icon={Target} title="Monthly DDP Attainment" subtitle="Monthly progress tracking for planned vs achieved activities" />
-
-        {/* Status cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-          <KpiCard label="Planned" value={cseMonthlyDDPStatus.planned}
-            gradient="bg-gradient-to-br from-violet-50 to-purple-50 text-violet-700" borderColor="border-violet-200" />
-          <KpiCard label="Achieved (Planned)" value={cseMonthlyDDPStatus.achievedPlanned}
-            gradient="bg-gradient-to-br from-emerald-50 to-green-50 text-emerald-700" borderColor="border-emerald-200" />
-          <KpiCard label="Pending" value={cseMonthlyDDPStatus.pending}
-            gradient="bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700" borderColor="border-rose-200" />
-          <KpiCard label="Achieved (Unplanned)" value={cseMonthlyDDPStatus.achievedUnplanned}
-            gradient="bg-gradient-to-br from-amber-50 to-yellow-50 text-amber-700" borderColor="border-amber-200" />
-        </div>
-
-        {/* Monthly activities table */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-emerald-700 text-white">
-                  {['S.No', 'Activity Name', 'Planned', 'Achieved (Planned)', 'Pending', 'Achieved (Unplanned)'].map((col, i) => (
-                    <th key={col} className={`${i < 2 ? 'text-left' : 'text-right'} px-4 py-2.5 font-semibold`}>{col}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {cseMonthlyActivities.map((a, i) => (
-                  <tr key={i} className={`border-b border-slate-100 ${a.pending > 0 ? 'bg-red-50/30' : ''}`}>
-                    <td className="px-4 py-2.5 text-slate-500">{i + 1}</td>
-                    <td className="px-4 py-2.5 font-medium text-slate-800">{a.activityName}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-slate-700">{a.planned}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-emerald-600 font-bold">{a.achievedPlanned}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-red-500 font-bold">{a.pending}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-slate-500">{a.achievedUnplanned}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="bg-slate-100">
-                  <td colSpan={2} className="px-4 py-2.5 font-bold text-slate-700">Total</td>
-                  <td className="px-4 py-2.5 text-right font-bold font-mono text-slate-700">{cseMonthlyDDPStatus.planned}</td>
-                  <td className="px-4 py-2.5 text-right font-bold font-mono text-emerald-700">{cseMonthlyDDPStatus.achievedPlanned}</td>
-                  <td className="px-4 py-2.5 text-right font-bold font-mono text-rose-600">{cseMonthlyDDPStatus.pending}</td>
-                  <td className="px-4 py-2.5 text-right font-bold font-mono text-slate-500">{cseMonthlyDDPStatus.achievedUnplanned}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </section>
-
-
       {/* ================================================================
          SECTION 7: PERFORMANCE ANALYTICS (charts)
          ================================================================ */}
@@ -581,7 +492,7 @@ export default function DepartmentPage() {
                 { key: 'submitted', color: '#94a3b8', name: 'Submitted' },
                 { key: 'approved', color: '#10b981', name: 'Approved' },
               ]}
-              lines={[{ key: 'rejected', color: '#ef4444', name: 'Rejected' }]} />
+              lines={[]} />
           </ChartCard>
         </div>
 
@@ -766,38 +677,7 @@ export default function DepartmentPage() {
         )}
       </section>
 
-      {/* ================================================================
-         SECTION 9: DEPARTMENT FACULTY LEADERBOARD (real data)
-         ================================================================ */}
-      <section>
-        <SectionDivider icon={Trophy} title="Department Leaderboard" subtitle="Faculty ranked by weighted DDP points — real BIP data" />
-
-        <div className="flex items-center justify-end mb-4">
-          <Link href="/leaderboard" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-            View College-wide Leaderboard &rarr;
-          </Link>
-        </div>
-
-        {deptFacultyRankings.length > 0 ? (
-          <LeaderboardWidget
-            data={deptFacultyRankings.map(f => ({
-              rank: f.rank,
-              name: f.name,
-              department: realCode,
-              points: f.points,
-              activities: f.activities,
-              badge: f.badge,
-            }))}
-            title={`${realCode} — Top Faculty by Weighted Points`}
-            showDepartment={false}
-          />
-        ) : (
-          <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 text-center">
-            <Trophy className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-sm text-slate-400">No ranked faculty data for {realCode}</p>
-          </div>
-        )}
-      </section>
+      
     </div>
   )
 }

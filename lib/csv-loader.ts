@@ -61,6 +61,15 @@ export interface LeaderboardEntry {
   badge: 'gold' | 'silver' | 'bronze' | 'top10' | 'top20' | ''
 }
 
+/**
+ * Optional date-range filter. Both boundaries are inclusive.
+ * Dates come from HTML date inputs as YYYY-MM-DD strings.
+ */
+export interface DateFilter {
+  from?: Date
+  to?: Date
+}
+
 export interface AchievementData {
   deptStats: DeptActivityStats[]
   deptRankings: DeptActivityStats[]
@@ -299,10 +308,59 @@ const DEPT_FULL_NAMES: Record<string, string> = {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
+/*  DATE HELPERS                                                               */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/** Month-abbreviation → 1-based number map (used in patent CSVs). */
+const MON_MAP: Record<string, number> = {
+  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+}
+
+/**
+ * Parse a date string from any BIP CSV export into a UTC-midnight Date.
+ * Handles two formats found across the 8 CSV files:
+ *   DD-MM-YYYY  (Events, Online Courses, Paper Presentations, Guest Lectures)
+ *   DD-Mon-YYYY (Patents — e.g. "01-Apr-2024")
+ */
+function parseCSVDate(s: string): Date | null {
+  const parts = s.trim().split('-')
+  if (parts.length !== 3) return null
+  const [rawDd, rawMm, rawYyyy] = parts
+  const dd   = parseInt(rawDd, 10)
+  const yyyy = parseInt(rawYyyy, 10)
+  if (!dd || !yyyy || yyyy < 1900) return null
+
+  // Numeric month (DD-MM-YYYY)
+  const mmNum = parseInt(rawMm, 10)
+  const mm = isNaN(mmNum)
+    ? MON_MAP[rawMm.toLowerCase()] ?? null  // month abbreviation (DD-Mon-YYYY)
+    : mmNum
+
+  if (!mm || mm < 1 || mm > 12) return null
+  // Use UTC so comparisons are timezone-independent
+  return new Date(Date.UTC(yyyy, mm - 1, dd))
+}
+
+/**
+ * Returns true when the activity's date falls within the filter range.
+ * If the cell is blank or unparseable the record is always included so
+ * we never silently discard data due to missing dates.
+ */
+function inRange(dateStr: string, filter: DateFilter): boolean {
+  if (!filter.from && !filter.to) return true
+  const d = parseCSVDate(dateStr)
+  if (!d) return true // include if date can't be read
+  if (filter.from && d < filter.from) return false
+  if (filter.to   && d > filter.to)   return false
+  return true
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 /*  MAIN COMPUTATION                                                           */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-export async function computeAchievementData(): Promise<AchievementData> {
+export async function computeAchievementData(filter: DateFilter = {}): Promise<AchievementData> {
   const faculty = new Map<string, FacultyAccumulator>()
 
   /* ── 1. Patent Filed ─────────────────────────────────────────────────── */
@@ -313,6 +371,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const id = r[2]?.trim(); const name = r[1]?.trim()
     const dept = normalizeDept(r[3]?.trim() || '')
     if (!id || !name || !dept) continue
+    if (!inRange(r[10]?.trim() || '', filter)) continue // Date of Registration
     const pts = 10
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.patentFiled++
@@ -327,6 +386,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[4]?.trim() || '')
     const level = r[21]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[9]?.trim() || '', filter)) continue // Date of Publication
     const pts = scorePatentPublished(level)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.patentPublished++
@@ -341,6 +401,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[4]?.trim() || '')
     const level = r[21]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[9]?.trim() || '', filter)) continue // Date of Grant
     const pts = scorePatentGranted(level)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.patentGranted++
@@ -355,6 +416,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[3]?.trim() || '')
     const level = r[40]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[42]?.trim() || '', filter)) continue // Event Start Date
     const pts = scorePaper(level)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.paperPresentations++
@@ -369,6 +431,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[3]?.trim() || '')
     const level = r[11]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[13]?.trim() || '', filter)) continue // Start Date
     const pts = scoreGuestLecture(level)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.guestLectures++
@@ -383,6 +446,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[3]?.trim() || '')
     const courseType = r[9]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[16]?.trim() || '', filter)) continue // Start Date
     const pts = scoreOnlineCourse(courseType)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.onlineCourses++
@@ -397,6 +461,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[3]?.trim() || '')
     const eventType = r[8]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[15]?.trim() || '', filter)) continue // Start Date
     const pts = scoreEventsAttended(eventType)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.eventsAttended++
@@ -411,6 +476,7 @@ export async function computeAchievementData(): Promise<AchievementData> {
     const dept = normalizeDept(r[3]?.trim() || '')
     const level = r[57]?.trim() || ''
     if (!id || !name || !dept) continue
+    if (!inRange(r[54]?.trim() || '', filter)) continue // Start Date
     const pts = scoreEventsOrganized(level)
     const acc = getOrCreate(faculty, id, name, dept)
     acc.points += pts; acc.activities++; acc.eventsOrganized++

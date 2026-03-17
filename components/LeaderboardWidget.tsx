@@ -5,6 +5,7 @@ import { Crown, Medal, Trophy } from 'lucide-react'
 
 export interface LeaderboardEntry {
   rank: number
+  facultyId?: string
   name: string
   department: string
   points: number
@@ -60,6 +61,7 @@ export default function LeaderboardWidget({
               2
             </div>
             <h3 className="text-sm font-bold text-slate-900">{topThree[1].name}</h3>
+            {topThree[1].facultyId && <p className="text-[10px] text-slate-500 mt-0.5">ID: {topThree[1].facultyId}</p>}
             {showDepartment && <p className="text-xs text-slate-400 mt-0.5">{topThree[1].department}</p>}
             <p className="text-2xl font-bold text-slate-800 mt-2" style={MONO}>
               {topThree[1].points}
@@ -74,6 +76,7 @@ export default function LeaderboardWidget({
               1
             </div>
             <h3 className="text-sm font-bold text-slate-900">{topThree[0].name}</h3>
+            {topThree[0].facultyId && <p className="text-[10px] text-slate-500 mt-0.5">ID: {topThree[0].facultyId}</p>}
             {showDepartment && <p className="text-xs text-slate-400 mt-0.5">{topThree[0].department}</p>}
             <p className="text-3xl font-bold text-amber-700 mt-2" style={MONO}>
               {topThree[0].points}
@@ -87,6 +90,7 @@ export default function LeaderboardWidget({
               3
             </div>
             <h3 className="text-sm font-bold text-slate-900">{topThree[2].name}</h3>
+            {topThree[2].facultyId && <p className="text-[10px] text-slate-500 mt-0.5">ID: {topThree[2].facultyId}</p>}
             {showDepartment && <p className="text-xs text-slate-400 mt-0.5">{topThree[2].department}</p>}
             <p className="text-2xl font-bold text-slate-800 mt-2" style={MONO}>
               {topThree[2].points}
@@ -113,7 +117,7 @@ export default function LeaderboardWidget({
         {/* Rows */}
         <div className="divide-y divide-slate-50">
           {data.map((f) => (
-            <div key={f.rank} className={`grid ${showDepartment ? 'grid-cols-12' : 'grid-cols-8'} gap-4 items-center px-5 py-4 hover:bg-slate-50/50 transition-colors`}>
+            <div key={`${f.facultyId || f.name}-${f.rank}`} className={`grid ${showDepartment ? 'grid-cols-12' : 'grid-cols-8'} gap-4 items-center px-5 py-4 hover:bg-slate-50/50 transition-colors`}>
               <div className="col-span-1 flex justify-center">
                 <RankBadge rank={f.rank} />
               </div>
@@ -122,9 +126,14 @@ export default function LeaderboardWidget({
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
                     <BadgeIcon badge={f.badge} />
-                  </div>                    {f.activities !== undefined && (
+                  </div>
+                  {f.facultyId && (
+                    <p className="text-[10px] text-slate-500">ID: {f.facultyId}</p>
+                  )}
+                  {f.activities !== undefined && (
                       <p className="text-[10px] text-slate-400">{f.activities} activities</p>
-                    )}                </div>
+                    )}
+                </div>
               </div>
               {showDepartment && (
                 <div className="col-span-4">

@@ -9,9 +9,10 @@ import {
 import {
   ddpOverallIndexing, ddpAllActivities, ddpOverallTotals,
   ddpJournalDeptBreakdown, ddpMonthlyTrend,
-  ddpCategoryAchievementRates, ddpHeatmapData, getDDPInsights,
+  ddpCategoryAchievementRates, getDDPInsights,
 } from '@/lib/ddp-data'
 import { useRealData } from '@/hooks/useRealData'
+import DateRangePicker, { type DateRange } from '@/components/DateRangePicker'
 import {
   ChartCard, TrendAreaChart, ComparisonBarChart, DonutChart,
   MultiLineChart, ComposedBarLineChart, MultiRadarChart,
@@ -44,8 +45,9 @@ const HEATMAP_LEGEND = [
   { label: 'No Progress', cls: 'bg-slate-100 border border-slate-200' },
 ]
 
-const HEATMAP_COLS = ['Journals', 'Conferences', 'Patents', 'Placements', 'Funding', 'Guest Lect.', 'FDP', 'NPTEL', 'Events'] as const
-const HEATMAP_KEYS = ['journals', 'conferences', 'patents', 'placements', 'funding', 'guestLectures', 'fdp', 'nptel', 'events'] as const
+const HEATMAP_COLS = ['Paper Pres.', 'Online Courses', 'Guest Lect.', 'Events Org.', 'Events Att.', 'Patent Filed', 'Patent Pub.', 'Patent Grant'] as const
+const HEATMAP_KEYS = ['paperPresentations', 'onlineCourses', 'guestLectures', 'eventsOrganized', 'eventsAttended', 'patentFiled', 'patentPublished', 'patentGranted'] as const
+type HeatmapKey = typeof HEATMAP_KEYS[number]
 
 function heatBg(v: number) {
   if (v >= 80) return { bg: '#22c55e', text: '#fff' }
@@ -186,7 +188,11 @@ function InsightCard({ label, title, detail, gradient, borderColor, iconBg, icon
    ================================================================ */
 
 export default function CollegePage() {
-  const { collegeStats: realCollegeStats, deptRankings: realDeptRankings, activityBreakdown: realActivityBreakdown } = useRealData()
+  const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
+  const { collegeStats: realCollegeStats, deptRankings: realDeptRankings, activityBreakdown: realActivityBreakdown, loading: realLoading } = useRealData({
+    dateFrom: dateRange.from || undefined,
+    dateTo:   dateRange.to   || undefined,
+  })
   const [selectedActivity, setSelectedActivity] = useState(ACTIVITY_OPTIONS[0])
   const [showAllIndexing, setShowAllIndexing] = useState(false)
   const [showAllJournal, setShowAllJournal] = useState(false)
@@ -216,6 +222,29 @@ export default function CollegePage() {
           pending: Math.round(d.totalTarget * (selectedAct.proposedTarget / 238)) - Math.round(d.achieved * (selectedAct.proposedAchieved / 168)),
         }))
 
+  const activityMaxima = {
+    paperPresentations: Math.max(...realDeptRankings.map(d => d.paperPresentations), 1),
+    onlineCourses: Math.max(...realDeptRankings.map(d => d.onlineCourses), 1),
+    guestLectures: Math.max(...realDeptRankings.map(d => d.guestLectures), 1),
+    eventsOrganized: Math.max(...realDeptRankings.map(d => d.eventsOrganized), 1),
+    eventsAttended: Math.max(...realDeptRankings.map(d => d.eventsAttended), 1),
+    patentFiled: Math.max(...realDeptRankings.map(d => d.patentFiled), 1),
+    patentPublished: Math.max(...realDeptRankings.map(d => d.patentPublished), 1),
+    patentGranted: Math.max(...realDeptRankings.map(d => d.patentGranted), 1),
+  }
+
+  const realHeatmapData: Array<{ dept: string } & Record<HeatmapKey, number>> = realDeptRankings.map(d => ({
+    dept: d.shortCode,
+    paperPresentations: Math.round((d.paperPresentations / activityMaxima.paperPresentations) * 100),
+    onlineCourses: Math.round((d.onlineCourses / activityMaxima.onlineCourses) * 100),
+    guestLectures: Math.round((d.guestLectures / activityMaxima.guestLectures) * 100),
+    eventsOrganized: Math.round((d.eventsOrganized / activityMaxima.eventsOrganized) * 100),
+    eventsAttended: Math.round((d.eventsAttended / activityMaxima.eventsAttended) * 100),
+    patentFiled: Math.round((d.patentFiled / activityMaxima.patentFiled) * 100),
+    patentPublished: Math.round((d.patentPublished / activityMaxima.patentPublished) * 100),
+    patentGranted: Math.round((d.patentGranted / activityMaxima.patentGranted) * 100),
+  }))
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto space-y-6 sm:space-y-8">
 
@@ -229,8 +258,19 @@ export default function CollegePage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">DDP Indicator Dashboard</h1>
-            <p className="text-sm text-slate-500">Department Development Plan &mdash; 2025-06-01 to 2026-05-31</p>
           </div>
+        </div>
+
+        {/* Date range filter */}
+        <div className="flex items-center gap-3 mb-4 px-1">
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            label="Filter activities by date"
+          />
+          {realLoading && (
+            <span className="text-xs text-slate-400 animate-pulse">Loading…</span>
+          )}
         </div>
 
         {/* Top KPI numbers */}
@@ -268,10 +308,10 @@ export default function CollegePage() {
       <section>
         <SectionDivider icon={Building2} title="Institutional Overview" subtitle="Key institutional metrics at a glance" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Departments" value={deanStats.totalDepartments} icon={Building2} iconBg="bg-blue-50" iconColor="text-blue-600" />
-          <StatCard label="Total Faculty" value={deanStats.totalFaculty} subtitle="Across all departments" icon={Users} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
-          <StatCard label="Activities" value={deanStats.totalActivities} subtitle={`${deanStats.totalPending} pending`} icon={Activity} iconBg="bg-purple-50" iconColor="text-purple-600" />
-          <StatCard label="Research Output" value={deanStats.researchOutput} subtitle={`${deanStats.patentsFiled} patents filed`} icon={GraduationCap} iconBg="bg-amber-50" iconColor="text-amber-600" />
+          <StatCard label="Departments" value={realCollegeStats.totalDepartments} icon={Building2} iconBg="bg-blue-50" iconColor="text-blue-600" />
+          <StatCard label="Total Faculty" value={realCollegeStats.totalUniqueFaculty} subtitle="Across all departments" icon={Users} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+          <StatCard label="Activities" value={realCollegeStats.totalActivities.toLocaleString()} subtitle="Approved records" icon={Activity} iconBg="bg-purple-50" iconColor="text-purple-600" />
+          <StatCard label="Research Output" value={realCollegeStats.paperPresentations.toLocaleString()} subtitle={`${realCollegeStats.totalPatents} patents (F+P+G)`} icon={GraduationCap} iconBg="bg-amber-50" iconColor="text-amber-600" />
         </div>
       </section>
 
@@ -464,7 +504,7 @@ export default function CollegePage() {
         {/* Department x Activity Heatmap */}
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <h3 className="text-sm font-semibold text-slate-900 mb-1">Department &times; Activity Achievement Heatmap</h3>
-          <p className="text-xs text-slate-500 mb-3">Achievement percentage for each department across key DDP activities</p>
+          <p className="text-xs text-slate-500 mb-3">Real approved activity volume by department (normalized to percentage within each activity)</p>
           <div className="flex flex-wrap items-center gap-3 mb-4 text-[11px]">
             {HEATMAP_LEGEND.map(l => (
               <span key={l.label} className="flex items-center gap-1.5">
@@ -484,7 +524,7 @@ export default function CollegePage() {
                 </tr>
               </thead>
               <tbody>
-                {ddpHeatmapData.map(row => (
+                {realHeatmapData.map(row => (
                   <tr key={row.dept} className="border-b border-slate-100">
                     <td className="px-3 py-0 font-semibold text-slate-800 sticky left-0 bg-white z-10 border-r border-slate-100">
                       <div className="flex items-center gap-1.5 h-10">
@@ -493,7 +533,7 @@ export default function CollegePage() {
                       </div>
                     </td>
                     {HEATMAP_KEYS.map(k => {
-                      const v = row[k]
+                      const v = row[k as HeatmapKey]
                       const c = heatBg(v)
                       return (
                         <td key={k} className="p-0">
@@ -652,116 +692,6 @@ export default function CollegePage() {
           )}
         </div>
       </section>
-
-      {/* ================================================================
-         SECTION 8: DEPARTMENT SCORECARDS
-         ================================================================ */}
-      <section>
-        <SectionDivider icon={BarChart3} title="Department DDP Scorecards" subtitle="Quick health-check per department based on DDP indicators" />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ddpOverallIndexing.slice(0, 9).map((dept, idx) => {
-            const pct = Math.round((dept.achieved / dept.totalTarget) * 100)
-            return (
-              <div key={dept.shortName} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all duration-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white"
-                      style={{ background: DEPT_COLORS[dept.shortName] || '#94a3b8' }}>
-                      {dept.shortName}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-sm font-semibold text-slate-800">{dept.shortName}</p>
-                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                          idx === 0 ? 'bg-yellow-100 text-yellow-700' : idx < 3 ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-500'
-                        }`}>#{dept.rank}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 truncate max-w-[150px]">{dept.department}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  <div>
-                    <p className="text-[10px] text-slate-400">Target</p>
-                    <p className="text-sm font-bold text-slate-800 font-mono">{dept.totalTarget}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-400">Achieved</p>
-                    <p className="text-sm font-bold text-emerald-600 font-mono">{dept.achieved}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-slate-400">Index</p>
-                    <p className={`text-sm font-bold font-mono ${dept.normalizedBonus >= 0.4 ? 'text-emerald-600' : dept.normalizedBonus >= 0.3 ? 'text-yellow-600' : 'text-red-500'}`}>
-                      {dept.normalizedBonus.toFixed(3)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="w-full bg-slate-100 rounded-full h-2 mb-1.5">
-                  <div className="h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(pct, 100)}%`, background: progressColor(pct) }} />
-                </div>
-                <p className="text-[10px] text-slate-400 text-right">{pct}% achieved</p>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* ================================================================
-         SECTION 9: TRENDS & COMPARISONS
-         ================================================================ */}
-      <section>
-        <SectionDivider icon={TrendingUp} title="Trends & Comparisons" subtitle="Year-over-year performance, faculty growth, and capability analysis" />
-
-        {/* YoY + Activity Type Distribution */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          <ChartCard title="Year-over-Year Comparison" subtitle="Points trajectory vs last year" className="lg:col-span-2">
-            <MultiLineChart data={yearlyComparisonData} xKey="month"
-              lines={[
-                { key: 'thisYear', color: '#3b82f6', name: '2025-26' },
-                { key: 'lastYear', color: '#94a3b8', name: '2024-25', dashed: true },
-              ]}
-              height={260} />
-          </ChartCard>
-          <ChartCard title="Activity Types" subtitle="College-wide distribution">
-            <DonutChart data={collegeActivityTypeData.slice(0, 5).map(t => ({ name: t.type, value: t.count, color: t.color }))} innerRadius={50} outerRadius={75} showLabel={false} />
-            <div className="mt-3 space-y-1.5">
-              {collegeActivityTypeData.slice(0, 6).map(t => (
-                <div key={t.type} className="flex items-center gap-2 text-[11px] text-slate-600">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                  <span className="truncate flex-1">{t.type}</span>
-                  <span className="font-semibold">{t.count}</span>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
-        </div>
-
-        {/* Faculty Growth + Radar */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ChartCard title="Faculty Growth" subtitle="Active faculty & new joiners by semester">
-            <ComposedBarLineChart data={facultyGrowthData} xKey="semester"
-              bars={[{ key: 'new', color: '#6366f1', name: 'New Joiners' }]}
-              lines={[{ key: 'active', color: '#10b981', name: 'Active Faculty' }]}
-              height={280}
-            />
-          </ChartCard>
-          <ChartCard title="Department Capability Radar" subtitle="Performance across 5 dimensions">
-            <MultiRadarChart data={deptRadarData} nameKey="metric"
-              series={[
-                { key: 'CSE', color: '#3b82f6', name: 'CSE' },
-                { key: 'ECE', color: '#8b5cf6', name: 'ECE' },
-                { key: 'MECH', color: '#ef4444', name: 'MECH' },
-                { key: 'EEE', color: '#f59e0b', name: 'EEE' },
-              ]}
-              height={280} />
-          </ChartCard>
-        </div>
-      </section>
-
       {/* ================================================================
          SECTION 10: TOP PERFORMERS & MONTHLY ACTIVITY
          ================================================================ */}
