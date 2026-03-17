@@ -6,15 +6,19 @@ import { useAuthStore } from '@/lib/store'
 
 export default function Page() {
   const router = useRouter()
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard')
+      if (user?.roles?.includes('dean')) {
+        router.push('/college')
+      } else {
+        router.push('/dashboard')
+      }
     } else {
       router.push('/login')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, user, router])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
