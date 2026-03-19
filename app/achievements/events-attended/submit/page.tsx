@@ -476,7 +476,7 @@ export default function EventsAttendedForm() {
     if (!formData.outcome || formData.outcome === "Select Outcome") {
       newErrors.outcome = "Outcome is required";
     }
-    if (formData.outcome === "Others" && !formData.otherOutcome) {
+    if (formData.outcome === "Others" && !formData.otherOutcome) {``
       newErrors.otherOutcome = "Please specify outcome";
     }
     if (!formData.certificateProof) {
