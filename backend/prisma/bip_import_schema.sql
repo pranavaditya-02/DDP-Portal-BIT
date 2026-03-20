@@ -84,7 +84,7 @@ CREATE TABLE `ref_newsletter_category` (
 
 CREATE TABLE `departments` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
-  `dept_code` varchar(20) UNIQUE NOT NULL,
+  `dept_code` varchar(20) UNIQUE NOT NULL
   `dept_name` varchar(120) UNIQUE NOT NULL,
   `status` boolean NOT NULL DEFAULT true COMMENT 'true=active, false=inactive',
   `created_at` timestamp DEFAULT (CURRENT_TIMESTAMP),
@@ -1661,3 +1661,5 @@ ALTER TABLE `professional_body_membership` ADD FOREIGN KEY (`validity_type_id`) 
 ALTER TABLE `professional_body_membership` ADD FOREIGN KEY (`apex_document_id`) REFERENCES `documents` (`id`);
 
 ALTER TABLE `professional_body_membership` ADD FOREIGN KEY (`document_proof_id`) REFERENCES `documents` (`id`);
+
+
