@@ -18,6 +18,10 @@ const DEMO_ACCOUNTS = [
   { label: 'Admin', email: 'admin@bit.edu', name: 'Admin User', roles: ['maintenance'], departmentId: undefined, color: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' },
 ]
 
+function getPostLoginRoute(roles: string[] = []) {
+  return roles.includes('dean') ? '/college' : '/dashboard'
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const { setUser, setToken } = useAuthStore()
@@ -34,7 +38,7 @@ export default function LoginPage() {
       setToken(response.token)
       setUser(response.user)
       toast.success('Login successful!')
-      router.push('/dashboard')
+      router.push(getPostLoginRoute(response.user?.roles || []))
     } catch (error: any) {
       const message = error.response?.data?.error || 'Login failed'
       toast.error(message)
@@ -57,7 +61,7 @@ export default function LoginPage() {
       departmentId: account.departmentId,
     })
     toast.success(`Logged in as ${account.label} (Demo)`)
-    router.push('/dashboard')
+    router.push(getPostLoginRoute(account.roles))
   }
 
   return (
