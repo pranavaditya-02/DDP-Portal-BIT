@@ -70,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [achievementsExpanded, setAchievementsExpanded] = useState(false);
   const [owiExpanded, setOwiExpanded] = useState(false);
   const [rndExpanded, setRndExpanded] = useState(false);
+  const [studentExpanded, setStudentExpanded] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -192,6 +193,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "onlineCourse", label: "Online Courses", icon: Video },
     { id: "papers", label: "Paper Presentation", icon: FileText },
     { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
+  ];
+
+  const studentItems = [
+    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/students/activity-master" },
+    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/students/activity-logger" },
+    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/students/internship/tracker" },
+    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/students/internship/report" },
   ];
 
   const owiItems = [
@@ -420,6 +428,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         {item.label}
                       </span>
                     </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Student Achievements Section */}
+        {isFaculty() && !isDean() && !collapsed && (
+          <div>
+            <button
+              onClick={() => setStudentExpanded(!studentExpanded)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+            >
+              <div className="flex items-center gap-3">
+                <Clipboard className="w-5 h-5 flex-shrink-0" />
+                <span>Student Achievements</span>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
+              />
+            </button>
+            {studentExpanded && (
+              <div className="space-y-1 mt-2 ml-2">
+                {studentItems.map((item) => {
+                  const Icon = item.icon;
+                  const href = item.href;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                        pathname === href
+                          ? "bg-blue-600/20 text-blue-400"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1 text-left truncate">{item.label}</span>
+                    </Link>
                   );
                 })}
               </div>
