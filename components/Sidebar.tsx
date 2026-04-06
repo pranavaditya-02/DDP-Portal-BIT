@@ -475,48 +475,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
           </div>
-        )}
-        
-        {/* Student Achievements Section */}
-        {(isFaculty() || isVerification() || isHod() ) && !isDean() && !collapsed && (
-          <div>
-            <button
-              onClick={() => setStudentExpanded(!studentExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <Clipboard className="w-5 h-5 flex-shrink-0" />
-                <span>Student Achievements</span>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-            {studentExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {studentItems.map((item) => {
-                  const Icon = item.icon;
-                  const href = item.href;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                        pathname === href
-                          ? "bg-purple-100 text-purple-700"
-                          : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 flex-shrink-0 ${pathname === href ? "text-purple-700" : ""}`} />
-                      <span className="flex-1 text-left truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
 
                 {/* OWI (Outside World Interaction) Section */}
                 <div>
@@ -721,7 +679,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <LogOut className="w-5 h-5" />
           </button>
-        )}+35 
+        )}
       </div>
     </aside>
   );
