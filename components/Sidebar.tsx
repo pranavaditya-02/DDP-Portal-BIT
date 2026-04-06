@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { useRoles } from "@/hooks/useRoles";
+import { studentNavItems } from "@/lib/student-navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -64,12 +65,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  const { isFaculty, isHod, isDean, isVerification, isMaintenance } =
+  const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } =
     useRoles();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [activityExpanded, setActivityExpanded] = useState(false);
   const [achievementsExpanded, setAchievementsExpanded] = useState(false);
   const [owiExpanded, setOwiExpanded] = useState(false);
   const [rndExpanded, setRndExpanded] = useState(false);
+  const [studentExpanded, setStudentExpanded] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -86,8 +89,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Dashboard",
           href: "/dashboard",
           icon: LayoutDashboard,
-          show: !isDean(),
+          show: !isDean() && !isStudent(),
         },
+      ],
+    },
+    {
+      title: "Student",
+      items: [
+        {
+          label: "Dashboard",
+          href: "/student/dashboard",
+          icon: LayoutDashboard,
+          show: isStudent(),
+        },
+        {
+          label: "Overview",
+          href: "/student/overview",
+          icon: FileText,
+          show: isStudent(),
+        },
+        ...studentNavItems.map((item) => ({
+          label: item.label,
+          href: `/student/${item.slug}`,
+          icon: FileText,
+          show: isStudent(),
+        })),
       ],
     },
     {
@@ -194,6 +220,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
   ];
 
+  const studentItems = [
+    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
+    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
+    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
+    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
+  ];
+
   const owiItems = [
     { label: "COE", slug: "coe" },
     { label: "External VIP Visit", slug: "external-vip-visit" },
@@ -239,6 +272,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       faculty: "bg-purple-100 text-purple-700",
       hod: "bg-emerald-500/20 text-emerald-300",
       dean: "bg-violet-100 text-violet-700",
+      student: "bg-indigo-100 text-indigo-700",
       verification: "bg-amber-500/20 text-amber-300",
       maintenance: "bg-red-500/20 text-red-300",
     };
@@ -262,11 +296,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="flex items-center gap-3 overflow-hidden"
         >
           <div className="w-9 h-9 bg-[#7D53F6] rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-            <span className="text-white font-bold text-lg">F</span>
+            <span className="text-white font-bold text-lg">I</span>
           </div>
           {!collapsed && (
             <span className="font-semibold text-sm whitespace-nowrap animate-fade-in">
-              Faculty Tracker
+              Information Portal
             </span>
           )}
         </Link>
@@ -343,71 +377,87 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ))}
 
-        {/* Faculty Achievements Section */}
+        {/* Activity Section */}
         {isFaculty() && !isDean() && !collapsed && (
           <div>
             <button
-              onClick={() => setAchievementsExpanded(!achievementsExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
+              onClick={() => setActivityExpanded(!activityExpanded)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
             >
               <div className="flex items-center gap-3">
-                <Trophy className="w-5 h-5 flex-shrink-0" />
-                <span>Faculty Achievements</span>
+                <Clipboard className="w-5 h-5 flex-shrink-0" />
+                <span>Activity</span>
               </div>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${activityExpanded ? "rotate-180" : ""}`}
               />
             </button>
-            {achievementsExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {achievementItems.map((item) => {
-                  const Icon = item.icon;
-                  const href =
-                    item.id === "awards"
-                      ? "/achievements/notable-achievements-and-awards"
-                      : item.id === "econtent"
-                        ? "/achievements/e-content-developed"
-                        : item.id === "eventAttended"
-                          ? "/achievements/events-attended"
-                          : item.id === "eventOrganized"
-                            ? "/achievements/events-organized"
-                            : item.id === "examiner"
-                              ? "/achievements/external-examiner"
-                              : item.id === "guestLecture"
-                                ? "/achievements/guest-lecture-delivered"
-                                : item.id === "internationalVisit"
-                                  ? "/achievements/international-visit"
-                                  : item.id === "newsletter"
-                                    ? "/achievements/newsletter"
-                                    : item.id === "reviewer"
-                                      ? "/achievements/journal-reviewer"
-                                      : item.id === "onlineCourse"
-                                        ? "/achievements/online-course"
-                                        : item.id === "papers"
-                                          ? "/achievements/paper-presentation"
-                                          : item.id === "resourcePerson"
-                                            ? "/achievements/resource-person"
-                                            : null;
+            {activityExpanded && (
+              <div className="space-y-3 mt-2 ml-2">
+                {/* Faculty Achievements Section */}
+                <div>
+                  <button
+                    onClick={() => setAchievementsExpanded(!achievementsExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Trophy className="w-5 h-5 flex-shrink-0" />
+                      <span>Faculty Achievements</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {achievementsExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {achievementItems.map((item) => {
+                        const Icon = item.icon;
+                        const href =
+                          item.id === "awards"
+                            ? "/achievements/notable-achievements-and-awards"
+                            : item.id === "econtent"
+                              ? "/achievements/e-content-developed"
+                              : item.id === "eventAttended"
+                                ? "/achievements/events-attended"
+                                : item.id === "eventOrganized"
+                                  ? "/achievements/events-organized"
+                                  : item.id === "examiner"
+                                    ? "/achievements/external-examiner"
+                                    : item.id === "guestLecture"
+                                      ? "/achievements/guest-lecture-delivered"
+                                      : item.id === "internationalVisit"
+                                        ? "/achievements/international-visit"
+                                        : item.id === "newsletter"
+                                          ? "/achievements/newsletter"
+                                          : item.id === "reviewer"
+                                            ? "/achievements/journal-reviewer"
+                                            : item.id === "onlineCourse"
+                                              ? "/achievements/online-course"
+                                              : item.id === "papers"
+                                                ? "/achievements/paper-presentation"
+                                                : item.id === "resourcePerson"
+                                                  ? "/achievements/resource-person"
+                                                  : null;
 
-                  if (href) {
-                    return (
-                      <Link
-                        key={item.id}
-                        href={href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                          pathname === href
-                            ? "bg-purple-100 text-purple-700"
-                            : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="flex-1 text-left truncate">
-                          {item.label}
-                        </span>
-                      </Link>
-                    );
-                  }
+                        if (href) {
+                          return (
+                            <Link
+                              key={item.id}
+                              href={href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                                pathname === href
+                                  ? "bg-blue-600/20 text-blue-400"
+                                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                              }`}
+                            >
+                              <Icon className="w-4 h-4 flex-shrink-0" />
+                              <span className="flex-1 text-left truncate">
+                                {item.label}
+                              </span>
+                            </Link>
+                          );
+                        }
 
                   return (
                     <button
@@ -425,93 +475,131 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
           </div>
-        )}
 
-        {/* OWI (Outside World Interaction) Section */}
-        {isFaculty() && !isDean() && !collapsed && (
-          <div>
-            <button
-              onClick={() => setOwiExpanded(!owiExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 flex-shrink-0" />
-                <span>OWI</span>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-            {owiExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {owiItems.map((item) => {
-                  const href = `/faculty/outside-world/${item.slug}`;
-                  const active = isActive(href);
-                  return (
-                    <Link
-                      key={item.slug}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                        active
-                          ? "bg-purple-100 text-purple-700"
-                          : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                      }`}
-                    >
-                      {active && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#7D53F6] rounded-r-full" />
-                      )}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                {/* OWI (Outside World Interaction) Section */}
+                <div>
+                  <button
+                    onClick={() => setOwiExpanded(!owiExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 flex-shrink-0" />
+                      <span>OWI (Outside World Interaction)</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {owiExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {owiItems.map((item) => {
+                        const href = `/faculty/outside-world/${item.slug}`;
+                        const active = isActive(href);
+                        return (
+                          <Link
+                            key={item.slug}
+                            href={href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                              active
+                                ? "bg-blue-600/20 text-blue-400"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            {active && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                            )}
+                            <span className="flex-1 truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* R&D Section */}
+                <div>
+                  <button
+                    onClick={() => setRndExpanded(!rndExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 flex-shrink-0" />
+                      <span>R&amp;D</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${rndExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {rndExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {rndItems.map((item) => {
+                        const href = `/faculty/r-and-d/${item.slug}`;
+                        const active = isActive(href);
+                        return (
+                          <Link
+                            key={item.slug}
+                            href={href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                              active
+                                ? "bg-blue-600/20 text-blue-400"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            {active && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                            )}
+                            <span className="flex-1 truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
           </div>
         )}
-
-        {/* R&D Section */}
-        {isFaculty() && !isDean() && !collapsed && (
-          <div>
-            <button
-              onClick={() => setRndExpanded(!rndExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 flex-shrink-0" />
-                <span>R&amp;D</span>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${rndExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-            {rndExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {rndItems.map((item) => {
-                  const href = `/faculty/r-and-d/${item.slug}`;
-                  const active = isActive(href);
-                  return (
-                    <Link
-                      key={item.slug}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                        active
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                      }`}
-                    >
-                      {active && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
-                      )}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
+                {/* Student Achievements Section */}
+                <div>
+                  <button
+                    onClick={() => setStudentExpanded(!studentExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Clipboard className="w-5 h-5 flex-shrink-0" />
+                      <span>Student Achievements</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {studentExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {studentItems.map((item) => {
+                        const Icon = item.icon;
+                        const href = item.href;
+                        return (
+                          <Link
+                            key={item.id}
+                            href={href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                              pathname === href
+                                ? "bg-blue-600/20 text-blue-400"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            <Icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="flex-1 text-left truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-          </div>
-        )}
       </nav>
 
       {/* User Profile Section */}
