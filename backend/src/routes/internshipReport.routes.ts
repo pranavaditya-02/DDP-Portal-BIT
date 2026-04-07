@@ -15,6 +15,7 @@ const allowedFileTypes = new Set(
     .map((type) => type.trim().toLowerCase())
     .filter(Boolean)
 );
+const INTERNSHIP_FILENAME_REGEX = /^[0-9]{7}[A-Z]{2}[0-9]{3}-internship-[0-9]{8}\.[a-zA-Z0-9]+$/i;
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -34,9 +35,13 @@ const upload = multer({
     fileSize: Number(process.env.MAX_FILE_SIZE || 10 * 1024 * 1024),
   },
   fileFilter: (_req, file, cb) => {
-    const extension = path.extname(file.originalname).slice(1).toLowerCase();
+    const originalName = file.originalname.trim();
+    const extension = path.extname(originalName).slice(1).toLowerCase();
     if (!allowedFileTypes.has(extension)) {
       return cb(new Error(`File type not allowed: .${extension}`));
+    }
+    if (!INTERNSHIP_FILENAME_REGEX.test(originalName)) {
+      return cb(new Error('File name must be in the format RegNo-internship-YYYYMMDD, for example 7376251CS492-internship-04072026.pdf'));
     }
     return cb(null, true);
   },
@@ -86,9 +91,9 @@ router.post(
         return res.status(400).json({ error: 'All required documents must be uploaded.' });
       }
 
-      const fullDocumentProofUrl = `/uploads/${fullDocument.filename}`;
-      const originalCertificateUrl = `/uploads/${originalCertificate.filename}`;
-      const attestedCertificateUrl = `/uploads/${attestedCertificate.filename}`;
+      const fullDocumentProofUrl = `/uploads/students/internships/reports/${fullDocument.filename}`;
+      const originalCertificateUrl = `/uploads/students/internships/reports/${originalCertificate.filename}`;
+      const attestedCertificateUrl = `/uploads/students/internships/reports/${attestedCertificate.filename}`;
 
       const report = await internshipReportService.createReport({
         tracker_id: parsed.tracker_id,
@@ -146,15 +151,21 @@ router.patch(
   async (req, res) => {
     try {
       const { reportId } = req.params;
-      const { iqac_verification } = req.body;
+      const { iqac_verification, reject_reason } = req.body;
 
       const parsed = z.object({
         iqac_verification: z.enum(['Initiated', 'Approved', 'Rejected']),
-      }).parse({ iqac_verification });
+        reject_reason: z.string().trim().min(1).optional(),
+      }).parse({ iqac_verification, reject_reason });
+
+      if (parsed.iqac_verification === 'Rejected' && !parsed.reject_reason) {
+        return res.status(400).json({ error: 'Reject reason is required when rejecting a report.' });
+      }
 
       const report = await internshipReportService.updateIqacVerification(
         Number(reportId),
         parsed.iqac_verification,
+        parsed.reject_reason,
       );
 
       if (!report) {
@@ -192,6 +203,20 @@ router.get('/sdg-goals', async (_req, res) => {
   } catch (error) {
     logger.error('Error listing SDG goals:', error);
     return res.status(500).json({ error: 'Failed to list SDG goals' });
+  }
+});
+
+router.get('/:reportId(\\d+)', async (req, res) => {
+  try {
+    const reportId = Number(req.params.reportId);
+    const report = await internshipReportService.getReportById(reportId);
+    if (!report) {
+      return res.status(404).json({ error: 'Internship report not found' });
+    }
+    return res.json({ report });
+  } catch (error) {
+    logger.error('Error fetching internship report by ID:', error);
+    return res.status(500).json({ error: 'Failed to fetch internship report' });
   }
 });
 

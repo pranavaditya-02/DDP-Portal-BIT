@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
 
@@ -32,18 +33,60 @@ interface InternshipReportSummary {
   original_certificate_url?: string | null;
   attested_certificate_url?: string | null;
   iqac_verification: string;
+  reject_reason?: string | null;
   created_at: string;
 }
 
+type ReportSortKey =
+  | "student_name"
+  | "special_lab_name"
+  | "year_of_study"
+  | "sector"
+  | "sdg_goal_name"
+  | "iqac_verification"
+  | "created_at";
+
+type SortDirection = "asc" | "desc" | null;
+
 export default function Page() {
   const [reports, setReports] = useState<InternshipReportSummary[]>([]);
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [updatingReportId, setUpdatingReportId] = useState<number | null>(null);
   const [selectedReport, setSelectedReport] = useState<InternshipReportSummary | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [isConfirmingReject, setIsConfirmingReject] = useState(false);
+  const [sortKey, setSortKey] = useState<ReportSortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   const roleUtils = useRoles();
+
+  const computeSortIcon = (column: ReportSortKey) => {
+    if (sortKey !== column) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="ml-1 inline-block h-3 w-3 text-slate-400" />
+    ) : (
+      <ChevronDown className="ml-1 inline-block h-3 w-3 text-slate-400" />
+    );
+  };
+
+  const handleSort = (column: ReportSortKey) => {
+    if (sortKey !== column) {
+      setSortKey(column);
+      setSortDirection("asc");
+      return;
+    }
+
+    if (sortDirection === "asc") {
+      setSortDirection("desc");
+      return;
+    }
+
+    setSortKey(null);
+    setSortDirection(null);
+  };
   const isVerification = roleUtils.isVerification();
 
   useEffect(() => {
@@ -65,16 +108,50 @@ export default function Page() {
     loadReports();
   }, []);
 
-  const handleUpdateReportStatus = async (reportId: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected') => {
+  const filteredReports = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return reports;
+
+    return reports.filter((report) =>
+      report.id.toString().includes(normalized) ||
+      report.student_name?.toLowerCase().includes(normalized) ||
+      report.special_lab_name?.toLowerCase().includes(normalized) ||
+      report.sector.toLowerCase().includes(normalized) ||
+      report.sdg_goal_name?.toLowerCase().includes(normalized) ||
+      report.iqac_verification.toLowerCase().includes(normalized)
+    );
+  }, [query, reports]);
+
+  const sortedReports = useMemo(() => {
+    if (!sortKey || !sortDirection) return filteredReports;
+
+    return [...filteredReports].sort((a, b) => {
+      const getValue = (item: InternshipReportSummary) => {
+        if (sortKey === "year_of_study") return item.year_of_study;
+        return String(item[sortKey] ?? "").toLowerCase();
+      };
+
+      const valueA = getValue(a);
+      const valueB = getValue(b);
+
+      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredReports, sortKey, sortDirection]);
+
+  const handleUpdateReportStatus = async (reportId: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string) => {
     setError(null);
     setStatusMessage(null);
     setUpdatingReportId(reportId);
 
     try {
-      const response = await apiClient.updateInternshipReportIqac(reportId, iqac_verification);
-      setReports((prev) => prev.map((report) => report.id === reportId ? { ...report, iqac_verification } : report));
-      setSelectedReport((current) => current && current.id === reportId ? { ...current, iqac_verification } : current);
+      const response = await apiClient.updateInternshipReportIqac(reportId, iqac_verification, reject_reason);
+      setReports((prev) => prev.map((report) => report.id === reportId ? { ...report, iqac_verification, reject_reason: reject_reason ?? report.reject_reason } : report));
+      setSelectedReport((current) => current && current.id === reportId ? { ...current, iqac_verification, reject_reason: reject_reason ?? current.reject_reason } : current);
       setStatusMessage(response?.message || `Report ${iqac_verification.toLowerCase()} successfully.`);
+      setRejectReason('');
+      setIsConfirmingReject(false);
     } catch (updateError: any) {
       console.error('Failed to update report status:', updateError);
       setError(updateError?.response?.data?.error || 'Failed to update report status.');
@@ -100,6 +177,17 @@ export default function Page() {
       </div>
 
       <div className="mt-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:w-80">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by ID, student, lab, sector, SDG or IQAC"
+              className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
         {error && (
           <div className="rounded border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             {error}
@@ -115,35 +203,51 @@ export default function Page() {
           <table className="w-full text-sm border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Student</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Lab</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Year</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Sector</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">SDG Goal</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">IQAC</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Created</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">ID</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("student_name")}>Student{computeSortIcon("student_name")}</button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("special_lab_name")}>Lab{computeSortIcon("special_lab_name")}</button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("year_of_study")}>Year{computeSortIcon("year_of_study")}</button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("sector")}>Sector{computeSortIcon("sector")}</button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("sdg_goal_name")}>SDG Goal{computeSortIcon("sdg_goal_name")}</button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("iqac_verification")}>IQAC{computeSortIcon("iqac_verification")}</button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("created_at")}>Created{computeSortIcon("created_at")}</button>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                     Loading reports...
                   </td>
                 </tr>
-              ) : reports.length === 0 ? (
+              ) : sortedReports.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                     No internship reports found.
                   </td>
                 </tr>
               ) : (
-                reports.map((report) => (
+                sortedReports.map((report) => (
                   <tr
                     key={report.id}
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                     onClick={() => setSelectedReport(report)}
                   >
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.id}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.student_name || 'Unknown'}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.special_lab_name || 'N/A'}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.year_of_study}</td>
@@ -160,7 +264,7 @@ export default function Page() {
       </div>
 
       {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4" onClick={() => setSelectedReport(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4" onClick={() => { setSelectedReport(null); setIsConfirmingReject(false); setRejectReason(''); }}>
           <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
               <div>
@@ -169,7 +273,7 @@ export default function Page() {
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedReport(null)}
+                onClick={() => { setSelectedReport(null); setIsConfirmingReject(false); setRejectReason(''); }}
                 className="rounded-full border border-slate-200 bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200"
               >
                 Close
@@ -178,6 +282,10 @@ export default function Page() {
 
             <div className="space-y-4 px-6 py-6 overflow-y-auto max-h-[70vh]">
               <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Report ID</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedReport.id}</div>
+                </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
                   <div className="mt-1 font-medium text-slate-900">{selectedReport.student_name || 'Unknown'}</div>
@@ -208,6 +316,13 @@ export default function Page() {
                   </div>
                 </div>
               </div>
+
+              {selectedReport.reject_reason ? (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                  <div className="text-xs uppercase tracking-wide text-rose-600">Reject reason</div>
+                  <div className="mt-1 text-sm text-rose-800">{selectedReport.reject_reason}</div>
+                </div>
+              ) : null}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -338,24 +453,59 @@ export default function Page() {
                 </div>
               </div>
 
-              {isVerification && selectedReport.iqac_verification === 'Initiated' && (
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateReportStatus(selectedReport.id, 'Rejected')}
-                    disabled={updatingReportId === selectedReport.id}
-                    className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {updatingReportId === selectedReport.id ? 'Processing...' : 'Reject'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateReportStatus(selectedReport.id, 'Approved')}
-                    disabled={updatingReportId === selectedReport.id}
-                    className="inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {updatingReportId === selectedReport.id ? 'Processing...' : 'Approve'}
-                  </button>
+              {isVerification && (
+                <div className="space-y-4">
+                  {isConfirmingReject ? (
+                    <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-rose-700">Reject reason</label>
+                      <textarea
+                        rows={4}
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className="w-full rounded-xl border border-rose-200 bg-white p-3 text-sm text-slate-700 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-100"
+                        placeholder="Please explain why this internship report is rejected."
+                      />
+                      <div className="flex flex-wrap gap-3 sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsConfirmingReject(false);
+                            setRejectReason('');
+                          }}
+                          className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateReportStatus(selectedReport.id, 'Rejected', rejectReason.trim())}
+                          disabled={updatingReportId === selectedReport.id || !rejectReason.trim()}
+                          className="inline-flex justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {updatingReportId === selectedReport.id ? 'Processing...' : 'Confirm Reject'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setIsConfirmingReject(true)}
+                        disabled={updatingReportId === selectedReport.id}
+                        className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {updatingReportId === selectedReport.id ? 'Processing...' : 'Reject'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateReportStatus(selectedReport.id, 'Approved')}
+                        disabled={updatingReportId === selectedReport.id}
+                        className="inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {updatingReportId === selectedReport.id ? 'Processing...' : 'Approve'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

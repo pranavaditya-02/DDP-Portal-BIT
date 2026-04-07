@@ -59,6 +59,7 @@ const CREATE_REPORT_SQL = `CREATE TABLE IF NOT EXISTS internship_reports (
   original_certificate_url VARCHAR(255) NOT NULL,
   attested_certificate_url VARCHAR(255) NOT NULL,
   iqac_verification ENUM('Initiated', 'Approved', 'Rejected') DEFAULT 'Initiated',
+  reject_reason VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_tracker FOREIGN KEY (tracker_id) REFERENCES internship_tracker(id),
@@ -84,6 +85,12 @@ async function ensureTablesExist(): Promise<void> {
     await pool.query(`ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL UNIQUE AFTER id`);
   } catch (error) {
     logger.warn('Could not add internship_reports.tracker_id column, it may already exist or require manual migration.', error);
+  }
+
+  try {
+    await pool.query(`ALTER TABLE internship_reports ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification`);
+  } catch (error) {
+    logger.warn('Could not add internship_reports.reject_reason column, it may already exist or require manual migration.', error);
   }
 
   try {
@@ -135,6 +142,7 @@ export interface InternshipReportCreateInput {
   original_certificate_url: string;
   attested_certificate_url: string;
   iqac_verification?: 'Initiated' | 'Approved' | 'Rejected';
+  reject_reason?: string | null;
 }
 
 export interface InternshipReportRecord {
@@ -167,6 +175,7 @@ export interface InternshipReportRecord {
   original_certificate_url: string;
   attested_certificate_url: string;
   iqac_verification: 'Initiated' | 'Approved' | 'Rejected';
+  reject_reason?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -212,8 +221,9 @@ export class InternshipReportService {
         full_document_proof_url,
         original_certificate_url,
         attested_certificate_url,
-        iqac_verification
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        iqac_verification,
+        reject_reason
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         data.tracker_id,
         data.student_id,
@@ -240,6 +250,7 @@ export class InternshipReportService {
         data.original_certificate_url,
         data.attested_certificate_url,
         data.iqac_verification ?? 'Initiated',
+        data.reject_reason ?? null,
       ],
     );
 
@@ -251,11 +262,15 @@ export class InternshipReportService {
     return report;
   }
 
-  async updateIqacVerification(id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected'): Promise<InternshipReportRecord | null> {
+  async updateIqacVerification(id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string | null): Promise<InternshipReportRecord | null> {
     await ensureTablesExist();
 
     const pool = getMysqlPool();
-    await pool.query('UPDATE internship_reports SET iqac_verification = ? WHERE id = ?', [iqac_verification, id]);
+    if (iqac_verification === 'Rejected') {
+      await pool.query('UPDATE internship_reports SET iqac_verification = ?, reject_reason = ? WHERE id = ?', [iqac_verification, reject_reason ?? null, id]);
+    } else {
+      await pool.query('UPDATE internship_reports SET iqac_verification = ?, reject_reason = NULL WHERE id = ?', [iqac_verification, id]);
+    }
     return this.getReportById(id);
   }
 
@@ -294,6 +309,7 @@ export class InternshipReportService {
         ir.original_certificate_url,
         ir.attested_certificate_url,
         ir.iqac_verification,
+        ir.reject_reason,
         ir.created_at,
         ir.updated_at
       FROM internship_reports ir
@@ -342,6 +358,7 @@ export class InternshipReportService {
         ir.original_certificate_url,
         ir.attested_certificate_url,
         ir.iqac_verification,
+        ir.reject_reason,
         ir.created_at,
         ir.updated_at
       FROM internship_reports ir

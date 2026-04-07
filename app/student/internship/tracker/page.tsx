@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, PlusCircle, Filter, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, PlusCircle, Filter, ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
 
@@ -16,6 +16,7 @@ interface InternshipTracker {
   aim_objectives_link?: string | null;
   offer_letter_link?: string | null;
   iqac_verification: 'initiated' | 'approved' | 'declined';
+  reject_reason?: string | null;
 }
 
 const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api$/, '');
@@ -35,6 +36,9 @@ const getPeriodLabel = (startDate: string, endDate: string) => {
   return label;
 };
 
+type TrackerSortKey = "student_name" | "industry_name" | "start_date";
+type SortDirection = "asc" | "desc" | null;
+
 export default function Page() {
   const [trackers, setTrackers] = useState<InternshipTracker[]>([]);
   const [query, setQuery] = useState("");
@@ -45,12 +49,41 @@ export default function Page() {
   const [filterEndDateTo, setFilterEndDateTo] = useState("");
   const [filterOfferLetter, setFilterOfferLetter] = useState("");
   const [filterIqacStatus, setFilterIqacStatus] = useState("");
+  const [sortKey, setSortKey] = useState<TrackerSortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [perPage, setPerPage] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+
+  const computeSortIcon = (column: TrackerSortKey) => {
+    if (sortKey !== column) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="ml-1 inline-block h-3 w-3 text-slate-400" />
+    ) : (
+      <ChevronDown className="ml-1 inline-block h-3 w-3 text-slate-400" />
+    );
+  };
+
+  const handleSort = (column: TrackerSortKey) => {
+    if (sortKey !== column) {
+      setSortKey(column);
+      setSortDirection("asc");
+      return;
+    }
+
+    if (sortDirection === "asc") {
+      setSortDirection("desc");
+      return;
+    }
+
+    setSortKey(null);
+    setSortDirection(null);
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [selectedTracker, setSelectedTracker] = useState<InternshipTracker | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [isConfirmingReject, setIsConfirmingReject] = useState(false);
   const [sectionOpen, setSectionOpen] = useState<{
     initiated: boolean;
     approved: boolean;
@@ -132,6 +165,7 @@ export default function Page() {
 
     if (normalized) {
       data = data.filter((item) =>
+        item.id.toString().includes(normalized) ||
         item.student_name.toLowerCase().includes(normalized) ||
         item.student_roll_no?.toLowerCase().includes(normalized) ||
         item.industry_name.toLowerCase().includes(normalized) ||
@@ -171,8 +205,24 @@ export default function Page() {
       data = data.filter((item) => item.iqac_verification === filterIqacStatus);
     }
 
-    return data;
-  }, [query, trackers, filterIndustry, filterStartDateFrom, filterStartDateTo, filterEndDateFrom, filterEndDateTo, filterOfferLetter, filterIqacStatus]);
+    if (!sortKey || !sortDirection) {
+      return data;
+    }
+
+    return [...data].sort((a, b) => {
+      const getValue = (item: InternshipTracker) => {
+        if (sortKey === "start_date") return item.start_date;
+        return String(item[sortKey] ?? "").toLowerCase();
+      };
+
+      const valueA = getValue(a);
+      const valueB = getValue(b);
+
+      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [query, trackers, filterIndustry, filterStartDateFrom, filterStartDateTo, filterEndDateFrom, filterEndDateTo, filterOfferLetter, filterIqacStatus, sortKey, sortDirection]);
 
   const visibleTrackers = useMemo(
     () => filteredTrackers.slice(0, perPage),
@@ -192,15 +242,19 @@ export default function Page() {
   const handleUpdateStatus = async (
     tracker: InternshipTracker,
     iqac_verification: InternshipTracker['iqac_verification'],
+    reject_reason?: string,
   ) => {
     try {
+      setError(null);
       setUpdatingId(tracker.id);
-      const response = await apiClient.updateInternshipTrackerIqac(tracker.id, iqac_verification);
+      const response = await apiClient.updateInternshipTrackerIqac(tracker.id, iqac_verification, reject_reason);
       const updatedTracker = response?.tracker;
       if (updatedTracker) {
         setTrackers((prev) => prev.map((item) => item.id === tracker.id ? updatedTracker : item));
         setSelectedTracker(updatedTracker);
       }
+      setRejectReason('');
+      setIsConfirmingReject(false);
     } catch (updateError: any) {
       console.error('Failed to update IQAC status:', updateError);
       setError(normalizeErrorMessage(updateError) || 'Failed to update IQAC status.');
@@ -427,9 +481,15 @@ export default function Page() {
                         <table className="min-w-full divide-y divide-slate-200 text-sm">
                           <thead className="bg-slate-50 text-slate-700">
                             <tr>
-                              <th className="px-4 py-3 text-left">Student</th>
-                              <th className="px-4 py-3 text-left">Industry</th>
-                              <th className="px-4 py-3 text-left">Period</th>
+                              <th className="px-4 py-3 text-left">
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("student_name")}>ID{computeSortIcon("student_name")}</button>
+                              </th>
+                              <th className="px-4 py-3 text-left">
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("industry_name")}>Industry{computeSortIcon("industry_name")}</button>
+                              </th>
+                              <th className="px-4 py-3 text-left">
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("start_date")}>Period{computeSortIcon("start_date")}</button>
+                              </th>
                               <th className="px-4 py-3 text-left">Documents</th>
                             </tr>
                           </thead>
@@ -440,6 +500,7 @@ export default function Page() {
                                 className="hover:bg-slate-50 cursor-pointer"
                                 onClick={() => setSelectedTracker(tracker)}
                               >
+                                <td className="px-4 py-3 text-slate-700">{tracker.id}</td>
                                 <td className="px-4 py-3">
                                   <div className="font-medium text-slate-900">{tracker.student_name}</div>
                                   <div className="text-xs text-slate-500">{tracker.student_roll_no}</div>
@@ -457,7 +518,7 @@ export default function Page() {
                                       rel="noreferrer"
                                       className="text-blue-600 hover:underline"
                                     >
-                                      Aim/Objective
+                                      Aim/Objective&nbsp;&nbsp;
                                     </a>
                                   ) : (
                                     <span className="text-slate-400">No file</span>
@@ -488,7 +549,7 @@ export default function Page() {
       </div>
 
       {selectedTracker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4" onClick={() => setSelectedTracker(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4" onClick={() => { setSelectedTracker(null); setIsConfirmingReject(false); setRejectReason(''); }}>
           <div className="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
               <div>
@@ -497,7 +558,7 @@ export default function Page() {
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedTracker(null)}
+                onClick={() => { setSelectedTracker(null); setIsConfirmingReject(false); setRejectReason(''); }}
                 className="rounded-full border border-slate-200 bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200"
               >
                 Close
@@ -505,6 +566,10 @@ export default function Page() {
             </div>
             <div className="space-y-4 px-6 py-6">
               <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Request ID</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.id}</div>
+                </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
                   <div className="mt-1 font-medium text-slate-900">{selectedTracker.student_name}</div>
@@ -526,6 +591,12 @@ export default function Page() {
                   <div className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-medium capitalize text-slate-700">
                     {selectedTracker.iqac_verification}
                   </div>
+                  {selectedTracker.reject_reason ? (
+                    <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 p-3">
+                      <div className="text-xs uppercase tracking-wide text-rose-600">Reject reason</div>
+                      <div className="mt-1 text-sm text-rose-800">{selectedTracker.reject_reason}</div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -562,24 +633,59 @@ export default function Page() {
                 </div>
               </div>
 
-              {isVerification && selectedTracker.iqac_verification === 'initiated' && (
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus(selectedTracker, 'declined')}
-                    disabled={updatingId === selectedTracker.id}
-                    className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {updatingId === selectedTracker.id ? 'Processing...' : 'Reject'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus(selectedTracker, 'approved')}
-                    disabled={updatingId === selectedTracker.id}
-                    className="inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {updatingId === selectedTracker.id ? 'Processing...' : 'Approve'}
-                  </button>
+              {isVerification && (
+                <div className="space-y-4">
+                  {isConfirmingReject ? (
+                    <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-rose-700">Reject reason</label>
+                      <textarea
+                        rows={4}
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className="w-full rounded-xl border border-rose-200 bg-white p-3 text-sm text-slate-700 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-100"
+                        placeholder="Please explain why this internship tracker is rejected."
+                      />
+                      <div className="flex flex-wrap gap-3 sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsConfirmingReject(false);
+                            setRejectReason('');
+                          }}
+                          className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(selectedTracker, 'declined', rejectReason.trim())}
+                          disabled={updatingId === selectedTracker.id || !rejectReason.trim()}
+                          className="inline-flex justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {updatingId === selectedTracker.id ? 'Processing...' : 'Confirm Reject'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setIsConfirmingReject(true)}
+                        disabled={updatingId === selectedTracker.id}
+                        className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {updatingId === selectedTracker.id ? 'Processing...' : 'Reject'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStatus(selectedTracker, 'approved')}
+                        disabled={updatingId === selectedTracker.id}
+                        className="inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {updatingId === selectedTracker.id ? 'Processing...' : 'Approve'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

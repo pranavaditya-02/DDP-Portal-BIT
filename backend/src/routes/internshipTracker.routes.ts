@@ -15,6 +15,9 @@ const allowedFileTypes = new Set(
     .map((type) => type.trim().toLowerCase())
     .filter(Boolean)
 );
+const INTERNSHIP_FILENAME_REGEX = /^[0-9]{7}[A-Z]{2}[0-9]{3}-(?:internship-[0-9]{8}|ITI-[0-9]{2}\.[0-9]{2}\.[0-9]{4})\.[a-zA-Z0-9]+$/i;
+const INTERNSHIP_FILENAME_ERROR =
+  'File name must be in the expected format, for example 7376251CS492-internship-04072026.pdf or 201CS111-ITI-08.06.2025.pdf.';
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -34,13 +37,31 @@ const upload = multer({
     fileSize: Number(process.env.MAX_FILE_SIZE || 5 * 1024 * 1024),
   },
   fileFilter: (_req, file, cb) => {
-    const extension = path.extname(file.originalname).slice(1).toLowerCase();
+    const originalName = file.originalname.trim();
+    const extension = path.extname(originalName).slice(1).toLowerCase();
     if (!allowedFileTypes.has(extension)) {
       return cb(new Error(`File type not allowed: .${extension}`));
+    }
+    if (!INTERNSHIP_FILENAME_REGEX.test(originalName)) {
+      return cb(new Error(INTERNSHIP_FILENAME_ERROR));
     }
     return cb(null, true);
   },
 });
+
+const uploadHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  upload.fields([
+    { name: 'aimObjectiveFile', maxCount: 1 },
+    { name: 'offerLetterFile', maxCount: 1 },
+  ])(req, res, (err) => {
+    if (err) {
+      logger.warn('File upload validation failed:', err);
+      const message = err instanceof Error ? err.message : 'Invalid file upload';
+      return res.status(400).json({ error: message });
+    }
+    next();
+  });
+};
 
 const internshipTrackerSchema = z.object({
   student_id: z.preprocess((value) => Number(value), z.number().int().positive()),
@@ -58,13 +79,7 @@ const internshipTrackerSchema = z.object({
     .default('initiated'),
 });
 
-router.post(
-  '/',
-  upload.fields([
-    { name: 'aimObjectiveFile', maxCount: 1 },
-    { name: 'offerLetterFile', maxCount: 1 },
-  ]),
-  async (req, res) => {
+router.post('/', uploadHandler, async (req, res) => {
     try {
       const parsed = internshipTrackerSchema.parse(req.body);
 
@@ -72,8 +87,8 @@ router.post(
       const aimFile = files?.aimObjectiveFile?.[0] ?? null;
       const offerFile = files?.offerLetterFile?.[0] ?? null;
 
-      const aimObjectivesLink = aimFile ? `/uploads/${aimFile.filename}` : null;
-      const offerLetterLink = offerFile ? `/uploads/${offerFile.filename}` : null;
+      const aimObjectivesLink = aimFile ? `/uploads/students/internships/tracker/${aimFile.filename}` : null;
+      const offerLetterLink = offerFile ? `/uploads/students/internships/tracker/${offerFile.filename}` : null;
 
       const tracker = await internshipTrackerService.createTracker({
         student_id: parsed.student_id,
@@ -104,15 +119,21 @@ router.patch(
   async (req, res) => {
     try {
       const { trackerId } = req.params;
-      const { iqac_verification } = req.body;
+      const { iqac_verification, reject_reason } = req.body;
 
       const parsed = z.object({
         iqac_verification: z.enum(['initiated', 'approved', 'declined']),
-      }).parse({ iqac_verification });
+        reject_reason: z.string().trim().min(1).optional(),
+      }).parse({ iqac_verification, reject_reason });
+
+      if (parsed.iqac_verification === 'declined' && !parsed.reject_reason) {
+        return res.status(400).json({ error: 'Reject reason is required when declining a tracker.' });
+      }
 
       const tracker = await internshipTrackerService.updateIqacVerification(
         Number(trackerId),
-        parsed.iqac_verification
+        parsed.iqac_verification,
+        parsed.reject_reason,
       );
 
       if (!tracker) {
@@ -155,6 +176,20 @@ router.get('/student/:studentId/approved', async (req, res) => {
   } catch (error) {
     logger.error('Error listing approved student trackers:', error);
     return res.status(500).json({ error: 'Failed to list approved trackers' });
+  }
+});
+
+router.get('/:trackerId(\\d+)', async (req, res) => {
+  try {
+    const trackerId = Number(req.params.trackerId);
+    const tracker = await internshipTrackerService.getTrackerById(trackerId);
+    if (!tracker) {
+      return res.status(404).json({ error: 'Internship tracker not found' });
+    }
+    return res.json({ tracker });
+  } catch (error) {
+    logger.error('Error fetching internship tracker by ID:', error);
+    return res.status(500).json({ error: 'Failed to fetch internship tracker' });
   }
 });
 

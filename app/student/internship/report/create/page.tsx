@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api";
-import { useAuthStore } from "@/lib/store";
 
 interface StudentOption {
   id: number;
@@ -66,10 +65,9 @@ const CLAIM_TYPE_OPTIONS = [
 
 export default function InternshipReportCreatePage() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
 
   const [students, setStudents] = useState<StudentOption[]>([]);
-  const [studentQuery, setStudentQuery] = useState<string>(user?.name ?? "");
+  const [studentQuery, setStudentQuery] = useState<string>("");
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
   const [trackers, setTrackers] = useState<InternshipTrackerOption[]>([]);
@@ -375,7 +373,7 @@ export default function InternshipReportCreatePage() {
               <option value="">{trackersLoading ? 'Loading approved trackers...' : 'Choose an approved tracker'}</option>
               {trackers.map((tracker) => (
                 <option key={tracker.id} value={tracker.id}>
-                  {`#${tracker.id} ${tracker.industry_name || 'Tracker'} (${new Date(tracker.start_date).toLocaleDateString()} → ${new Date(tracker.end_date).toLocaleDateString()})`}
+                  {`${tracker.id} ${tracker.industry_name || 'Tracker'} (${new Date(tracker.start_date).toLocaleDateString()} → ${new Date(tracker.end_date).toLocaleDateString()})`}
                 </option>
               ))}
             </select>

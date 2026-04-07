@@ -437,6 +437,7 @@ export default function CreateTrackerPage() {
             />
             <p className="text-xs text-red-500">
               * Please find the Aim & Objective format{" "}
+
               <a
                 href="https://docs.google.com/document/d/1ki-95XbVVzKdh-TXJEOsRh0OEpEZXmkQ/edit"
                 target="_blank"
@@ -445,6 +446,7 @@ export default function CreateTrackerPage() {
               >
                 here
               </a>
+              
             </p>
 
             <label className="block text-sm font-medium text-slate-700">
@@ -458,8 +460,8 @@ export default function CreateTrackerPage() {
               className="input-base"
             />
             <p className="text-xs text-red-500">
-              * Please specify the Proof name only in the following format
-              201CS111-ITI-08.06.2025
+              * File names should follow the expected student format, for example
+              7376251CS492-internship-04072026.pdf or 201CS111-ITI-08.06.2025.pdf.
             </p>
           </div>
 

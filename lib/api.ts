@@ -240,13 +240,20 @@ export const apiClient = {
     return response.data;
   },
 
+  getInternshipTrackerById: async (id: number) => {
+    const response = await client.get(`/internship-tracker/${id}`);
+    return response.data;
+  },
+
   getApprovedTrackersByStudent: async (studentId: number) => {
     const response = await client.get(`/internship-tracker/student/${studentId}/approved`);
     return response.data;
   },
 
-  updateInternshipTrackerIqac: async (id: number, iqac_verification: 'initiated' | 'approved' | 'declined') => {
-    const response = await client.patch(`/internship-tracker/${id}/iqac`, { iqac_verification });
+  updateInternshipTrackerIqac: async (id: number, iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string) => {
+    const payload: Record<string, unknown> = { iqac_verification };
+    if (reject_reason) payload.reject_reason = reject_reason;
+    const response = await client.patch(`/internship-tracker/${id}/iqac`, payload);
     return response.data;
   },
 
@@ -259,13 +266,20 @@ export const apiClient = {
     return response.data;
   },
 
-  updateInternshipReportIqac: async (id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected') => {
-    const response = await client.patch(`/internship-report/${id}/iqac`, { iqac_verification });
+  updateInternshipReportIqac: async (id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string) => {
+    const payload: Record<string, unknown> = { iqac_verification };
+    if (reject_reason) payload.reject_reason = reject_reason;
+    const response = await client.patch(`/internship-report/${id}/iqac`, payload);
     return response.data;
   },
 
   getInternshipReports: async () => {
     const response = await client.get('/internship-report');
+    return response.data;
+  },
+
+  getInternshipReportById: async (id: number) => {
+    const response = await client.get(`/internship-report/${id}`);
     return response.data;
   },
 
