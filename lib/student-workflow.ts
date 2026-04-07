@@ -35,7 +35,7 @@ export const studentWorkflowStages: WorkflowStage[] = [
   },
   {
     title: 'Verification Panel',
-    route: '/verification227',
+    route: '/verification-panel',
     summary: 'Approve or reject submissions after checking evidence and eligibility.',
     owner: 'Verifier',
     accent: 'from-amber-600 to-orange-700',
@@ -81,7 +81,7 @@ export const activityLoggerRecords: WorkflowRecord[] = [
     subtitle: 'Pending review from verification desk',
     status: 'pending',
     meta: 'Waiting on proof document and seat validation',
-    route: '/verification227',
+    route: '/verification-panel',
   },
   {
     id: 'AL-103',
@@ -89,7 +89,7 @@ export const activityLoggerRecords: WorkflowRecord[] = [
     subtitle: 'Rejected due to incomplete proof packet',
     status: 'rejected',
     meta: 'Rejected with resubmission notes attached',
-    route: '/verification227',
+    route: '/verification-panel',
   },
 ]
 
@@ -108,7 +108,7 @@ export const registrationRecords: WorkflowRecord[] = [
     subtitle: 'Registration submitted',
     status: 'pending',
     meta: 'Awaiting verification before logger visibility',
-    route: '/verification227',
+    route: '/verification-panel',
   },
   {
     id: 'RG-203',

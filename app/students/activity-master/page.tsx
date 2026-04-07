@@ -310,19 +310,30 @@ export default function Page() {
     try {
       setRegistrationSubmitting(true)
       setErrorMessage(null)
-      await apiClient.registerForEvent({
-        eventId: selectedEvent.id,
-        studentName: registrationForm.student,
-        studentDepartment: null,
-        eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
-        activityEvent: registrationForm.activityEvent,
-        fromDate: registrationForm.fromDate || null,
-        toDate: registrationForm.toDate || null,
-        modeOfParticipation: registrationForm.modeOfParticipation || null,
-        iqacVerification: registrationForm.iqacVerification || 'Initiated',
-      })
+      const token = useAuthStore.getState().token
+      const isDemoSession = !token || token.startsWith('demo-')
+
+      if (!isDemoSession) {
+        await apiClient.registerForEvent({
+          eventId: selectedEvent.id,
+          studentName: registrationForm.student,
+          studentDepartment: null,
+          eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
+          activityEvent: registrationForm.activityEvent,
+          fromDate: registrationForm.fromDate || null,
+          toDate: registrationForm.toDate || null,
+          modeOfParticipation: registrationForm.modeOfParticipation || null,
+          iqacVerification: registrationForm.iqacVerification || 'Initiated',
+        })
+      }
 
       setRegistrationSubmitted(true)
+
+      const updatedEvent = {
+        ...selectedEvent,
+        appliedCount: selectedEvent.appliedCount + 1,
+        balanceCount: Math.max(0, selectedEvent.balanceCount - 1),
+      }
 
       setEvents((prev) =>
         prev.map((item) =>
@@ -335,6 +346,8 @@ export default function Page() {
             : item,
         ),
       )
+
+      setSelectedEvent(updatedEvent)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to register for the event.'
       setErrorMessage(message)

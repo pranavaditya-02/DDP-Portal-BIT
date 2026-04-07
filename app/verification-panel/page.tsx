@@ -1,0 +1,1 @@
+export { default } from '../students/verification-panel/page'   

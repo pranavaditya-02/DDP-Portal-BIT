@@ -224,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         },
         {
           label: "Verification Panel",
-          href: "/verification227",
+          href: "/verification-panel",
           icon: ShieldCheck,
           show: isVerification(),
         },
