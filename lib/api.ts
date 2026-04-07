@@ -58,7 +58,29 @@ export interface CreateEventPayload {
   winnerRewards?: string | null;
 }
 
-const apiBaseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const DEFAULT_API_URL = 'http://localhost:5000/api';
+
+function normalizeApiUrl(rawUrl?: string) {
+  const urlValue = rawUrl?.toString().trim();
+  if (!urlValue) return undefined;
+
+  let normalizedUrl = urlValue;
+  if (normalizedUrl.startsWith(':')) {
+    normalizedUrl = `http://localhost${normalizedUrl}`;
+  } else if (normalizedUrl.startsWith('//')) {
+    normalizedUrl = `http:${normalizedUrl}`;
+  } else if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(normalizedUrl)) {
+    normalizedUrl = `http://${normalizedUrl}`;
+  }
+
+  try {
+    return new URL(normalizedUrl).toString().replace(/\/+$/, '');
+  } catch {
+    return undefined;
+  }
+}
+
+const apiBaseURL = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL) || DEFAULT_API_URL;
 
 const client: AxiosInstance = axios.create({
   baseURL: apiBaseURL,
