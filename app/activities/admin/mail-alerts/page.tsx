@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { apiClient } from '@/lib/api'
+import { useAuthStore } from '@/lib/store'
 import { useRoles } from '@/hooks/useRoles'
 import { Mail, Save, RotateCcw, Search, Trash2, ShieldAlert } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -10,7 +12,7 @@ interface EmailTemplate {
   name: string
   subject: string
   content: string
-  type: 'deadline-reminder' | 'submission-confirmation' | 'approval-notification' | 'custom'
+  type: 'deadline-reminder' | 'submission-confirmation' | 'approval-notification' | 'task-completion' | 'custom'
   placeholders: string[]
 }
 
@@ -77,28 +79,100 @@ Your achievement points have been updated in the system.
 This is an automated email. Please do not reply to this message.`,
     placeholders: ['facultyName', 'taskTitle', 'pointsEarned', 'approvalDate'],
   },
+  {
+    id: 'task-completion',
+    name: 'Task Completion',
+    type: 'task-completion',
+    subject: 'Task Completed: {{taskTitle}}',
+    content: `Dear {{facultyName}},
+
+Your task "{{taskTitle}}" has been marked as completed in the Faculty Achievement Dashboard.
+
+Faculty Email: {{facultyEmail}}
+Completed At: {{completedAt}}
+
+This is an automated email. Please do not reply to this message.`,
+    placeholders: ['facultyName', 'facultyEmail', 'taskTitle', 'completedAt'],
+  },
 ]
 
 const TEMPLATES_STORAGE_KEY = 'email-templates-v1'
 
 export default function MailAlertsPage() {
   const { isMaintenance } = useRoles()
+  const token = useAuthStore((state) => state.token)
+  const hasHydrated = useAuthStore((state) => state._hasHydrated)
   const [templates, setTemplates] = useState<EmailTemplate[]>(DEFAULT_TEMPLATES)
   const [hasChanges, setHasChanges] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [dirtyMap, setDirtyMap] = useState<Record<string, boolean>>({})
+  const [isLoading, setIsLoading] = useState(true)
+  const useServerTemplates = hasHydrated && !!token && !token.startsWith('demo-')
 
   useEffect(() => {
-    const raw = localStorage.getItem(TEMPLATES_STORAGE_KEY)
-    if (!raw) return
+    let isMounted = true
 
-    try {
-      const parsed = JSON.parse(raw) as EmailTemplate[]
-      setTemplates(parsed)
-    } catch {
-      localStorage.removeItem(TEMPLATES_STORAGE_KEY)
+    const loadTemplates = async () => {
+      if (!hasHydrated) {
+        return
+      }
+
+      if (!useServerTemplates) {
+        try {
+          const raw = localStorage.getItem(TEMPLATES_STORAGE_KEY)
+          if (raw) {
+            const parsed = JSON.parse(raw) as EmailTemplate[]
+            if (isMounted && Array.isArray(parsed) && parsed.length > 0) {
+              setTemplates(parsed)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load local email templates:', error)
+        } finally {
+          if (isMounted) {
+            setIsLoading(false)
+          }
+        }
+
+        return
+      }
+
+      try {
+        const response = await apiClient.getEmailTemplates()
+        if (isMounted && Array.isArray(response.templates) && response.templates.length > 0) {
+          setTemplates(response.templates)
+        }
+      } catch (error) {
+        console.error('Failed to load email templates:', error)
+        const status = (error as { response?: { status?: number } }).response?.status
+        if (status !== 401 && status !== 403) {
+          toast.error('Using default templates until the saved templates load.')
+        }
+
+        try {
+          const raw = localStorage.getItem(TEMPLATES_STORAGE_KEY)
+          if (raw) {
+            const parsed = JSON.parse(raw) as EmailTemplate[]
+            if (isMounted && Array.isArray(parsed) && parsed.length > 0) {
+              setTemplates(parsed)
+            }
+          }
+        } catch (localError) {
+          console.error('Failed to load local email templates after API failure:', localError)
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
     }
-  }, [])
+
+    void loadTemplates()
+
+    return () => {
+      isMounted = false
+    }
+  }, [hasHydrated, useServerTemplates])
 
   if (!isMaintenance()) {
     return (
@@ -120,28 +194,75 @@ export default function MailAlertsPage() {
     setDirtyMap((prev) => ({ ...prev, [id]: true }))
   }
 
-  const handleSaveAll = () => {
-    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates))
-    setHasChanges(false)
-    setDirtyMap({})
-    toast.success('Email templates saved successfully', { duration: 3000 })
+  const persistTemplates = async (nextTemplates: EmailTemplate[]) => {
+    if (!useServerTemplates) {
+      localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(nextTemplates))
+      return nextTemplates
+    }
+
+    const response = await apiClient.saveEmailTemplates(nextTemplates)
+    return Array.isArray(response.templates) ? response.templates : nextTemplates
   }
 
-  const handleSaveTemplate = (id: string, label: string) => {
-    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates))
-    const nextDirtyMap = { ...dirtyMap, [id]: false }
-    setDirtyMap(nextDirtyMap)
-    setHasChanges(Object.values(nextDirtyMap).some(Boolean))
-    toast.success(`${label} template saved`, { duration: 2500 })
-  }
-
-  const handleReset = () => {
-    if (confirm('Are you sure? This will reset all templates to defaults.')) {
-      setTemplates(DEFAULT_TEMPLATES)
-      localStorage.removeItem(TEMPLATES_STORAGE_KEY)
+  const handleSaveAll = async () => {
+    try {
+      const savedTemplates = await persistTemplates(templates)
+      setTemplates(savedTemplates)
       setHasChanges(false)
       setDirtyMap({})
-      toast.success('Templates reset to defaults', { duration: 3000 })
+      toast.success('Email templates saved successfully', { duration: 3000 })
+    } catch (error) {
+      console.error('Failed to save email templates:', error)
+      const status = (error as { response?: { status?: number } }).response?.status
+      if (status === 401 || status === 403) {
+        localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates))
+        setHasChanges(false)
+        setDirtyMap({})
+        toast.success('Email templates saved locally', { duration: 3000 })
+        return
+      }
+
+      toast.error('Failed to save email templates')
+    }
+  }
+
+  const handleSaveTemplate = async (id: string, label: string) => {
+    try {
+      const savedTemplates = await persistTemplates(templates)
+      setTemplates(savedTemplates)
+      const nextDirtyMap = { ...dirtyMap, [id]: false }
+      setDirtyMap(nextDirtyMap)
+      setHasChanges(Object.values(nextDirtyMap).some(Boolean))
+      toast.success(`${label} template saved`, { duration: 2500 })
+    } catch (error) {
+      console.error('Failed to save email template:', error)
+      const status = (error as { response?: { status?: number } }).response?.status
+      if (status === 401 || status === 403) {
+        localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates))
+        const nextDirtyMap = { ...dirtyMap, [id]: false }
+        setDirtyMap(nextDirtyMap)
+        setHasChanges(Object.values(nextDirtyMap).some(Boolean))
+        toast.success(`${label} template saved locally`, { duration: 2500 })
+        return
+      }
+
+      toast.error(`Failed to save ${label.toLowerCase()} template`)
+    }
+  }
+
+  const handleReset = async () => {
+    if (confirm('Are you sure? This will reset all templates to defaults.')) {
+      try {
+        const savedTemplates = await persistTemplates(DEFAULT_TEMPLATES)
+        setTemplates(savedTemplates)
+        setHasChanges(false)
+        setDirtyMap({})
+        toast.success('Templates reset to defaults', { duration: 3000 })
+      } catch (error) {
+        console.error('Failed to reset email templates:', error)
+        localStorage.removeItem(TEMPLATES_STORAGE_KEY)
+        toast.error('Failed to reset templates')
+      }
     }
   }
 
@@ -176,6 +297,11 @@ export default function MailAlertsPage() {
       </div>
 
       <div className="space-y-6 animate-fade-in">
+        {isLoading ? (
+          <div className="rounded-2xl border border-violet-100 bg-white p-6 shadow-sm text-sm text-slate-500">
+            Loading email templates...
+          </div>
+        ) : null}
         <div className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1 max-w-xl">

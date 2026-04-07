@@ -1,6 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
 import deadlineAlertsService from '../services/deadlineAlerts.service';
+import emailTemplateService from '../services/emailTemplate.service';
 import emailService from '../services/emailService';
 import { authenticateToken, type AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
@@ -40,6 +41,19 @@ const taskCompletedSchema = z.object({
   completedAt: z.string().datetime().optional(),
   facultyEmail: z.string().email().optional(),
   facultyName: z.string().optional(),
+});
+
+const emailTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  subject: z.string(),
+  content: z.string(),
+  type: z.enum(['deadline-reminder', 'submission-confirmation', 'approval-notification', 'task-completion', 'custom']),
+  placeholders: z.array(z.string()),
+});
+
+const emailTemplatesPayloadSchema = z.object({
+  templates: z.array(emailTemplateSchema),
 });
 
 /**
@@ -156,7 +170,14 @@ router.post('/task-completed', async (req: AuthRequest, res) => {
     }
 
     const { taskTitle, completedAt, facultyEmail, facultyName } = validationResult.data;
-    const recipient = process.env.ALERT_NOTIFY_EMAIL || 'hemasri.it23@bitsathy.ac.in';
+    const recipient = process.env.ALERT_NOTIFY_EMAIL;
+
+    if (!recipient) {
+      return res.status(500).json({
+        error: 'ALERT_NOTIFY_EMAIL is not configured',
+      });
+    }
+
     const senderEmail = facultyEmail || req.user?.email || 'unknown@local.dev';
     const senderName = facultyName || req.user?.email?.split('@')[0] || 'Faculty Member';
     const doneAt = completedAt || new Date().toISOString();
@@ -178,6 +199,48 @@ router.post('/task-completed', async (req: AuthRequest, res) => {
     logger.error('Error in task-completed endpoint:', error);
     res.status(500).json({
       error: 'Failed to send task completion notification',
+      message: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+    });
+  }
+});
+
+/**
+ * GET /api/alerts/email-templates
+ * Get email templates managed from the admin templates page.
+ */
+router.get('/email-templates', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const templates = await emailTemplateService.getTemplates();
+    res.json({ templates, timestamp: new Date() });
+  } catch (error) {
+    logger.error('Error fetching email templates:', error);
+    res.status(500).json({
+      error: 'Failed to fetch email templates',
+      message: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+    });
+  }
+});
+
+/**
+ * PUT /api/alerts/email-templates
+ * Save templates from the admin templates page.
+ */
+router.put('/email-templates', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const validationResult = emailTemplatesPayloadSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: 'Invalid request body',
+        details: validationResult.error.errors,
+      });
+    }
+
+    const templates = await emailTemplateService.saveTemplates(validationResult.data.templates);
+    res.json({ templates, message: 'Email templates saved successfully' });
+  } catch (error) {
+    logger.error('Error saving email templates:', error);
+    res.status(500).json({
+      error: 'Failed to save email templates',
       message: process.env.NODE_ENV === 'development' ? String(error) : undefined,
     });
   }

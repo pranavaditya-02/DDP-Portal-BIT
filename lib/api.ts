@@ -135,6 +135,23 @@ export const apiClient = {
 
     return response.data;
   },
+
+  getEmailTemplates: async () => {
+    const response = await client.get('/alerts/email-templates');
+    return response.data;
+  },
+
+  saveEmailTemplates: async (templates: Array<{
+    id: string;
+    name: string;
+    subject: string;
+    content: string;
+    type: 'deadline-reminder' | 'submission-confirmation' | 'approval-notification' | 'task-completion' | 'custom';
+    placeholders: string[];
+  }>) => {
+    const response = await client.put('/alerts/email-templates', { templates });
+    return response.data;
+  },
 };
 
 export default client;
