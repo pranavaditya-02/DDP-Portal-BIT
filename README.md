@@ -1,50 +1,69 @@
 # Faculty Achievement Dashboard
 
-Faculty Achievement Dashboard is a full-stack academic workflow platform for tracking faculty achievements, departmental performance, and institutional compliance timelines.
+Faculty Achievement Dashboard is a full-stack web platform that helps institutions manage faculty performance workflows in one place.
 
-It combines a modern Next.js frontend with a role-aware backend API to support multiple user types including faculty, HOD, dean, verification teams, maintenance/admin users, and students.
+It replaces scattered spreadsheets and manual follow-ups with a role-based system for submissions, approvals, analytics, and deadline reminders.
 
-## Why This Project Exists
+## Quick Summary
 
-Academic performance tracking is often spread across spreadsheets, emails, and manual follow-ups. This project centralizes those workflows into one platform with:
-- Submission and tracking of achievement activities
-- Department and college-level visibility
-- Verification and approval flows
-- Deadline reminders and alert automation
-- CSV-assisted data ingestion for legacy records
+- Domain: Academic performance and compliance management
+- Product Type: Internal workflow and analytics dashboard
+- Users: Faculty, HOD, dean, verification team, admin, student
+- Value: Faster tracking, better visibility, fewer missed deadlines
 
-## Core Capabilities
+## Why This Project Matters
 
-- Multi-role dashboard experience with route-level navigation
-- Faculty activity submission and personal progress tracking
-- Verification queue for approve/reject workflows
-- Department and college analytics views
-- Deadline alert engine with email notifications
-- Admin email template management
-- CSV import pipeline for events-attended data
+In many institutions, performance data is fragmented across sheets, forms, and email threads. This project consolidates the process into a single source of truth.
 
-## Architecture Overview
+Key outcomes:
+- Standardized submission and verification flow
+- Transparent department and college-level progress
+- Deadline awareness via automated alerts
+- Better decision support with role-specific dashboards
 
-The system uses a split frontend-backend architecture.
+## Highlights for Recruiters and Hiring Managers
+
+This project demonstrates practical, production-oriented skills:
+
+- Full-stack architecture design and execution
+- RBAC-aware product design for multiple user personas
+- API design, validation, and integration
+- Data import workflows from external files
+- Notification automation via email services
+- Real-world frontend UX with scalable component architecture
+
+## Feature Set
+
+- Multi-role dashboard and navigation experience
+- Faculty activity submission and self-tracking
+- Verification queue for approval and rejection workflows
+- Department and college views for leadership
+- Deadline alerting and reminder emails
+- Admin-managed email templates
+- CSV import support for legacy academic records
+
+## Architecture
 
 Frontend:
-- Next.js App Router pages in [app](app)
-- Shared UI and navigation components in [components](components)
-- Role and state handling via [lib/store.ts](lib/store.ts) and [hooks/useRoles.ts](hooks/useRoles.ts)
+- Built with Next.js App Router
+- Shared components and role-aware navigation
+- Centralized client state and API integration
 
 Backend:
-- Express API entry at [backend/src/index.ts](backend/src/index.ts)
-- Route modules in [backend/src/routes](backend/src/routes)
-- Business services in [backend/src/services](backend/src/services)
-- MySQL connection utilities in [backend/src/database/mysql.ts](backend/src/database/mysql.ts)
+- Express REST API with modular routes
+- Authentication and role-based authorization middleware
+- Service layer for business logic and alerts
+- MySQL connectivity for import-backed workflows
 
-Data and utilities:
-- Institutional assets in [assets](assets)
-- Supporting scripts in [scripts](scripts)
+Repository references:
+- Frontend pages: [app](app)
+- Shared components: [components](components)
+- Client state and API layer: [lib](lib)
+- Backend source: [backend/src](backend/src)
 
 ## Tech Stack
 
-Frontend stack:
+Frontend:
 - Next.js 16
 - React 19
 - TypeScript
@@ -54,71 +73,69 @@ Frontend stack:
 - Recharts
 - Framer Motion
 
-Backend stack:
+Backend:
 - Node.js
 - Express
 - TypeScript
-- JWT-based auth middleware
-- MySQL via mysql2
+- JWT auth middleware
+- mysql2
 - Nodemailer
-- Multer (multipart file upload)
-- Zod validation
+- Multer
+- Zod
 
-Tooling and project infrastructure:
-- npm package management
-- ESLint (backend)
-- Docker Compose file available for containerized setup baseline
+Tooling:
+- npm
+- ESLint
+- Docker Compose (available as baseline)
 
 ## Project Structure
 
 ```text
-app/                             Next.js pages (dashboard, college, department, student, achievements)
-components/                      Shared UI and navigation components
+app/                             Application routes and pages
+components/                      Reusable UI and dashboard components
 hooks/                           Custom hooks (roles, alerts, data)
-lib/                             API client, store, helpers, workflow definitions
-backend/                         Express backend project
-backend/src/routes/              auth, activities, import, alerts routes
-backend/src/services/            auth, alerts, import, email services
-backend/src/database/            MySQL connection helpers
-assets/                          CSV/SQL/JSON datasets and generated files
+lib/                             API client, state store, workflow helpers
+backend/                         Backend API project
+backend/src/routes/              auth, activities, import, alerts
+backend/src/services/            business services (alerts, email, import)
+backend/src/database/            MySQL utilities
+assets/                          Data files (CSV, SQL, JSON)
 scripts/                         Data extraction and verification scripts
 ```
 
 ## Getting Started
 
-## 1. Run Frontend
+## 1) Start Frontend
 
-From repository root:
-
-```bash
-npm install
-npm run dev
-```
-
-Frontend URL: http://localhost:3000
-
-You can test quickly using demo login buttons on [app/login/page.tsx](app/login/page.tsx).
-
-## 2. Run Backend
-
-From [backend](backend):
+Run from repository root:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Backend URL: http://localhost:5000
+Open: http://localhost:3000
 
-Health endpoint:
+You can quickly explore the UI using demo login options on [app/login/page.tsx](app/login/page.tsx).
+
+## 2) Start Backend
+
+Run from [backend](backend):
+
+```bash
+npm install
+npm run dev
+```
+
+Open health check:
 
 ```text
-GET /api/health
+GET http://localhost:5000/api/health
 ```
 
-## 3. Configure Environment Variables
+## 3) Configure Environment
 
-Create [backend/.env](backend/.env) locally (already gitignored) with these minimum keys:
+Create local [backend/.env](backend/.env) (this file is gitignored):
 
 ```env
 PORT=5000
@@ -137,7 +154,7 @@ MYSQL_DATABASE=your_database
 MYSQL_SSL=false
 ```
 
-Optional mail configuration:
+Optional email setup:
 
 ```env
 EMAIL_PROVIDER=smtp
@@ -150,15 +167,15 @@ EMAIL_FROM=noreply@example.com
 ALERT_NOTIFY_EMAIL=recipient@example.com
 ```
 
-## API Surface
+## API Overview
 
-Auth:
+Auth APIs:
 - POST /api/auth/register
 - POST /api/auth/login
 - POST /api/auth/verify
 - GET /api/auth/me
 
-Activities:
+Activity APIs:
 - GET /api/activities/my-activities
 - POST /api/activities/submit
 - GET /api/activities/pending
@@ -167,10 +184,10 @@ Activities:
 - GET /api/activities/department/:departmentId
 - GET /api/activities/stats/department/:departmentId
 
-Import:
+Import APIs:
 - POST /api/import/events-attended/csv
 
-Alerts:
+Alert APIs:
 - POST /api/alerts/check-and-send
 - POST /api/alerts/send-bulk
 - POST /api/alerts/task-completed
@@ -179,7 +196,7 @@ Alerts:
 - GET /api/alerts/verify-email
 - GET /api/alerts/statistics
 
-## Scripts
+## Available Scripts
 
 Root scripts from [package.json](package.json):
 - npm run dev
@@ -195,9 +212,7 @@ Backend scripts from [backend/package.json](backend/package.json):
 - npm run lint
 - npm test
 
-Note: Prisma-related backend scripts may exist as legacy entries depending on branch history and should be used only if a Prisma schema/migration setup is present.
-
-## Documentation Map
+## Documentation
 
 - [DOCS_INDEX.md](DOCS_INDEX.md)
 - [GETTING_STARTED.md](GETTING_STARTED.md)
@@ -207,21 +222,19 @@ Note: Prisma-related backend scripts may exist as legacy entries depending on br
 - [EMAIL_ALERTS_IMPLEMENTATION.md](EMAIL_ALERTS_IMPLEMENTATION.md)
 - [EMAIL_ALERTS_QUICK_START.md](EMAIL_ALERTS_QUICK_START.md)
 
-When documentation and implementation differ, prefer the implementation in source files as the current truth.
+## Security Notes
 
-## Security and Git Hygiene
-
-- Environment files are excluded from Git in [.gitignore](.gitignore)
-- Keep secrets only in local env files or secure secret stores
-- If any secret was previously committed, rotate it immediately
+- Env files are excluded via [.gitignore](.gitignore)
+- Keep credentials only in local environment files or secret managers
+- Rotate any secret that may have been committed in the past
 
 ## Contributing
 
 1. Create a feature branch from main.
-2. Make focused changes with clear commit messages.
-3. Verify frontend and backend start cleanly.
-4. Open a pull request with testing notes.
+2. Keep changes focused and well documented.
+3. Validate frontend and backend startup before creating a PR.
+4. Include testing notes in the PR description.
 
 ## License
 
-Internal academic software project for faculty achievement and compliance tracking.
+Internal academic software project.
