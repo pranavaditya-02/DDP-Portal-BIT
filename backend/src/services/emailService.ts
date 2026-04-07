@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import { logger } from '../utils/logger';
+import emailTemplateService from './emailTemplate.service';
 
 // Email service for sending notifications
 class EmailService {
@@ -83,55 +84,25 @@ class EmailService {
     }
 
     try {
-      const subject = `⏰ Deadline Reminder: ${taskTitle} due in ${daysUntilDeadline} day(s)`;
+      const template = await emailTemplateService.renderTemplate('deadline-reminder', {
+        facultyName,
+        taskTitle,
+        deadlineDate,
+        daysRemaining: String(daysUntilDeadline),
+        daysUntilDeadline: String(daysUntilDeadline),
+        taskStatus: 'Pending',
+      });
 
-      const htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h2 style="color: #333; margin-top: 0;">Deadline Reminder</h2>
-            <p style="color: #666; line-height: 1.6;">
-              Dear <strong>${facultyName}</strong>,
-            </p>
-            <p style="color: #666; line-height: 1.6;">
-              This is a reminder that your task <strong>"${taskTitle}"</strong> is due on <strong>${deadlineDate}</strong>.
-            </p>
-            <p style="color: #666; line-height: 1.6;">
-              You have <strong>${daysUntilDeadline} day(s)</strong> to complete and submit this task.
-            </p>
-          </div>
-
-          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px;">
-            <p style="color: #856404; margin: 0; line-height: 1.6;">
-              <strong>Action Required:</strong> Please log in to the Faculty Achievement Dashboard to submit your work before the deadline.
-            </p>
-          </div>
-
-          <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
-            This is an automated email. Please do not reply to this message.
-          </p>
-        </div>
-      `;
-
-      const textContent = `
-Deadline Reminder
-
-Dear ${facultyName},
-
-This is a reminder that your task "${taskTitle}" is due on ${deadlineDate}.
-You have ${daysUntilDeadline} day(s) to complete and submit this task.
-
-Please log in to the Faculty Achievement Dashboard to submit your work before the deadline.
-
----
-This is an automated email. Please do not reply to this message.
-      `;
+      if (!template) {
+        return false;
+      }
 
       const mailOptions = {
         from: process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER,
         to: facultyEmail,
-        subject,
-        html: htmlContent,
-        text: textContent,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
       };
 
       const info = await this.transporter.sendMail(mailOptions);
@@ -167,28 +138,23 @@ This is an automated email. Please do not reply to this message.
         minute: '2-digit',
       });
 
-      const subject = `Task Completed: ${taskTitle}`;
-      const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
-          <h2 style="color: #333;">Task Completion Alert</h2>
-          <p>A task has been marked as completed in the Faculty Achievement Dashboard.</p>
-          <table style="border-collapse: collapse; width: 100%; margin-top: 12px;">
-            <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Faculty Name</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${facultyName}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Faculty Email</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${facultyEmail}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Task</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${taskTitle}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Completed At</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${completedAt}</td></tr>
-          </table>
-        </div>
-      `;
+      const template = await emailTemplateService.renderTemplate('task-completion', {
+        facultyName,
+        facultyEmail,
+        taskTitle,
+        completedAt,
+      });
 
-      const text = `Task Completion Alert\n\nFaculty Name: ${facultyName}\nFaculty Email: ${facultyEmail}\nTask: ${taskTitle}\nCompleted At: ${completedAt}`;
+      if (!template) {
+        return false;
+      }
 
       const info = await this.transporter.sendMail({
         from: process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER,
         to: toEmail,
-        subject,
-        html,
-        text,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
       });
 
       logger.info(`Task completion notification sent to ${toEmail}`, { messageId: info.messageId, taskTitle });

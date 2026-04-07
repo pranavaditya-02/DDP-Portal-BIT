@@ -1,15 +1,13 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import 'express-async-errors';
-import dotenv from 'dotenv';
 import { logger } from './utils/logger';
 import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
 import alertsRoutes from './routes/alerts.routes';
 import { verifyMysqlConnection } from './database/mysql';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
