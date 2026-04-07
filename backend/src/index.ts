@@ -9,6 +9,8 @@ import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
 import internshipTrackerRoutes from './routes/internshipTracker.routes';
+import internshipReportRoutes from './routes/internshipReport.routes';
+import studentsRoutes from './routes/students.routes';
 import eventsRoutes from './routes/events.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
@@ -50,6 +52,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/internship-tracker', internshipTrackerRoutes);
+app.use('/api/internship-report', internshipReportRoutes);
+app.use('/api/students', studentsRoutes);
 app.use('/api/industries', industriesRoutes);
 app.use('/api/events', eventsRoutes);
 

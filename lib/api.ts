@@ -194,6 +194,13 @@ export const apiClient = {
     return response.data;
   },
 
+  getStudents: async (q?: string) => {
+    const response = await client.get('/students', {
+      params: q ? { q } : undefined,
+    });
+    return response.data;
+  },
+
   createIndustry: async (data: {
     industry: string;
     address: string;
@@ -233,8 +240,42 @@ export const apiClient = {
     return response.data;
   },
 
-  updateInternshipTrackerIqac: async (id: number, iqac_verification: 'initiated' | 'inprogress' | 'completed') => {
+  getApprovedTrackersByStudent: async (studentId: number) => {
+    const response = await client.get(`/internship-tracker/student/${studentId}/approved`);
+    return response.data;
+  },
+
+  updateInternshipTrackerIqac: async (id: number, iqac_verification: 'initiated' | 'approved' | 'declined') => {
     const response = await client.patch(`/internship-tracker/${id}/iqac`, { iqac_verification });
+    return response.data;
+  },
+
+  createInternshipReport: async (formData: FormData) => {
+    const response = await client.post('/internship-report', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  updateInternshipReportIqac: async (id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected') => {
+    const response = await client.patch(`/internship-report/${id}/iqac`, { iqac_verification });
+    return response.data;
+  },
+
+  getInternshipReports: async () => {
+    const response = await client.get('/internship-report');
+    return response.data;
+  },
+
+  getSpecialLabs: async () => {
+    const response = await client.get('/internship-report/special-labs');
+    return response.data;
+  },
+
+  getSdgGoals: async () => {
+    const response = await client.get('/internship-report/sdg-goals');
     return response.data;
   },
 

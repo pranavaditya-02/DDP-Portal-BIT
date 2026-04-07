@@ -8,7 +8,7 @@ import { logger } from '../utils/logger';
 
 const router = express.Router();
 
-const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_DIR || './uploads');
+const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_DIR || './uploads/students/internships/tracker');
 const allowedFileTypes = new Set(
   (process.env.ALLOWED_FILE_TYPES || 'pdf,jpg,jpeg,png,docx,xlsx')
     .split(',')
@@ -53,7 +53,7 @@ const internshipTrackerSchema = z.object({
         return value.toLowerCase();
       }
       return value;
-    }, z.enum(['initiated', 'inprogress', 'completed']))
+    }, z.enum(['initiated', 'approved', 'declined']))
     .optional()
     .default('initiated'),
 });
@@ -89,7 +89,10 @@ router.post(
     } catch (error) {
       logger.error('Error creating internship tracker:', error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
+        const message = error.errors
+          .map((err) => typeof err.message === 'string' ? err.message : JSON.stringify(err.message))
+          .join('; ');
+        return res.status(400).json({ error: message || 'Invalid internship tracker data' });
       }
       return res.status(500).json({ error: 'Failed to create internship tracker', message: error instanceof Error ? error.message : undefined });
     }
@@ -104,7 +107,7 @@ router.patch(
       const { iqac_verification } = req.body;
 
       const parsed = z.object({
-        iqac_verification: z.enum(['initiated', 'inprogress', 'completed']),
+        iqac_verification: z.enum(['initiated', 'approved', 'declined']),
       }).parse({ iqac_verification });
 
       const tracker = await internshipTrackerService.updateIqacVerification(
@@ -120,7 +123,10 @@ router.patch(
     } catch (error) {
       logger.error('Error updating IQAC verification:', error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
+        const message = error.errors
+          .map((err) => typeof err.message === 'string' ? err.message : JSON.stringify(err.message))
+          .join('; ');
+        return res.status(400).json({ error: message || 'Invalid IQAC verification data' });
       }
       return res.status(500).json({ error: 'Failed to update IQAC verification', message: error instanceof Error ? error.message : undefined });
     }
@@ -134,6 +140,21 @@ router.get('/', async (_req, res) => {
   } catch (error) {
     logger.error('Error listing internship trackers:', error);
     return res.status(500).json({ error: 'Failed to list internship trackers' });
+  }
+});
+
+router.get('/student/:studentId/approved', async (req, res) => {
+  try {
+    const studentId = Number(req.params.studentId);
+    if (!Number.isInteger(studentId) || studentId <= 0) {
+      return res.status(400).json({ error: 'Invalid student ID' });
+    }
+
+    const trackers = await internshipTrackerService.listApprovedTrackersByStudent(studentId);
+    return res.json({ trackers });
+  } catch (error) {
+    logger.error('Error listing approved student trackers:', error);
+    return res.status(500).json({ error: 'Failed to list approved trackers' });
   }
 });
 
