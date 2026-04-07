@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
 import eventsRoutes from './routes/events.routes';
+import registrationRoutes from './routes/registration.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
@@ -39,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/registrations', registrationRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
