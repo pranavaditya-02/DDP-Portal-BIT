@@ -1,1 +1,1 @@
-export { default } from '../students/verification-panel/page'   
+export { default } from '../student/activity/verification-panel/page'

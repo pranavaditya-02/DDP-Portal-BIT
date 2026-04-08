@@ -118,27 +118,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         },
         {
           label: "Activity Master",
-          href: "/students/activity-master",
+          href: "/student/activity/master",
           icon: Clipboard,
           show: isStudent(),
         },
         {
           label: "Activity Logger",
-          href: "/students/activity-logger",
+          href: "/student/activity/logger",
           icon: PlusCircle,
           show: isStudent(),
         },
         {
           label: "Create Event",
-          href: "/students/create-event",
+          href: "/student/activity/create-event",
           icon: Calendar,
           show: isAdmin(),
-        },
-        {
-          label: "My Registrations",
-          href: "/students/my-registrations",
-          icon: ClipboardCheck,
-          show: isStudent(),
         },
         
         ...studentNavItems.map((item) => ({
@@ -260,10 +254,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const studentItems = [
-    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/students/activity-master" },
-    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/students/activity-logger" },
-    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/students/internship/tracker" },
-    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/students/internship/report" },
+    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
+    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
+    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
+    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
   ];
 
   const owiItems = [
@@ -498,22 +492,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           );
                         }
 
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setMobileOpen(false)}
-                            className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-                          >
-                            <Icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="flex-1 text-left truncate">
-                              {item.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors"
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1 text-left truncate">
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
                 {/* OWI (Outside World Interaction) Section */}
                 <div>

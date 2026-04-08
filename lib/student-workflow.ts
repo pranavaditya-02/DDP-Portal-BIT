@@ -50,11 +50,6 @@ export const studentWorkflowQuickLinks = [
     summary: 'Open the event intake form for a new master record.',
   },
   {
-    title: 'My Registrations',
-    route: '/students/my-registrations',
-    summary: 'See all registrations, confirmations, and attendance states.',
-  },
-  {
     title: 'Activity Master',
     route: '/students/activity-master',
     summary: 'Open the master catalog and registration controls.',
@@ -100,7 +95,7 @@ export const registrationRecords: WorkflowRecord[] = [
     subtitle: 'Registered for 17 Apr 2026',
     status: 'approved',
     meta: 'Seat confirmed | Eligible for rewards',
-    route: '/students/activity-logger',
+    route: '/student/activity/logger',
   },
   {
     id: 'RG-202',
@@ -116,7 +111,7 @@ export const registrationRecords: WorkflowRecord[] = [
     subtitle: 'Request rejected',
     status: 'rejected',
     meta: 'Capacity exhausted for selected batch',
-    route: '/students/activity-master',
+    route: '/student/activity/master',
   },
 ]
 
