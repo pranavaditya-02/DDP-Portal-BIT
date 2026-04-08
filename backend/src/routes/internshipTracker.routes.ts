@@ -5,6 +5,7 @@ import path from 'path';
 import { z } from 'zod';
 import internshipTrackerService from '../services/internshipTracker.service';
 import { logger } from '../utils/logger';
+import { sendEmail } from '../utils/mailer';
 
 const router = express.Router();
 
@@ -130,14 +131,38 @@ router.patch(
         return res.status(400).json({ error: 'Reject reason is required when declining a tracker.' });
       }
 
+      const searchId = Number(trackerId);
+      const existingTracker = await internshipTrackerService.getTrackerByIdOrNumber(searchId);
+      if (!existingTracker) {
+        return res.status(404).json({ error: 'Internship tracker not found' });
+      }
+
       const tracker = await internshipTrackerService.updateIqacVerification(
-        Number(trackerId),
+        existingTracker.id,
         parsed.iqac_verification,
         parsed.reject_reason,
       );
 
       if (!tracker) {
         return res.status(404).json({ error: 'Internship tracker not found' });
+      }
+
+      if (tracker.student_email && parsed.iqac_verification !== 'initiated') {
+        const statusText = parsed.iqac_verification === 'approved' ? 'approved' : 'rejected';
+        const subject = `Internship Tracker ${statusText.toUpperCase()} | BannariAmman College IQAC`;
+        const bodyText = `Hello ${tracker.student_name ?? 'Student'},\n\nYour internship tracker submission (ID: ${tracker.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
+        const bodyHtml = `<p>Hello ${tracker.student_name ?? 'Student'},</p><p>Your internship tracker submission <strong>(ID: ${tracker.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+        try {
+          await sendEmail({
+            to: tracker.student_email,
+            subject,
+            text: bodyText,
+            html: bodyHtml,
+          });
+        } catch (emailError) {
+          logger.error('Failed to send internship tracker status email:', emailError);
+        }
       }
 
       return res.json({ message: 'IQAC verification updated successfully', tracker });
@@ -182,7 +207,7 @@ router.get('/student/:studentId/approved', async (req, res) => {
 router.get('/:trackerId(\\d+)', async (req, res) => {
   try {
     const trackerId = Number(req.params.trackerId);
-    const tracker = await internshipTrackerService.getTrackerById(trackerId);
+    const tracker = await internshipTrackerService.getTrackerByIdOrNumber(trackerId);
     if (!tracker) {
       return res.status(404).json({ error: 'Internship tracker not found' });
     }
