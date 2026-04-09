@@ -195,67 +195,73 @@ class EventMasterService {
       throw new EventCodeExistsError(input.eventCode);
     }
 
-    const [result] = await getMysqlPool().execute<ResultSetHeader>(
-      `INSERT INTO ${eventMasterTableRef} (
-        maximum_count,
-        applied_count,
-        apply_by_student,
-        event_code,
-        event_name,
-        event_organizer,
-        web_link,
-        event_category,
-        active_status,
-        start_date,
-        end_date,
-        duration_days,
-        event_location,
-        event_level,
-        state,
-        country,
-        within_bit,
-        related_to_special_lab,
-        department,
-        competition_name,
-        total_level_of_competition,
-        eligible_for_rewards,
-        winner_rewards,
-        img_link
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.maximumCount,
-        input.appliedCount,
-          input.applyByStudent ? 'Yes' : 'No',
-        input.eventCode,
-        input.eventName,
-        input.eventOrganizer ?? null,
-        input.webLink ?? null,
-        input.eventCategory ?? null,
-        input.status,
-        input.startDate ?? null,
-        input.endDate ?? null,
-        input.durationDays ?? null,
-        ((): string | null => {
-          const val = input.eventLocation ?? null;
-          if (val === null) return null;
-          const s = String(val).trim().toLowerCase();
-          if (!s) return null;
-          if (s.includes('online') || s.startsWith('http') || s.includes('zoom') || s.includes('meet') || s.includes('virtual')) return 'ONLINE';
-          return 'OFFLINE';
-        })(),
-        input.eventLevel ?? null,
-        input.state ?? null,
-        input.country ?? null,
-          input.withinBit ? 'Yes' : 'No',
-          input.relatedToSpecialLab ? 'Yes' : 'No',
-        input.department ?? null,
-        input.competitionName ?? null,
-        input.totalLevelOfCompetition ?? null,
-          input.eligibleForRewards ? 'Yes' : 'No',
-        input.winnerRewards ?? null,
-        input.imgLink ?? null,
-      ]
-    );
+    const columns = [
+      'maximum_count',
+      'applied_count',
+      'apply_by_student',
+      'event_code',
+      'event_name',
+      'event_organizer',
+      'web_link',
+      'event_category',
+      'active_status',
+      'start_date',
+      'end_date',
+      'duration_days',
+      'event_location',
+      'event_level',
+      'state',
+      'country',
+      'within_bit',
+      'related_to_special_lab',
+      'department',
+      'competition_name',
+      'total_level_of_competition',
+      'eligible_for_rewards',
+      'winner_rewards',
+      'img_link',
+    ];
+
+    const eventLocationValue = ((): string | null => {
+      const val = input.eventLocation ?? null;
+      if (val === null) return null;
+      const s = String(val).trim().toLowerCase();
+      if (!s) return null;
+      if (s.includes('online') || s.startsWith('http') || s.includes('zoom') || s.includes('meet') || s.includes('virtual')) return 'ONLINE';
+      return 'OFFLINE';
+    })();
+
+    const values = [
+      input.maximumCount,
+      input.appliedCount,
+      input.applyByStudent ? 1 : 0,
+      input.eventCode,
+      input.eventName,
+      input.eventOrganizer ?? null,
+      input.webLink ?? null,
+      input.eventCategory ?? null,
+      input.status,
+      input.startDate ?? null,
+      input.endDate ?? null,
+      input.durationDays ?? null,
+      eventLocationValue,
+      input.eventLevel ?? null,
+      input.state ?? null,
+      input.country ?? null,
+      input.withinBit ? 1 : 0,
+      input.relatedToSpecialLab ? 1 : 0,
+      input.department ?? null,
+      input.competitionName ?? null,
+      input.totalLevelOfCompetition ?? null,
+      input.eligibleForRewards ? 1 : 0,
+      input.winnerRewards ?? null,
+      input.imgLink ?? null,
+    ];
+
+    const placeholders = columns.map(() => '?').join(', ');
+    const sql = `INSERT INTO ${eventMasterTableRef} (${columns.join(', ')}) VALUES (${placeholders})`;
+
+    const [result] = await getMysqlPool().execute<ResultSetHeader>(sql, values);
 
     const [rows] = await getMysqlPool().query<EventMasterRow[]>(
       `SELECT
