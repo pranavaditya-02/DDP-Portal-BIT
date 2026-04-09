@@ -8,6 +8,7 @@ import { useRoles } from "@/hooks/useRoles";
 
 interface InternshipTracker {
   id: number;
+  tracker_number?: number;
   student_name: string;
   student_roll_no?: string | null;
   industry_name: string;
@@ -165,6 +166,7 @@ export default function Page() {
 
     if (normalized) {
       data = data.filter((item) =>
+        item.tracker_number?.toString().includes(normalized) ||
         item.id.toString().includes(normalized) ||
         item.student_name.toLowerCase().includes(normalized) ||
         item.student_roll_no?.toLowerCase().includes(normalized) ||
@@ -482,7 +484,7 @@ export default function Page() {
                           <thead className="bg-slate-50 text-slate-700">
                             <tr>
                               <th className="px-4 py-3 text-left">
-                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("student_name")}>ID{computeSortIcon("student_name")}</button>
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("student_name")}>Tracker #{computeSortIcon("student_name")}</button>
                               </th>
                               <th className="px-4 py-3 text-left">
                                 <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("industry_name")}>Industry{computeSortIcon("industry_name")}</button>
@@ -500,7 +502,7 @@ export default function Page() {
                                 className="hover:bg-slate-50 cursor-pointer"
                                 onClick={() => setSelectedTracker(tracker)}
                               >
-                                <td className="px-4 py-3 text-slate-700">{tracker.id}</td>
+                                <td className="px-4 py-3 text-slate-700">{tracker.tracker_number ?? tracker.id}</td>
                                 <td className="px-4 py-3">
                                   <div className="font-medium text-slate-900">{tracker.student_name}</div>
                                   <div className="text-xs text-slate-500">{tracker.student_roll_no}</div>
@@ -568,7 +570,7 @@ export default function Page() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Request ID</div>
-                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.id}</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.tracker_number ?? selectedTracker.id}</div>
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>

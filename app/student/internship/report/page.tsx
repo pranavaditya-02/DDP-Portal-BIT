@@ -8,6 +8,7 @@ import { useRoles } from "@/hooks/useRoles";
 
 interface InternshipReportSummary {
   id: number;
+  report_number?: number;
   tracker_id?: number;
   student_name?: string | null;
   special_lab_name?: string | null;
@@ -113,6 +114,7 @@ export default function Page() {
     if (!normalized) return reports;
 
     return reports.filter((report) =>
+      report.report_number?.toString().includes(normalized) ||
       report.id.toString().includes(normalized) ||
       report.student_name?.toLowerCase().includes(normalized) ||
       report.special_lab_name?.toLowerCase().includes(normalized) ||
@@ -203,7 +205,7 @@ export default function Page() {
           <table className="w-full text-sm border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">ID</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Report #</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">
                   <button type="button" className="inline-flex items-center gap-1" onClick={() => handleSort("student_name")}>Student{computeSortIcon("student_name")}</button>
                 </th>
@@ -247,7 +249,7 @@ export default function Page() {
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                     onClick={() => setSelectedReport(report)}
                   >
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.id}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.report_number ?? report.id}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.student_name || 'Unknown'}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.special_lab_name || 'N/A'}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-700">{report.year_of_study}</td>

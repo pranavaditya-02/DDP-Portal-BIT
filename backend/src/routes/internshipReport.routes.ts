@@ -5,6 +5,7 @@ import path from 'path';
 import { z } from 'zod';
 import internshipReportService from '../services/internshipReport.service';
 import { logger } from '../utils/logger';
+import { sendEmail } from '../utils/mailer';
 
 const router = express.Router();
 
@@ -162,14 +163,38 @@ router.patch(
         return res.status(400).json({ error: 'Reject reason is required when rejecting a report.' });
       }
 
+      const searchId = Number(reportId);
+      const existingReport = await internshipReportService.getReportByIdOrNumber(searchId);
+      if (!existingReport) {
+        return res.status(404).json({ error: 'Internship report not found' });
+      }
+
       const report = await internshipReportService.updateIqacVerification(
-        Number(reportId),
+        existingReport.id,
         parsed.iqac_verification,
         parsed.reject_reason,
       );
 
       if (!report) {
         return res.status(404).json({ error: 'Internship report not found' });
+      }
+
+      if (report.student_email && parsed.iqac_verification !== 'Initiated') {
+        const statusText = parsed.iqac_verification === 'Approved' ? 'approved' : 'rejected';
+        const subject = `Internship Report ${statusText.toUpperCase()} | BannariAmman College IQAC`;
+        const bodyText = `Hello ${report.student_name ?? 'Student'},\n\nYour internship report submission (ID: ${report.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
+        const bodyHtml = `<p>Hello ${report.student_name ?? 'Student'},</p><p>Your internship report submission <strong>(ID: ${report.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+        try {
+          await sendEmail({
+            to: report.student_email,
+            subject,
+            text: bodyText,
+            html: bodyHtml,
+          });
+        } catch (emailError) {
+          logger.error('Failed to send internship report status email:', emailError);
+        }
       }
 
       return res.json({ message: 'IQAC verification updated successfully', report });
@@ -209,7 +234,7 @@ router.get('/sdg-goals', async (_req, res) => {
 router.get('/:reportId(\\d+)', async (req, res) => {
   try {
     const reportId = Number(req.params.reportId);
-    const report = await internshipReportService.getReportById(reportId);
+    const report = await internshipReportService.getReportByIdOrNumber(reportId);
     if (!report) {
       return res.status(404).json({ error: 'Internship report not found' });
     }

@@ -39,8 +39,8 @@ function StatusBadge({ status }: { status: string }) {
   
   const styles: Record<string, string> = {
     initiated: "bg-yellow-100 text-yellow-800",
-    processing: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
+    processing: "bg-green-100 text-green-800",
+    completed: "bg-red-100 text-red-800",
     participated: "bg-slate-100 text-slate-800",
     winner: "bg-amber-100 text-amber-800",
   };
@@ -57,8 +57,8 @@ function DetailsModal({
   isOpen,
   onClose,
   onDelete,
-  onUpdateIqacStatus,
-  isVerification,
+  onApprove,
+  onReject,
   isDeleting,
   isUpdating,
 }: {
@@ -66,8 +66,8 @@ function DetailsModal({
   isOpen: boolean;
   onClose: () => void;
   onDelete: (id: number) => void;
-  onUpdateIqacStatus: (id: number, status: string) => void;
-  isVerification: boolean;
+  onApprove: (id: number) => void;
+  onReject: (id: number) => void;
   isDeleting: boolean;
   isUpdating: boolean;
 }) {
@@ -278,16 +278,27 @@ function DetailsModal({
 
             {/* Actions */}
             <div className="border-t border-slate-200 pt-6 flex flex-wrap gap-3">
-              {isVerification && (
-                <button
-                  onClick={() => onUpdateIqacStatus(record.id, record.iqacVerification)}
-                  disabled={isUpdating || record.iqacVerification === "completed"}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center gap-2"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                  {isUpdating ? "Updating..." : "Update IQAC Status"}
-                </button>
+              {record.iqacVerification === "initiated" && (
+                <>
+                  <button
+                    onClick={() => onApprove(record.id)}
+                    disabled={isUpdating}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center gap-2"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                    {isUpdating ? "Approving..." : "Approve"}
+                  </button>
+                  <button
+                    onClick={() => onReject(record.id)}
+                    disabled={isUpdating}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    {isUpdating ? "Rejecting..." : "Reject"}
+                  </button>
+                </>
               )}
+              
               <button
                 onClick={() => onDelete(record.id)}
                 disabled={isDeleting}
@@ -310,6 +321,80 @@ function DetailsModal({
   );
 }
 
+// Rejection Modal Component
+function RejectionModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isLoading,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (remarks: string) => void;
+  isLoading: boolean;
+}) {
+  const [remarks, setRemarks] = useState("");
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (!remarks.trim()) {
+      alert("Please enter rejection remarks");
+      return;
+    }
+    onSubmit(remarks);
+    setRemarks("");
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black z-[9998] opacity-50 pointer-events-auto transition-opacity duration-200"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
+        <div
+          className="bg-white rounded-lg shadow-xl max-w-md w-full pointer-events-auto animate-in zoom-in duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Reject Record</h2>
+            <p className="text-sm text-slate-600 mb-4">Please provide the reason for rejection:</p>
+            
+            <textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Enter rejection reason..."
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+              rows={4}
+            />
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={onClose}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 border border-slate-300 text-slate-900 rounded-lg hover:bg-slate-50 transition font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Rejecting..." : "Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function PaperPresentationPage() {
   const [records, setRecords] = useState<PaperPresentation[]>([]);
   const [query, setQuery] = useState("");
@@ -319,8 +404,8 @@ export default function PaperPresentationPage() {
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<PaperPresentation | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const roleUtils = useRoles();
-  const isVerification = roleUtils.isVerification();
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [recordToReject, setRecordToReject] = useState<number | null>(null);
 
   // Fetch records on mount
   useEffect(() => {
@@ -370,31 +455,58 @@ export default function PaperPresentationPage() {
     }
   };
 
-  const handleUpdateIqacStatus = async (id: number, currentStatus: string) => {
-    const nextStatus = currentStatus === "initiated" ? "processing" : 
-                      currentStatus === "processing" ? "completed" : null;
-    
-    if (!nextStatus) return;
-
+  const handleApproveRecord = async (id: number) => {
     try {
       setUpdatingId(id);
       await apiClient.put(`/student-paper-presentations/${id}/iqac-status`, {
-        iqacVerification: nextStatus,
+        iqacVerification: "processing",
       });
       setRecords((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, iqacVerification: nextStatus } : r))
+        prev.map((r) => (r.id === id ? { ...r, iqacVerification: "processing" } : r))
       );
       // Update modal record if open
       if (selectedRecord?.id === id) {
-        setSelectedRecord({ ...selectedRecord, iqacVerification: nextStatus });
+        setSelectedRecord({ ...selectedRecord, iqacVerification: "processing" });
       }
       setError(null);
     } catch (err: any) {
-      console.error("Failed to update IQAC status:", err);
-      setError(err?.response?.data?.message || "Failed to update IQAC status");
+      console.error("Failed to approve record:", err);
+      setError(err?.response?.data?.message || "Failed to approve record");
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const handleRejectRecord = async (remarks: string) => {
+    if (!recordToReject) return;
+
+    try {
+      setUpdatingId(recordToReject);
+      await apiClient.put(`/student-paper-presentations/${recordToReject}/iqac-status`, {
+        iqacVerification: "completed",
+        iqacRejectionRemarks: remarks,
+      });
+      setRecords((prev) =>
+        prev.map((r) => (r.id === recordToReject ? { ...r, iqacVerification: "completed" } : r))
+      );
+      // Update modal record if open
+      if (selectedRecord?.id === recordToReject) {
+        setSelectedRecord({ ...selectedRecord, iqacVerification: "completed" });
+      }
+      setRejectionModalOpen(false);
+      setRecordToReject(null);
+      setError(null);
+    } catch (err: any) {
+      console.error("Failed to reject record:", err);
+      setError(err?.response?.data?.message || "Failed to reject record");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const openRejectModal = (id: number) => {
+    setRecordToReject(id);
+    setRejectionModalOpen(true);
   };
 
   const openDetails = (record: PaperPresentation) => {
@@ -574,10 +686,21 @@ export default function PaperPresentationPage() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onDelete={handleDeleteRecord}
-        onUpdateIqacStatus={handleUpdateIqacStatus}
-        isVerification={isVerification}
+        onApprove={handleApproveRecord}
+        onReject={openRejectModal}
         isDeleting={deletingId !== null}
         isUpdating={updatingId !== null}
+      />
+
+      {/* Rejection Modal */}
+      <RejectionModal
+        isOpen={rejectionModalOpen}
+        onClose={() => {
+          setRejectionModalOpen(false);
+          setRecordToReject(null);
+        }}
+        onSubmit={handleRejectRecord}
+        isLoading={updatingId !== null}
       />
     </div>
   );

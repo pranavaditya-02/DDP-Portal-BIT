@@ -12,9 +12,11 @@ export interface StudentNonTechnicalData {
   eventStartDate: string;
   eventEndDate: string;
   eventDuration: number;
+  eventMode: 'online' | 'offline';
   eventLocation: string;
-  eventOrganiser: 'BIT' | 'industry' | 'foreign_institute' | 'other';
-  organisorNameOther?: string;
+  eventOrganiser: 'BIT' | 'indian_institute' | 'foreign_institute' | 'industry';
+  organisationName?: string;
+  organisationLocation?: string;
   eventLevel: 'international' | 'national' | 'district' | 'regional' | 'zonal';
   country?: string;
   state?: string;
@@ -52,7 +54,8 @@ function convertToCamelCase(row: any): any {
     eventDuration: row.event_duration,
     eventLocation: row.event_location,
     eventOrganiser: row.event_organiser,
-    organisorNameOther: row.organisor_name_other,
+    organisationName: row.organisation_name,
+    organisationLocation: row.organisation_location,
     eventLevel: row.event_level,
     country: row.country,
     state: row.state,
@@ -90,13 +93,13 @@ class StudentNonTechnicalService {
       const query = `
         INSERT INTO student_non_technical (
           student_id, student_name, year_of_study, event_attended, club_id, club_events,
-          other_event_specify, event_start_date, event_end_date, event_duration, event_location,
-          event_organiser, organisor_name_other, event_level, country, state, within_bit,
+          other_event_specify, event_start_date, event_end_date, event_duration, event_mode, event_location,
+          event_organiser, organisation_name, organisation_location, event_level, country, state, within_bit,
           home_department, role_in_event, role_specify_organised, role_specify_participated,
           status, prize_type, prize_amount, social_activity_involved, social_activity_name,
           time_spent_hours, interdisciplinary, interdisciplinary_dept, other_dept_student_count,
           certificate_proof_path, iqac_verification, created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const [result] = await connection.execute(query, [
@@ -110,9 +113,11 @@ class StudentNonTechnicalService {
         data.eventStartDate,
         data.eventEndDate,
         data.eventDuration,
+        data.eventMode,
         data.eventLocation,
         data.eventOrganiser,
-        data.organisorNameOther || null,
+        data.organisationName || null,
+        data.organisationLocation || null,
         data.eventLevel,
         data.country || null,
         data.state || null,
@@ -240,9 +245,11 @@ class StudentNonTechnicalService {
         eventStartDate: 'event_start_date',
         eventEndDate: 'event_end_date',
         eventDuration: 'event_duration',
+        eventMode: 'event_mode',
         eventLocation: 'event_location',
         eventOrganiser: 'event_organiser',
-        organisorNameOther: 'organisor_name_other',
+        organisationName: 'organisation_name',
+        organisationLocation: 'organisation_location',
         eventLevel: 'event_level',
         withinBIT: 'within_bit',
         homeDepartment: 'home_department',

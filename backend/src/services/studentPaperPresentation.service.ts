@@ -4,6 +4,7 @@ import { logger } from '../utils/logger';
 export interface StudentPaperPresentationData {
   studentId: string;
   studentName: string;
+  studentEmail?: string;
   paperTitle: string;
   eventStartDate: string;
   eventEndDate: string;
@@ -14,6 +15,7 @@ export interface StudentPaperPresentationData {
   attestedCertificatePath?: string;
   status: 'participated' | 'winner';
   iqacVerification?: 'initiated' | 'processing' | 'completed';
+  iqacRejectionRemarks?: string;
   parentalDepartmentId?: number;
   createdBy?: string;
 }
@@ -23,6 +25,7 @@ function convertToCamelCase(row: any): any {
     id: row.id,
     studentId: row.student_id,
     studentName: row.student_name,
+    studentEmail: row.student_email,
     paperTitle: row.paper_title,
     eventStartDate: row.event_start_date,
     eventEndDate: row.event_end_date,
@@ -33,6 +36,7 @@ function convertToCamelCase(row: any): any {
     attestedCertificatePath: row.attested_certificate_path,
     status: row.status,
     iqacVerification: row.iqac_verification,
+    iqacRejectionRemarks: row.iqac_rejection_remarks,
     parentalDepartmentId: row.parental_department_id,
     createdBy: row.created_by,
     createdAt: row.created_at,
@@ -51,16 +55,17 @@ class StudentPaperPresentationService {
     try {
       const query = `
         INSERT INTO student_paper_presentations (
-          student_id, student_name, paper_title, event_start_date, event_end_date,
+          student_id, student_name, student_email, paper_title, event_start_date, event_end_date,
           is_academic_project_outcome, image_proof_path, abstract_proof_path,
           certificate_proof_path, attested_certificate_path,
           status, iqac_verification, parental_department_id, created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const [result] = await connection.execute(query, [
         data.studentId,
         data.studentName,
+        data.studentEmail || null,
         data.paperTitle,
         data.eventStartDate,
         data.eventEndDate,
@@ -171,6 +176,32 @@ class StudentPaperPresentationService {
       
       if (results.length > 0) {
         return convertToCamelCase(results[0]);
+      }
+      return null;
+    } catch (error) {
+      logger.error('Error fetching paper presentation:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async getPresentationByIdWithEmail(id: number): Promise<any> {
+    const pool = getMysqlPool();
+    const connection = await pool.getConnection();
+
+    try {
+      const query = `
+        SELECT spp.*, spp.student_email
+        FROM student_paper_presentations spp
+        WHERE spp.id = ?
+      `;
+      const [rows] = await connection.execute(query, [id]);
+      const results = rows as any[];
+      
+      if (results.length > 0) {
+        const record = convertToCamelCase(results[0]);
+        return record;
       }
       return null;
     } catch (error) {

@@ -16,9 +16,11 @@ interface FormData {
   eventStartDate: string;
   eventEndDate: string;
   eventDuration: string;
+  eventMode: "online" | "offline" | "";
   eventLocation: string;
-  eventOrganiser: "BIT" | "industry" | "foreign_institute" | "other" | "";
-  organisorNameOther?: string;
+  eventOrganiser: "BIT" | "indian_institute" | "foreign_institute" | "industry" | "";
+  organisationName?: string;
+  organisationLocation?: string;
   eventLevel: "international" | "national" | "district" | "regional" | "zonal" | "";
   country?: string;
   state?: string;
@@ -157,6 +159,7 @@ export default function NonTechnicalSubmitPage() {
     eventStartDate: "",
     eventEndDate: "",
     eventDuration: "",
+    eventMode: "",
     eventLocation: "",
     eventOrganiser: "",
     eventLevel: "",
@@ -219,9 +222,11 @@ export default function NonTechnicalSubmitPage() {
       newErrors.eventEndDate = "End date must be after start date";
     }
     if (!formData.eventDuration) newErrors.eventDuration = "Event duration is required";
+    if (!formData.eventMode) newErrors.eventMode = "Event mode is required";
     if (!formData.eventLocation?.trim()) newErrors.eventLocation = "Event location is required";
     if (!formData.eventOrganiser) newErrors.eventOrganiser = "Event organiser is required";
-    if (formData.eventOrganiser === "other" && !formData.organisorNameOther?.trim()) newErrors.organisorNameOther = "Please specify organiser name";
+    if ((formData.eventOrganiser === "indian_institute" || formData.eventOrganiser === "foreign_institute" || formData.eventOrganiser === "industry") && !formData.organisationName?.trim()) newErrors.organisationName = "Organisation name is required";
+    if ((formData.eventOrganiser === "indian_institute" || formData.eventOrganiser === "foreign_institute" || formData.eventOrganiser === "industry") && !formData.organisationLocation?.trim()) newErrors.organisationLocation = "Organisation location is required";
     if (!formData.eventLevel) newErrors.eventLevel = "Event level is required";
     if (formData.eventLevel === "international" && !formData.country?.trim()) newErrors.country = "Country is required";
     if (formData.eventLevel === "national" && !formData.state?.trim()) newErrors.state = "State is required";
@@ -286,10 +291,12 @@ export default function NonTechnicalSubmitPage() {
       formDataToSend.append("eventStartDate", formData.eventStartDate);
       formDataToSend.append("eventEndDate", formData.eventEndDate);
       formDataToSend.append("eventDuration", formData.eventDuration);
+      formDataToSend.append("eventMode", formData.eventMode);
       formDataToSend.append("eventLocation", formData.eventLocation);
       formDataToSend.append("eventOrganiser", formData.eventOrganiser);
-      if (formData.eventOrganiser === "other") {
-        formDataToSend.append("organisorNameOther", formData.organisorNameOther || "");
+      if (formData.eventOrganiser === "indian_institute" || formData.eventOrganiser === "foreign_institute" || formData.eventOrganiser === "industry") {
+        formDataToSend.append("organisationName", formData.organisationName || "");
+        formDataToSend.append("organisationLocation", formData.organisationLocation || "");
       }
       formDataToSend.append("eventLevel", formData.eventLevel);
       if (formData.eventLevel === "international") {
@@ -649,29 +656,71 @@ export default function NonTechnicalSubmitPage() {
               >
                 <option value="">-- Select Organiser --</option>
                 <option value="BIT">BIT</option>
-                <option value="industry">Industry</option>
+                <option value="indian_institute">Indian Institute</option>
                 <option value="foreign_institute">Foreign Institute</option>
-                <option value="other">Other</option>
+                <option value="industry">Industry</option>
               </select>
               {errors.eventOrganiser && <p className="text-red-600 text-sm mt-2">{errors.eventOrganiser}</p>}
             </div>
 
-            {/* Conditional: Other Organiser Name */}
-            {formData.eventOrganiser === "other" && (
-              <div>
-                <label className="block font-medium text-slate-700 mb-2">
-                  Organiser Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.organisorNameOther || ""}
-                  onChange={(e) => handleChange("organisorNameOther", e.target.value)}
-                  placeholder="Enter organiser name"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.organisorNameOther ? "border-red-400 bg-red-50" : "border-slate-300"
-                  }`}
-                />
-                {errors.organisorNameOther && <p className="text-red-600 text-sm mt-2">{errors.organisorNameOther}</p>}
+            {/* Event Mode */}
+            <div>
+              <label className="block font-medium text-slate-700 mb-2">
+                Event Mode <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.eventMode}
+                onChange={(e) => handleChange("eventMode", e.target.value)}
+                className={`w-full px-4 py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none ${
+                  errors.eventMode ? "border-red-400 bg-red-50" : "border-slate-300"
+                }`}
+                style={{
+                  backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 8 10 12 14 8"></polyline></svg>')`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 8px center',
+                  backgroundSize: '20px',
+                }}
+              >
+                <option value="">-- Select Mode --</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+              </select>
+              {errors.eventMode && <p className="text-red-600 text-sm mt-2">{errors.eventMode}</p>}
+            </div>
+
+            {/* Conditional: Organisation Details for Indian Institute, Foreign Institute, and Industry */}
+            {(formData.eventOrganiser === "indian_institute" || formData.eventOrganiser === "foreign_institute" || formData.eventOrganiser === "industry") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block font-medium text-slate-700 mb-2">
+                    Name of the Organisation <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.organisationName || ""}
+                    onChange={(e) => handleChange("organisationName", e.target.value)}
+                    placeholder="Enter organisation name"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                      errors.organisationName ? "border-red-400 bg-red-50" : "border-slate-300"
+                    }`}
+                  />
+                  {errors.organisationName && <p className="text-red-600 text-sm mt-2">{errors.organisationName}</p>}
+                </div>
+                <div>
+                  <label className="block font-medium text-slate-700 mb-2">
+                    Location of the Organisation <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.organisationLocation || ""}
+                    onChange={(e) => handleChange("organisationLocation", e.target.value)}
+                    placeholder="Enter organisation location"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                      errors.organisationLocation ? "border-red-400 bg-red-50" : "border-slate-300"
+                    }`}
+                  />
+                  {errors.organisationLocation && <p className="text-red-600 text-sm mt-2">{errors.organisationLocation}</p>}
+                </div>
               </div>
             )}
 

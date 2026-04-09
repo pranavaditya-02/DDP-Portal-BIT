@@ -14,6 +14,7 @@ import path from 'path';
 import fs from 'fs';
 import studentPaperPresentationService from '../services/studentPaperPresentation.service';
 import { logger } from '../utils/logger';
+import { sendEmail } from '../utils/mailer';
 
 const router = Router();
 
@@ -271,7 +272,7 @@ router.put(
 router.put('/:id/iqac-status', async (req: Request, res: Response) => {
   try {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
-    const { iqacVerification } = req.body;
+    const { iqacVerification, iqacRejectionRemarks } = req.body;
 
     if (!['initiated', 'processing', 'completed'].includes(iqacVerification)) {
       return res.status(400).json({
@@ -279,9 +280,52 @@ router.put('/:id/iqac-status', async (req: Request, res: Response) => {
         message: 'Invalid IQAC verification status',
       });
     }
-    await studentPaperPresentationService.updatePresentation(parseInt(idParam), {
-      iqacVerification: iqacVerification as 'initiated' | 'processing' | 'completed',
-    });
+
+    const id = parseInt(idParam);
+
+    // Get the record
+    const record = await studentPaperPresentationService.getPresentationByIdWithEmail(id);
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Paper presentation record not found',
+      });
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      iqacVerification,
+    };
+    
+    if (iqacRejectionRemarks && iqacVerification === 'completed') {
+      updateData.iqacRejectionRemarks = iqacRejectionRemarks;
+    }
+
+    // Update the record
+    await studentPaperPresentationService.updatePresentation(id, updateData);
+
+    // Send email notification if student email is available
+    const studentEmail = record.studentEmail;
+    if (studentEmail) {
+      const statusText = iqacVerification === 'processing' ? 'APPROVED' : iqacVerification === 'completed' ? 'REJECTED' : 'UNDER REVIEW';
+      const subject = `Paper Presentation Submission ${statusText} - BannariAmman College`;
+      const bodyText = `Hello ${record.studentName ?? 'Student'},\n\nYour paper presentation submission (ID: ${record.id}, Title: "${record.paperTitle}") has been ${statusText} by the IQAC team at BannariAmman College.\n${iqacRejectionRemarks ? `\nReason: ${iqacRejectionRemarks}\n` : ''}\nIf you have any questions, please reply to this email.\n\nIQAC Team\nBannariAmman College`;
+      const bodyHtml = `<p>Hello ${record.studentName ?? 'Student'},</p><p>Your paper presentation submission <strong>(ID: ${record.id})</strong> with title <strong>"${record.paperTitle}"</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${iqacRejectionRemarks ? `<p><strong>Reason:</strong> ${iqacRejectionRemarks}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+      try {
+        await sendEmail({
+          to: studentEmail,
+          subject,
+          text: bodyText,
+          html: bodyHtml,
+        });
+        logger.info(`Email notification sent to ${studentEmail} for paper presentation ${id}`);
+      } catch (emailError) {
+        logger.error('Failed to send paper presentation status email:', emailError);
+      }
+    }
+
+    logger.info(`IQAC status updated for paper presentation ${id}: ${iqacVerification}${iqacRejectionRemarks ? ' with remarks: ' + iqacRejectionRemarks : ''}`);
 
     res.status(200).json({
       success: true,

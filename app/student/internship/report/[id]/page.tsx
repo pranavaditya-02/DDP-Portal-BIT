@@ -9,6 +9,7 @@ import { useRoles } from "@/hooks/useRoles";
 
 interface InternshipReportDetail {
   id: number;
+  report_number?: number;
   tracker_id: number;
   student_name?: string | null;
   special_lab_name?: string | null;
@@ -133,7 +134,7 @@ export default function Page() {
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <div className="text-xs uppercase tracking-wide text-slate-500">Report ID</div>
-                <div className="mt-1 text-lg font-semibold text-slate-900">{report.id}</div>
+                <div className="mt-1 text-lg font-semibold text-slate-900">{report.report_number ?? report.id}</div>
               </div>
               <div>
                 <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
