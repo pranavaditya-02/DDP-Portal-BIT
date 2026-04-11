@@ -4842,3 +4842,9 @@
 {"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}
 {"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}
 {"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 12:13:44"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 12:13:44"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-11 12:13:46"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 12:13:47"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-11 12:13:48"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-11 12:13:48"}
