@@ -31,8 +31,14 @@ export default function CreatePatentTrackerPage() {
 	// Additional student members (indices 2..10)
 	const [memberIds, setMemberIds] = useState<Array<number | null>>(Array(9).fill(null));
 
-	// faculty id (free text - faculty identifier)
+	// number of additional student members to show (0..9)
+	const [extraCount, setExtraCount] = useState<number>(0);
+
+	// faculty autocomplete state (selected faculty id is string)
 	const [facultyId, setFacultyId] = useState<string>("");
+	const [faculties, setFaculties] = useState<Array<{ id: string; name: string | null; email: string | null }>>([]);
+	const [facultyQuery, setFacultyQuery] = useState<string>("");
+	const [showFacultySuggestions, setShowFacultySuggestions] = useState(false);
 
 	// IQAC verification state (default Initiated)
 	const [iqacVerification, setIqacVerification] = useState<string>("Initiated");
@@ -89,6 +95,42 @@ export default function CreatePatentTrackerPage() {
 				if (!cancelled) setStudents(resp?.students || []);
 			} catch (err) {
 				console.error('Failed to load students for dropdowns', err);
+			}
+		})();
+
+		return () => { cancelled = true };
+	}, []);
+
+	// Debounced load faculties on query change
+	useEffect(() => {
+		let cancelled = false;
+
+		if (!facultyQuery || facultyQuery.trim().length === 0) {
+			setFaculties([]);
+			return;
+		}
+
+		const timerF = window.setTimeout(async () => {
+			try {
+				const resp = await apiClient.getFaculties(facultyQuery.trim());
+				if (!cancelled) setFaculties(resp?.faculties || []);
+			} catch (err) {
+				console.error('Failed to load faculties', err);
+			}
+		}, 200);
+
+		return () => { cancelled = true; window.clearTimeout(timerF); };
+	}, [facultyQuery]);
+
+	// load some faculties for dropdowns on mount
+	useEffect(() => {
+		let cancelled = false;
+		( async () => {
+			try {
+				const resp = await apiClient.getFaculties();
+				if (!cancelled) setFaculties(resp?.faculties || []);
+			} catch (err) {
+				console.error('Failed to load faculties for dropdowns', err);
 			}
 		})();
 
@@ -268,16 +310,62 @@ export default function CreatePatentTrackerPage() {
 							</select>
 						</div>
 
-						{/* If applicants include faculty, show faculty id/text input */}
+						{/* If applicants include faculty, show faculty autocomplete */}
 						{applicants === 'BIT student along with faculty' && (
-							<div className="sm:col-span-2">
-								<label className="block text-sm font-medium text-slate-700 mb-2">Faculty (ID or name)</label>
-								<input type="text" value={facultyId} onChange={(e) => setFacultyId(e.target.value)} placeholder="Faculty ID or name" className="input-base w-full" />
+							<div className="sm:col-span-2 relative">
+								<label className="block text-sm font-medium text-slate-700 mb-2">Faculty</label>
+								<input
+									type="text"
+									value={facultyQuery || (facultyId ?? '')}
+									onChange={(e) => { setFacultyQuery(e.target.value); setFacultyId(''); setShowFacultySuggestions(true); }}
+									onFocus={() => setShowFacultySuggestions(true)}
+									onBlur={() => setTimeout(() => setShowFacultySuggestions(false), 150)}
+									placeholder={faculties.length === 0 ? 'Loading faculties...' : 'Type faculty name or id'}
+									className="input-base w-full"
+									autoComplete="off"
+								/>
+								{showFacultySuggestions && (facultyQuery || '').trim().length > 0 && (
+									<div className="absolute z-20 mt-1 w-full bg-white border border-slate-200 rounded shadow-lg max-h-56 overflow-auto">
+										{faculties.filter((opt) => ((opt.name || '').toLowerCase().includes((facultyQuery || '').toLowerCase()) || opt.id.toLowerCase().includes((facultyQuery || '').toLowerCase()))).length === 0 ? (
+											<div className="p-2 text-xs text-slate-500">No matching faculties</div>
+										) : (
+											faculties.filter((opt) => ((opt.name || '').toLowerCase().includes((facultyQuery || '').toLowerCase()) || opt.id.toLowerCase().includes((facultyQuery || '').toLowerCase()))).slice(0, 50).map((opt) => (
+												<button key={opt.id} type="button" className="w-full text-left px-2 py-1 hover:bg-slate-100" onMouseDown={(e) => e.preventDefault()} onClick={() => { setFacultyId(opt.id); setFacultyQuery(opt.name || opt.id); setShowFacultySuggestions(false); }}>
+												<div className="text-sm font-medium text-slate-700">{opt.name || opt.id}</div>
+												<div className="text-xs text-slate-500">{opt.id}{opt.email ? ` • ${opt.email}` : ''}</div>
+											</button>
+											))
+										)}
+									</div>
+								)}
+								<p className="text-xs text-slate-500">Select a faculty from the suggestions to ensure the record is saved.</p>
 							</div>
 						)}
 
-						{/* Additional student member selects (2..10) */}
-						{[...Array(9)].map((_, idx) => {
+						{/* Control to choose how many additional student member fields to show (max 9) */}
+						<div className="sm:col-span-2 flex items-center gap-3">
+							<label className="block text-sm font-medium text-slate-700">Additional student members</label>
+							<div className="inline-flex items-center border rounded">
+								<button type="button" className="px-3 py-1" onClick={() => {
+									setExtraCount((c) => {
+										const next = Math.max(0, c - 1);
+										if (next < c) {
+											// clear any truncated member ids
+											const copy = [...memberIds];
+											for (let i = next; i < copy.length; i++) copy[i] = null;
+											setMemberIds(copy);
+										}
+										return next;
+									});
+								}}>-</button>
+								<div className="px-4">{extraCount}</div>
+								<button type="button" className="px-3 py-1" onClick={() => setExtraCount((c) => Math.min(9, c + 1))}>+</button>
+							</div>
+							<p className="text-xs text-slate-500 ml-2">Add up to 9 additional student members.</p>
+						</div>
+
+						{/* Render only the number of additional member selects requested by extraCount */}
+						{memberIds.slice(0, extraCount).map((_, idx) => {
 							const labelIndex = idx + 2;
 							return (
 								<div key={idx} className="sm:col-span-2">

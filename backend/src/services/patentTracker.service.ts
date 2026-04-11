@@ -28,6 +28,7 @@ const CREATE_PATENT_TRACKER_SQL = `CREATE TABLE IF NOT EXISTS patent_tracker (
   forms_1_and_2_prepared ENUM('Yes','No') DEFAULT 'No',
   forms_file_path VARCHAR(512),
   iqac_verification ENUM('Initiated','Approved','Declined') DEFAULT 'Initiated',
+  reject_reason VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );`;
@@ -72,6 +73,18 @@ export interface PatentTrackerCreateInput {
 export interface PatentTrackerRecord {
   id: number;
   student_id: number;
+  student_name?: string | null;
+  student_roll_no?: string | null;
+  student_email?: string | null;
+  second_student_id?: number | null;
+  third_student_id?: number | null;
+  fourth_student_id?: number | null;
+  fifth_student_id?: number | null;
+  sixth_student_id?: number | null;
+  seventh_student_id?: number | null;
+  eighth_student_id?: number | null;
+  ninth_student_id?: number | null;
+  tenth_student_id?: number | null;
   patent_contribution: string;
   patent_title: string;
   applicants_involved: string;
@@ -86,6 +99,7 @@ export interface PatentTrackerRecord {
   forms_1_and_2_prepared: string;
   forms_file_path?: string | null;
   iqac_verification: string;
+  reject_reason?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -138,21 +152,21 @@ export class PatentTrackerService {
   async updateIqacVerification(id: number, iqac_verification: 'Initiated' | 'Approved' | 'Declined'): Promise<PatentTrackerRecord | null> {
     await ensureTableExists();
     const pool = getMysqlPool();
-    await pool.query('UPDATE patent_tracker SET iqac_verification = ? WHERE id = ?', [iqac_verification, id]);
+    await pool.query('UPDATE patent_tracker SET iqac_verification = ?, reject_reason = NULL WHERE id = ?', [iqac_verification, id]);
     return this.getTrackerById(id);
   }
 
   async getTrackerById(id: number): Promise<PatentTrackerRecord | null> {
     await ensureTableExists();
     const pool = getMysqlPool();
-    const [rows] = await pool.query<RowDataPacket[]>(`SELECT * FROM patent_tracker WHERE id = ? LIMIT 1`, [id]);
+    const [rows] = await pool.query<RowDataPacket[]>(`SELECT pt.*, s.student_name, s.roll_no AS student_roll_no, s.college_email AS student_email FROM patent_tracker pt LEFT JOIN students s ON pt.student_id = s.id WHERE pt.id = ? LIMIT 1`, [id]);
     return (rows as PatentTrackerRecord[])[0] ?? null;
   }
 
   async listTrackers(): Promise<PatentTrackerRecord[]> {
     await ensureTableExists();
     const pool = getMysqlPool();
-    const [rows] = await pool.query<RowDataPacket[]>(`SELECT * FROM patent_tracker ORDER BY created_at DESC LIMIT 1000`);
+    const [rows] = await pool.query<RowDataPacket[]>(`SELECT pt.*, s.student_name, s.roll_no AS student_roll_no, s.college_email AS student_email FROM patent_tracker pt LEFT JOIN students s ON pt.student_id = s.id ORDER BY pt.created_at DESC LIMIT 1000`);
     return rows as PatentTrackerRecord[];
   }
 }

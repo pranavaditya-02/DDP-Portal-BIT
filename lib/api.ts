@@ -298,6 +298,13 @@ export const apiClient = {
     return response.data;
   },
 
+  getFaculties: async (q?: string) => {
+    const response = await client.get('/faculties', {
+      params: q ? { q } : undefined,
+    });
+    return response.data;
+  },
+
   createIndustry: async (data: {
     industry: string;
     address: string;
@@ -352,6 +359,18 @@ export const apiClient = {
 
   getPatentTrackers: async () => {
     const response = await client.get('/patent-tracker');
+    return response.data;
+  },
+
+  getPatentTrackerById: async (id: number) => {
+    const response = await client.get(`/patent-tracker/${id}`);
+    return response.data;
+  },
+
+  updatePatentTrackerIqac: async (id: number, iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string) => {
+    const payload: Record<string, unknown> = { iqac_verification };
+    if (reject_reason) payload.reject_reason = reject_reason;
+    const response = await client.patch(`/patent-tracker/${id}/iqac`, payload);
     return response.data;
   },
 

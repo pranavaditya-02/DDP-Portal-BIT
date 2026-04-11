@@ -27,7 +27,25 @@ export default function PatentReportCreatePage() {
 
 	const [patentStatus, setPatentStatus] = useState<string>("filed");
 	const [patentTrackerId, setPatentTrackerId] = useState<number | null>(null);
-	const [yearOfStudy, setYearOfStudy] = useState("");
+	const [level, setLevel] = useState("");
+
+	// filed-specific additional fields
+	const [positionOfStudent, setPositionOfStudent] = useState<string>("");
+	const [isAcademicProject, setIsAcademicProject] = useState<string>("");
+	const [registrationDate, setRegistrationDate] = useState<string>("");
+	const [cbrReceipt, setCbrReceipt] = useState<File | null>(null);
+	const [applicationNumber, setApplicationNumber] = useState<string>("");
+	const [sdgGoals, setSdgGoals] = useState<string>("");
+	const [iqacVerification, setIqacVerification] = useState<string>("Initiated");
+	const [isEarlyPublicationFiled, setIsEarlyPublicationFiled] = useState<string>("");
+	const [isExaminationFiled, setIsExaminationFiled] = useState<string>("");
+	const [patentLicenseDetails, setPatentLicenseDetails] = useState<string>("");
+	const [fundingAgency, setFundingAgency] = useState<string>("");
+	const [fundsReceived, setFundsReceived] = useState<string>("");
+	const [fundAmount, setFundAmount] = useState<string>("");
+	const [interdisciplinary, setInterdisciplinary] = useState<string>("");
+	const [department, setDepartment] = useState<string>("");
+	const [otherDepartmentStudents, setOtherDepartmentStudents] = useState<string>("");
 
 	// common files
 	const [yuktiProof, setYuktiProof] = useState<File | null>(null);
@@ -40,8 +58,11 @@ export default function PatentReportCreatePage() {
 	// granted-specific
 	const [grantedProof, setGrantedProof] = useState<File | null>(null);
 
-	const [numberOfFaculty, setNumberOfFaculty] = useState<number>(1);
+	const [numberOfFaculty, setNumberOfFaculty] = useState<number>(0);
 	const [faculty1, setFaculty1] = useState<string>("");
+	const [faculty2, setFaculty2] = useState<string>("");
+	const [faculty3, setFaculty3] = useState<string>("");
+	const [faculty4, setFaculty4] = useState<string>("");
 
 	const [priorArt, setPriorArt] = useState("");
 	const [novelty, setNovelty] = useState("");
@@ -112,6 +133,16 @@ export default function PatentReportCreatePage() {
 			return;
 		}
 
+		if (patentStatus === 'filed' && !fullDocumentProof) {
+			setError('Full document proof is required for filed status.');
+			return;
+		}
+
+		if (patentStatus === 'filed' && !cbrReceipt) {
+			setError('CBR Receipt is required for filed status.');
+			return;
+		}
+
 		if (patentStatus === 'published' && !publicationProof) {
 			setError('Publication proof is required for published status.');
 			return;
@@ -128,16 +159,28 @@ export default function PatentReportCreatePage() {
 			formData.append('student_id', String(selectedStudent.id));
 			formData.append('patent_status', patentStatus);
 			if (patentTrackerId) formData.append('patent_tracker_id', String(patentTrackerId));
-			formData.append('year_of_study', yearOfStudy);
 			formData.append('prior_art', priorArt);
 			formData.append('novelty', novelty);
 			formData.append('number_of_faculty', String(numberOfFaculty));
-			formData.append('faculty_1', faculty1);
 			if (yuktiProof) formData.append('yukti_proof', yuktiProof);
 			if (fullDocumentProof) formData.append('full_document_proof', fullDocumentProof);
+			if (cbrReceipt) formData.append('cbr_receipt', cbrReceipt);
+			if (positionOfStudent) formData.append('position_of_student', positionOfStudent);
+			if (isAcademicProject) formData.append('is_academic_project', isAcademicProject);
+			if (registrationDate) formData.append('registration_date', registrationDate);
+			if (applicationNumber) formData.append('application_number', applicationNumber);
+			if (sdgGoals) formData.append('sdg_goals', sdgGoals);
+			if (iqacVerification) formData.append('iqac_verification', iqacVerification);
+			
 			if (publicationProof) formData.append('publication_proof', publicationProof);
 			if (publishedDate) formData.append('published_date', publishedDate);
 			if (grantedProof) formData.append('granted_proof', grantedProof);
+
+			// append faculty names
+			if (faculty1) formData.append('faculty_1', faculty1);
+			if (numberOfFaculty >= 2 && faculty2) formData.append('faculty_2', faculty2);
+			if (numberOfFaculty >= 3 && faculty3) formData.append('faculty_3', faculty3);
+			if (numberOfFaculty >= 4 && faculty4) formData.append('faculty_4', faculty4);
 
 			await apiClient.createPatentReport(formData);
 			setMessage('Patent report submitted successfully.');
@@ -203,18 +246,122 @@ export default function PatentReportCreatePage() {
 							</select>
 						</label>
 
+						
+
 						<label className="block sm:col-span-2">
 							<span className="text-sm font-medium text-slate-700">Yukti Portal Registration Proof *</span>
 							<input ref={yuktiRef} type="file" accept="application/pdf,image/*" onChange={(e) => setYuktiProof(e.target.files?.[0] ?? null)} className="input-base mt-1 w-full" />
 							<p className="text-xs text-slate-500">Yukti Registration Procedure: Download linked procedure if needed.</p>
+						</label>
+						<label className="block">
+							<span className="text-sm font-medium text-slate-700">Position of Student in Patent *</span>
+							<select value={positionOfStudent} onChange={(e) => setPositionOfStudent(e.target.value)} className="input-base mt-1 w-full">
+								<option value="">Choose an option</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+								<option value="6">6</option>
+								<option value="7">7</option>
+								<option value="8">8</option>
+								<option value="9">9</option>
+								<option value="10">10</option>
+							</select>
+						</label>
+
+						<label className="block">
+							<span className="text-sm font-medium text-slate-700">Are you claiming this as the outcome of an academic project *</span>
+							<select value={isAcademicProject} onChange={(e) => setIsAcademicProject(e.target.value)} className="input-base mt-1 w-full">
+								<option value="">Choose an option</option>
+								<option value="yes">Yes</option>
+								<option value="no">No</option>
+							</select>
 						</label>
 
 						{patentStatus === 'filed' && (
 							<>
 								<label className="block sm:col-span-2">
 									<span className="text-sm font-medium text-slate-700">Patent Tracker *</span>
-									<input placeholder="Tracker id (optional)" value={patentTrackerId ?? ''} onChange={(e) => setPatentTrackerId(Number(e.target.value) || null)} className="input-base mt-1 w-full" />
+									<input placeholder="Tracker" value={patentTrackerId ?? ''} onChange={(e) => setPatentTrackerId(Number(e.target.value) || null)} className="input-base mt-1 w-full" />
 								</label>
+
+								<label>
+									<span className="text-sm font-medium text-slate-700">level *</span>
+									<select value={level} onChange={(e) => setLevel(e.target.value)} className="input-base mt-1 w-full">
+										<option value="">Choose an option</option>
+										<option value="1">national</option>
+										<option value="2">international</option>
+									</select>
+								</label>
+
+								<label className="block">
+									<span className="text-sm font-medium text-slate-700">Is the request for early publication been filed(Form 9)? *</span>
+									<select value={isEarlyPublicationFiled} onChange={(e) => setIsEarlyPublicationFiled(e.target.value)} className="input-base mt-1 w-full">
+										<option value="">Choose an option</option>
+										<option value="yes">Yes</option>
+										<option value="no">No</option>
+									</select>
+								</label>
+
+								<label className="block">
+									<span className="text-sm font-medium text-slate-700">Is the request for examination been filed(Form 18)? *</span>
+									<select value={isExaminationFiled} onChange={(e) => setIsExaminationFiled(e.target.value)} className="input-base mt-1 w-full">
+										<option value="">Choose an option</option>
+										<option value="yes">Yes</option>
+										<option value="no">No</option>
+									</select>
+								</label>
+
+								<label className="block">
+									<span className="text-sm font-medium text-slate-700">Patent License Details*</span>
+									<textarea value={patentLicenseDetails} onChange={(e) => setPatentLicenseDetails(e.target.value)} className="input-base h-28 w-full mt-1" />
+								</label>
+
+								<label className="block">
+									<span className="text-sm font-medium text-slate-700">Funding Agency *</span>
+									<input placeholder="Funding Agency" value={fundingAgency} onChange={(e) => setFundingAgency(e.target.value)} className="input-base mt-1 w-full" />
+								</label>
+
+								<label className="block">
+									<span className="text-sm font-medium text-slate-700">Funds received from management *</span>
+									<select value={fundsReceived} onChange={(e) => setFundsReceived(e.target.value)} className="input-base mt-1 w-full">
+										<option value="">Choose an option</option>
+										<option value="yes">Yes</option>
+										<option value="no">No</option>
+									</select>
+								</label>
+								{fundsReceived === 'yes' && (
+									<label className="block">
+										<span className="text-sm font-medium text-slate-700">Fund Amount *</span>
+										<input placeholder="Fund Amount" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} className="input-base mt-1 w-full" />
+									</label>
+								)}
+								<label className="block">
+									<span className="text-sm font-medium text-slate-700">interseciplinary *</span>
+									<select value={interdisciplinary} onChange={(e) => setInterdisciplinary(e.target.value)} className="input-base mt-1 w-full">
+										<option value="">Choose an option</option>
+										<option value="yes">Yes</option>
+										<option value="no">No</option>
+									</select>
+								</label>
+								{interdisciplinary === 'yes' && (
+									<>
+										<label className="block">
+											<span className="text-sm font-medium text-slate-700">department *</span>
+											<select value={department} onChange={(e) => setDepartment(e.target.value)} className="input-base mt-1 w-full">
+												<option value="">Choose an option</option>
+												<option value="cs">Computer Science</option>
+												<option value="ee">Electrical Engineering</option>
+											</select>
+										</label>
+
+										<label className="block">
+											<span className="text-sm font-medium text-slate-700">Number of Other Department Students *</span>
+											<input placeholder="Number of Other Department Students" value={otherDepartmentStudents} onChange={(e) => setOtherDepartmentStudents(e.target.value)} className="input-base mt-1 w-full" />
+										</label>
+									</>
+								)}
 
 								<label className="block sm:col-span-2">
 									<span className="text-sm font-medium text-slate-700">Full Document Proof *</span>
@@ -222,6 +369,107 @@ export default function PatentReportCreatePage() {
 								</label>
 							</>
 						)}
+
+
+						{patentStatus === 'published' && (
+							<>
+							<label className="block">
+								<span className="text-sm font-medium text-slate-700">Approved Filed Bip ID *</span>
+								<input placeholder="Approved Filed Bip ID" value={patentTrackerId ?? ''} onChange={(e) => setPatentTrackerId(Number(e.target.value) || null)} className="input-base mt-1 w-full" />
+							</label>
+
+							<label className="block">
+								<span className="text-sm font-medium text-slate-700">publication proof *</span>
+								<input ref={publicationRef} type="file" accept="application/pdf,image/*" onChange={(e) => setPublicationProof(e.target.files?.[0] ?? null)} className="input-base mt-1 w-full" />
+							</label>
+
+							<label className="block">
+								<span className="text-sm font-medium text-slate-700">Published Registration Date *</span>
+								<input type="date" value={registrationDate} onChange={(e) => setRegistrationDate(e.target.value)} className="input-base mt-1 w-full" />
+							</label>
+							</>
+						)}
+
+						{patentStatus === 'granted' && (
+							<>
+
+							<label className="block">
+								<span className="text-sm font-medium text-slate-700">Approved Filed Bip ID *</span>
+								<input placeholder="Approved Filed Bip ID" value={patentTrackerId ?? ''} onChange={(e) => setPatentTrackerId(Number(e.target.value) || null)} className="input-base mt-1 w-full" />
+							</label>
+
+							<label className="block">
+								<span className="text-sm font-medium text-slate-700">Granted proof *</span>
+								<input ref={grantedRef} type="file" accept="application/pdf,image/*" onChange={(e) => setGrantedProof(e.target.files?.[0] ?? null)} className="input-base mt-1 w-full" />
+							</label>
+
+							</>
+						)}
+
+							<div className="sm:col-span-2">
+								<label className="block text-sm font-medium text-slate-700">Number of Faculty Involved *</label>
+								<div className="flex items-center gap-3 mt-2">
+									<button type="button" onClick={() => setNumberOfFaculty((n) => Math.max(0, n - 1))} className="btn-outline px-3 py-1">-</button>
+									<div className="px-3 py-1 border rounded bg-slate-800 text-white">{numberOfFaculty}</div>
+									<button type="button" onClick={() => setNumberOfFaculty((n) => Math.min(4, n + 1))} className="btn-outline px-3 py-1">+</button>
+								</div>
+								<div className="mt-4 space-y-3">
+									{numberOfFaculty >= 1 && (
+										<label className="block">
+											<span className="text-sm font-medium text-slate-700">Faculty 1 *</span>
+											<input type="text" value={faculty1} onChange={(e) => setFaculty1(e.target.value)} placeholder="Faculty name" className="input-base mt-1 w-full" />
+										</label>
+									)}
+									{numberOfFaculty >= 2 && (
+										<label className="block">
+											<span className="text-sm font-medium text-slate-700">Faculty 2 *</span>
+											<input type="text" value={faculty2} onChange={(e) => setFaculty2(e.target.value)} placeholder="Faculty name" className="input-base mt-1 w-full" />
+										</label>
+									)}
+									{numberOfFaculty >= 3 && (
+										<label className="block">
+											<span className="text-sm font-medium text-slate-700">Faculty 3 *</span>
+											<input type="text" value={faculty3} onChange={(e) => setFaculty3(e.target.value)} placeholder="Faculty name" className="input-base mt-1 w-full" />
+										</label>
+									)}
+									{numberOfFaculty >= 4 && (
+										<label className="block">
+											<span className="text-sm font-medium text-slate-700">Faculty 4 *</span>
+											<input type="text" value={faculty4} onChange={(e) => setFaculty4(e.target.value)} placeholder="Faculty name" className="input-base mt-1 w-full" />
+										</label>
+									)}
+								</div>
+							</div>
+
+						<label className="block">
+							<span className="text-sm font-medium text-slate-700">Registration Date *</span>
+							<input type="date" value={registrationDate} onChange={(e) => setRegistrationDate(e.target.value)} className="input-base mt-1 w-full" />
+						</label>
+
+						<label className="block sm:col-span-2">
+							<span className="text-sm font-medium text-slate-700">CBR Receipt *</span>
+							<input type="file" accept="application/pdf,image/*" onChange={(e) => setCbrReceipt(e.target.files?.[0] ?? null)} className="input-base mt-1 w-full" />
+						</label>
+
+						<label className="block">
+							<span className="text-sm font-medium text-slate-700">Application / Registration Number *</span>
+							<input placeholder="Application / Registration Number" value={applicationNumber} onChange={(e) => setApplicationNumber(e.target.value)} className="input-base mt-1 w-full" />
+						</label>
+
+						<label className="block">
+							<span className="text-sm font-medium text-slate-700">SDG Goals *</span>
+							<select value={sdgGoals} onChange={(e) => setSdgGoals(e.target.value)} className="input-base mt-1 w-full">
+								<option value="">Choose an option</option>
+								<option value="sdg1">SDG 1</option>
+								<option value="sdg2">SDG 2</option>
+								<option value="sdg3">SDG 3</option>
+							</select>
+						</label>
+
+
+
+
+
 
 						{patentStatus === 'published' && (
 							<>
@@ -256,15 +504,7 @@ export default function PatentReportCreatePage() {
 							<textarea value={novelty} onChange={(e) => setNovelty(e.target.value)} className="input-base h-28 w-full" />
 						</label>
 
-						<label className="block">
-							<span className="text-sm font-medium text-slate-700">Number of Faculty Involved *</span>
-							<input type="number" min={1} value={numberOfFaculty} onChange={(e) => setNumberOfFaculty(Number(e.target.value) || 1)} className="input-base mt-1 w-full" />
-						</label>
-
-						<label className="block">
-							<span className="text-sm font-medium text-slate-700">Faculty 1 *</span>
-							<input type="text" value={faculty1} onChange={(e) => setFaculty1(e.target.value)} placeholder="Faculty name" className="input-base mt-1 w-full" />
-						</label>
+                        
 
 					</div>
 

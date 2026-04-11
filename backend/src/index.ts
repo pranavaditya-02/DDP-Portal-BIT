@@ -12,6 +12,7 @@ import internshipTrackerRoutes from './routes/internshipTracker.routes';
 import internshipReportRoutes from './routes/internshipReport.routes';
 import patentTrackerRoutes from './routes/patentTracker.routes';
 import studentsRoutes from './routes/students.routes';
+import patentReportRoutes from './routes/patentReport.routes';
 import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
 import { verifyMysqlConnection } from './database/mysql';
@@ -49,6 +50,7 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 import industriesRoutes from './routes/industries.routes';
+import facultiesRoutes from './routes/faculties.routes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
@@ -56,8 +58,10 @@ app.use('/api/import', importRoutes);
 app.use('/api/internship-tracker', internshipTrackerRoutes);
 app.use('/api/internship-report', internshipReportRoutes);
 app.use('/api/patent-tracker', patentTrackerRoutes);
+app.use('/api/patent-report', patentReportRoutes);
 app.use('/api/students', studentsRoutes);
 app.use('/api/industries', industriesRoutes);
+app.use('/api/faculties', facultiesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationRoutes);
 

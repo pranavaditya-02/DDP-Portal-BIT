@@ -34,6 +34,15 @@ const transform = (req: express.Request, rec: any) => ({
 
 const schema = z.object({
   student_id: z.preprocess((v) => Number(v), z.number().int().positive()),
+  second_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  third_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  fourth_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  fifth_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  sixth_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  seventh_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  eighth_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  ninth_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
+  tenth_student_id: z.preprocess((v) => v === undefined || v === '' ? null : Number(v), z.union([z.number().int().positive(), z.null()])).optional(),
   patent_contribution: z.enum(['Applicant', 'Inventor']),
   patent_title: z.string().min(1),
   applicants_involved: z.enum(['BIT students only','BIT student along with faculty','BIT student along with external institutions']),
@@ -65,10 +74,19 @@ router.post('/', upload.fields([
 
     const tracker = await patentTrackerService.createTracker({
       student_id: parsed.student_id,
+      second_student_id: parsed.second_student_id ?? null,
+      third_student_id: parsed.third_student_id ?? null,
+      fourth_student_id: parsed.fourth_student_id ?? null,
+      fifth_student_id: parsed.fifth_student_id ?? null,
+      sixth_student_id: parsed.sixth_student_id ?? null,
+      seventh_student_id: parsed.seventh_student_id ?? null,
+      eighth_student_id: parsed.eighth_student_id ?? null,
+      ninth_student_id: parsed.ninth_student_id ?? null,
+      tenth_student_id: parsed.tenth_student_id ?? null,
       patent_contribution: parsed.patent_contribution,
       patent_title: parsed.patent_title,
       applicants_involved: parsed.applicants_involved,
-      faculty_id: parsed.faculty_id ?? null,
+      faculty_id: parsed.faculty_id && String(parsed.faculty_id).trim().length > 0 ? String(parsed.faculty_id).trim() : null,
       patent_type: parsed.patent_type,
       has_image_layout_support: parsed.has_image_layout_support ?? 'No',
       experimentation_file_path,
@@ -117,10 +135,42 @@ router.get('/:id(\\d+)', async (req, res) => {
 router.patch('/:id(\\d+)/iqac', async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const body = z.object({ iqac_verification: z.enum(['Initiated','Approved','Declined']) }).parse(req.body);
-    const updated = await patentTrackerService.updateIqacVerification(id, body.iqac_verification);
+    const body = z.object({
+      iqac_verification: z.preprocess((v) => typeof v === 'string' ? v.toLowerCase() : v, z.enum(['initiated','approved','declined'])),
+      reject_reason: z.string().trim().min(1).optional(),
+    }).parse(req.body);
+
+    const iqacValue = body.iqac_verification === 'initiated' ? 'Initiated' : body.iqac_verification === 'approved' ? 'Approved' : 'Declined';
+
+    if (iqacValue === 'Declined' && !body.reject_reason) {
+      return res.status(400).json({ error: 'Reject reason is required when declining a tracker.' });
+    }
+
+    const existing = await patentTrackerService.getTrackerById(id);
+    if (!existing) return res.status(404).json({ error: 'Patent tracker not found' });
+
+    // update verification; if declined, store reject reason
+    const pool = await patentTrackerService.updateIqacVerification(id, iqacValue as any);
+    const updated = await patentTrackerService.getTrackerById(id);
     if (!updated) return res.status(404).json({ error: 'Patent tracker not found' });
-    return res.json({ message: 'IQAC updated', tracker: transform(req, updated) });
+
+    // send email to student if email available and not initiated
+    const studentEmail = (updated as any).student_email;
+    if (studentEmail && body.iqac_verification !== 'initiated') {
+      const statusText = body.iqac_verification === 'approved' ? 'approved' : 'declined';
+      const subject = `Patent Tracker ${statusText.toUpperCase()} | BannariAmman College IQAC`;
+      const bodyText = `Hello ${(updated as any).student_name ?? 'Student'},\n\nYour patent tracker submission (ID: ${updated.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${body.reject_reason ? `Reason: ${body.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nBannariAmman College`;
+      const bodyHtml = `<p>Hello ${(updated as any).student_name ?? 'Student'},</p><p>Your patent tracker submission <strong>(ID: ${updated.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${body.reject_reason ? `<p><strong>Reason:</strong> ${body.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+      try {
+        const { sendEmail } = await import('../utils/mailer');
+        await sendEmail({ to: studentEmail, subject, text: bodyText, html: bodyHtml });
+      } catch (emailErr) {
+        logger.error('Failed to send patent tracker status email:', emailErr);
+      }
+    }
+
+    return res.json({ message: 'IQAC verification updated', tracker: transform(req, updated) });
   } catch (err) {
     logger.error('Error updating IQAC for patent tracker', err);
     if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors.map(e => e.message).join('; ') });
