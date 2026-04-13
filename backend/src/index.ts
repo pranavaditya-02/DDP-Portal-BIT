@@ -21,9 +21,42 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const parseAllowedOrigins = () => {
+  const configuredOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
+  if ((process.env.NODE_ENV || 'development').toLowerCase() !== 'production') {
+    configuredOrigins.push(
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+    )
+  }
+
+  return Array.from(new Set(configuredOrigins))
+}
+
+const allowedOrigins = parseAllowedOrigins()
+
 // Middleware
 app.use(cors({
-  origin: (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(','),
+  origin: (origin, callback) => {
+    // Allow server-to-server requests and same-origin requests without Origin header.
+    if (!origin) {
+      callback(null, true)
+      return
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+      return
+    }
+
+    callback(new Error(`Origin ${origin} is not allowed by CORS`))
+  },
   credentials: true,
 }));
 
