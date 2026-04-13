@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
-import { studentNavItems } from "@/lib/student-navigation";
 import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
 import { clearAuthCookie } from "@/app/actions";
 import {
@@ -87,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [verificationQueuePendingCount, setVerificationQueuePendingCount] = useState(0);
   const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
   const isVerificationUser = isVerification();
-  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isAdmin();
+  const canAccessLogger = isStudent();
 
   useEffect(() => {
     if (!isVerificationUser) {
@@ -163,6 +162,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   if (!user) return null;
 
+  const studentItems = [
+    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
+    { id: "industries", label: "Industries", icon: Building2, href: "/student/industries" },
+    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
+    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
+    { id: "patentTracker", label: "Patent Tracker", icon: ClipboardCheck, href: "/student/patent/tracker" },
+    { id: "patentReport", label: "Patent Report", icon: ClipboardCheck, href: "/student/patent/report" },
+  ];
+
   const navGroups: NavGroup[] = [
     {
       title: "Overview",
@@ -186,16 +194,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           show: isStudent(),
         },
         {
-          label: "Activity Master",
-          href: "/student/activity/master",
+          label: "Activity Logger",
+          href: "/student/activity/logger",
           icon: Clipboard,
           show: isStudent(),
         },
         {
-          label: "Activity Logger",
-          href: "/student/activity/logger",
+          label: "Activity Master",
+          href: "/student/activity/master",
           icon: PlusCircle,
-          show: false,
+          show: isFaculty() || isHod() || isDean() || isVerification() || isAdmin(),
         },
         {
           label: "Create Event",
@@ -204,23 +212,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           show: isAdmin(),
         },
         
-        ...studentNavItems.map((item) => ({
+        ...studentItems.map((item: typeof studentItems[number]) => ({
           label: item.label,
-          href: `/student/${item.slug}`,
+          href: item.href,
           icon: FileText,
-          show: isStudent() && item.slug !== 'activity-logger',
+          show: isStudent() && item.id !== 'activityLogger',
         })),
-      ],
-    },
-    {
-      title: "Logger",
-      items: [
-        {
-          label: "Activity Logger",
-          href: "/student/activity/logger",
-          icon: PlusCircle,
-          show: canAccessLogger,
-        },
       ],
     },
     {
@@ -332,16 +329,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "onlineCourse", label: "Online Courses", icon: Video },
     { id: "papers", label: "Paper Presentation", icon: FileText },
     { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
-  ];
-
-  const studentItems = [
-    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
-    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
-    { id: "industries", label: "Industries", icon: Building2, href: "/student/industries" },
-    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
-    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
-    { id: "patentTracker", label: "Patent Tracker", icon: ClipboardCheck, href: "/student/patent/tracker" },
-    { id: "patentReport", label: "Patent Report", icon: ClipboardCheck, href: "/student/patent/report" },
   ];
 
   const owiItems = [
