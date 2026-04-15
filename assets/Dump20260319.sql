@@ -3441,6 +3441,39 @@ LOCK TABLES `submissions` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `workflow_task_completion`
+--
+
+DROP TABLE IF EXISTS `workflow_task_completion`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `workflow_task_completion` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `faculty_id` varchar(50) NOT NULL COMMENT 'Faculty who completed the workflow task',
+  `workflow_type` varchar(20) NOT NULL COMMENT 'paper | patent',
+  `target_index` tinyint NOT NULL DEFAULT '1' COMMENT 'Paper target index (1..n), patent uses 1',
+  `step_id` varchar(100) NOT NULL COMMENT 'Canonical step id like paper-idea-selection',
+  `completed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,
+  UNIQUE KEY `workflow_task_completion_uq_1` (`faculty_id`,`workflow_type`,`target_index`,`step_id`),
+  KEY `workflow_task_completion_fk_faculty_idx` (`faculty_id`),
+  KEY `workflow_task_completion_completed_at_idx` (`completed_at`),
+  CONSTRAINT `workflow_task_completion_fk_faculty` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `workflow_task_completion`
+--
+
+LOCK TABLES `workflow_task_completion` WRITE;
+/*!40000 ALTER TABLE `workflow_task_completion` DISABLE KEYS */;
+/*!40000 ALTER TABLE `workflow_task_completion` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `technical_society_dept_mapping`
 --
 

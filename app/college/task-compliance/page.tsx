@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from 'react'
 import { useRoles } from '@/hooks/useRoles'
 import { facultyMembers } from '@/lib/mock-data'
-import { ChartCard, ComparisonBarChart, DonutChart, MultiLineChart } from '@/components/charts'
 import {
   DEFAULT_WORKFLOW_DEADLINE_MAP,
   DEFAULT_WORKFLOW_SETTINGS,
@@ -12,10 +11,7 @@ import {
   WORKFLOW_DEADLINE_ITEMS,
   WORKFLOW_SETTINGS_STORAGE_KEY,
 } from '@/lib/workflow-deadlines'
-import { CheckCircle2, Clock3, ShieldAlert, Users } from 'lucide-react'
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
-const MONTH_OPTIONS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+import { CheckCircle2, Clock3, RotateCcw, ShieldAlert, Users } from 'lucide-react'
 
 type TabKey = 'pending' | 'completed'
 
@@ -37,6 +33,22 @@ type TaskOption = {
   label: string
   type: 'paper' | 'patent'
   deadlineISO: string
+}
+
+type TaskStatusFilter = 'all' | 'upcoming' | 'near-deadline' | 'overdue'
+
+type CombinedTaskRow = {
+  key: string
+  task: string
+  workflow: string
+  type: 'paper' | 'patent'
+  targetIndex: number
+  deadlineISO: string
+  completionRate: number
+  completedFaculty: number
+  pendingFaculty: number
+  statusLabel: 'Upcoming' | 'Near deadline' | 'Overdue'
+  statusClass: string
 }
 
 function buildTaskOptions(paperTargets: number, deadlineMap: Record<string, string>): TaskOption[] {
@@ -71,12 +83,33 @@ function buildTaskOptions(paperTargets: number, deadlineMap: Record<string, stri
   return options
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+function getDeadlineStatus(deadlineISO: string) {
+  const now = new Date()
+  const deadline = new Date(deadlineISO)
+  const msInDay = 1000 * 60 * 60 * 24
+  const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / msInDay)
+
+  if (diffDays < 0) {
+    return {
+      key: 'overdue' as const,
+      label: 'Overdue' as const,
+      className: 'border-red-200 bg-red-50 text-red-700',
+    }
+  }
+
+  if (diffDays <= 14) {
+    return {
+      key: 'near-deadline' as const,
+      label: 'Near deadline' as const,
+      className: 'border-orange-200 bg-orange-50 text-orange-700',
+    }
+  }
+
+  return {
+    key: 'upcoming' as const,
+    label: 'Upcoming' as const,
+    className: 'border-blue-200 bg-blue-50 text-blue-700',
+  }
 }
 
 function buildComplianceData(totalTasks: number): FacultyCompliance[] {
@@ -98,34 +131,15 @@ function buildComplianceData(totalTasks: number): FacultyCompliance[] {
   })
 }
 
-function buildMonthlyTaskRateData(selectedTaskKey: string, taskOptions: TaskOption[], facultyCount: number) {
-  const taskIndex = taskOptions.findIndex((t) => t.key === selectedTaskKey)
-  const base = taskIndex >= 0 ? taskIndex : 0
-
-  return MONTHS.map((month, idx) => {
-    const simulatedCompleted = Math.max(
-      0,
-      Math.min(
-        facultyCount,
-        Math.round(facultyCount * (0.45 + (idx * 0.08) + ((base % 3) * 0.03) - ((idx % 2) * 0.02))),
-      ),
-    )
-    const rate = facultyCount === 0 ? 0 : Math.round((simulatedCompleted / facultyCount) * 100)
-
-    return {
-      month,
-      completionRate: rate,
-      completedFaculty: simulatedCompleted,
-      pendingFaculty: Math.max(0, facultyCount - simulatedCompleted),
-    }
-  })
-}
-
 export default function DeanTaskCompliancePage() {
   const { isDean } = useRoles()
   const [activeTab, setActiveTab] = useState<TabKey>('pending')
-  const [search, setSearch] = useState('')
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth())
+  const [facultySearch, setFacultySearch] = useState('')
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('all')
+  const [selectedDesignation, setSelectedDesignation] = useState<string>('all')
+  const [selectedTargetFilter, setSelectedTargetFilter] = useState<'all' | '1' | '2'>('all')
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<TaskStatusFilter>('all')
+  const [selectedTaskFilter, setSelectedTaskFilter] = useState<string>('all')
   const [paperTargets] = useState<number>(() => {
     if (typeof window === 'undefined') return DEFAULT_WORKFLOW_SETTINGS.paperTargets
     try {
@@ -152,30 +166,73 @@ export default function DeanTaskCompliancePage() {
   })
 
   const taskOptions = useMemo(() => buildTaskOptions(paperTargets, deadlineMap), [paperTargets, deadlineMap])
-  const [selectedTaskKey, setSelectedTaskKey] = useState<string>('')
 
-  const selectedTaskLabel = useMemo(() => {
-    const selected = taskOptions.find((t) => t.key === selectedTaskKey)
-    return selected?.label || taskOptions[0]?.label || 'Task'
-  }, [selectedTaskKey, taskOptions])
+  const departmentOptions = useMemo(
+    () => ['all', ...Array.from(new Set(facultyMembers.map((member) => member.department))).sort((a, b) => a.localeCompare(b))],
+    [],
+  )
 
-  const effectiveTaskKey = selectedTaskKey || taskOptions[0]?.key || ''
+  const designationOptions = useMemo(
+    () => ['all', ...Array.from(new Set(facultyMembers.map((member) => member.designation))).sort((a, b) => a.localeCompare(b))],
+    [],
+  )
 
   const compliance = useMemo(() => buildComplianceData(taskOptions.length), [taskOptions.length])
 
+  const scopedCompliance = useMemo(() => {
+    return compliance.filter((member) => {
+      const departmentOk = selectedDepartment === 'all' || member.department === selectedDepartment
+      const designationOk = selectedDesignation === 'all' || member.designation === selectedDesignation
+      return departmentOk && designationOk
+    })
+  }, [compliance, selectedDepartment, selectedDesignation])
+
+  const facultyTaskRows = useMemo(() => {
+    if (selectedTaskFilter === 'all') return scopedCompliance
+
+    const taskIndex = taskOptions.findIndex((task) => task.key === selectedTaskFilter)
+    const safeTaskIndex = taskIndex < 0 ? 0 : taskIndex
+
+    return scopedCompliance.map((member) => {
+      const isCompleted = ((member.id * 17 + safeTaskIndex * 13) % 100) < member.completionRate
+      return {
+        ...member,
+        completedTasks: isCompleted ? 1 : 0,
+        pendingTasks: isCompleted ? 0 : 1,
+        completionRate: isCompleted ? 100 : 0,
+      }
+    })
+  }, [scopedCompliance, selectedTaskFilter, taskOptions])
+
   const pendingFaculty = useMemo(
-    () => compliance.filter((f) => f.pendingTasks > 0),
-    [compliance],
+    () => facultyTaskRows.filter((f) => f.pendingTasks > 0),
+    [facultyTaskRows],
   )
 
   const completedFaculty = useMemo(
-    () => compliance.filter((f) => f.pendingTasks === 0),
-    [compliance],
+    () => facultyTaskRows.filter((f) => f.pendingTasks === 0),
+    [facultyTaskRows],
   )
+
+  const filteredTaskOptions = useMemo(() => {
+    return taskOptions.filter((task) => {
+      const status = getDeadlineStatus(task.deadlineISO)
+      const statusOk = selectedStatusFilter === 'all' || status.key === selectedStatusFilter
+      const taskOk = selectedTaskFilter === 'all' || task.key === selectedTaskFilter
+      const targetOk = selectedTargetFilter === 'all' || task.targetIndex === Number(selectedTargetFilter)
+
+      return statusOk && taskOk && targetOk
+    })
+  }, [selectedStatusFilter, selectedTargetFilter, selectedTaskFilter, taskOptions])
+
+  const selectedTask = useMemo(() => {
+    if (selectedTaskFilter === 'all') return null
+    return taskOptions.find((task) => task.key === selectedTaskFilter) || null
+  }, [selectedTaskFilter, taskOptions])
 
   const visibleRows = useMemo(() => {
     const source = activeTab === 'pending' ? pendingFaculty : completedFaculty
-    const term = search.trim().toLowerCase()
+    const term = facultySearch.trim().toLowerCase()
 
     if (!term) return source
     return source.filter((item) => {
@@ -185,55 +242,23 @@ export default function DeanTaskCompliancePage() {
         item.email.toLowerCase().includes(term)
       )
     })
-  }, [activeTab, completedFaculty, pendingFaculty, search])
-
-  const statusDonutData = useMemo(
-    () => [
-      { name: 'Completed', value: completedFaculty.length, color: '#7c3aed' },
-      { name: 'Pending', value: pendingFaculty.length, color: '#f59e0b' },
-    ],
-    [completedFaculty.length, pendingFaculty.length],
-  )
-
-  const pendingByDepartment = useMemo(() => {
-    const grouped = new Map<string, number>()
-    pendingFaculty.forEach((f) => {
-      grouped.set(f.department, (grouped.get(f.department) || 0) + f.pendingTasks)
-    })
-
-    return Array.from(grouped.entries())
-      .map(([department, pending]) => ({ department, pending }))
-      .sort((a, b) => b.pending - a.pending)
-      .slice(0, 8)
-  }, [pendingFaculty])
+  }, [activeTab, completedFaculty, pendingFaculty, facultySearch])
 
   const averageCompletion = useMemo(() => {
-    if (compliance.length === 0) return 0
-    const total = compliance.reduce((sum, item) => sum + item.completionRate, 0)
-    return Math.round(total / compliance.length)
-  }, [compliance])
+    if (facultyTaskRows.length === 0) return 0
+    const total = facultyTaskRows.reduce((sum, item) => sum + item.completionRate, 0)
+    return Math.round(total / facultyTaskRows.length)
+  }, [facultyTaskRows])
 
-  const monthlyTaskRates = useMemo(() => {
-    return buildMonthlyTaskRateData(effectiveTaskKey, taskOptions, compliance.length)
-  }, [effectiveTaskKey, taskOptions, compliance.length])
+  const scopedFacultyCount = facultyTaskRows.length
 
-  const tasksDueInSelectedMonth = useMemo(() => {
-    return taskOptions.filter((task) => new Date(task.deadlineISO).getMonth() === selectedMonth)
-  }, [taskOptions, selectedMonth])
-
-  const dueTaskRateRows = useMemo(() => {
-    return tasksDueInSelectedMonth.map((task) => {
-      const data = buildMonthlyTaskRateData(task.key, taskOptions, compliance.length)
-      const monthData = data.find((d) => d.month === MONTH_OPTIONS[selectedMonth]) || data[0]
-      return {
-        task: task.label,
-        deadline: formatDate(task.deadlineISO),
-        completionRate: monthData?.completionRate || 0,
-        completedFaculty: monthData?.completedFaculty || 0,
-        pendingFaculty: monthData?.pendingFaculty || 0,
-      }
-    })
-  }, [tasksDueInSelectedMonth, selectedMonth, taskOptions, compliance.length])
+  const clearAllFilters = () => {
+    setSelectedDepartment('all')
+    setSelectedDesignation('all')
+    setSelectedTargetFilter('all')
+    setSelectedStatusFilter('all')
+    setSelectedTaskFilter('all')
+  }
 
   if (!isDean()) {
     return (
@@ -259,129 +284,73 @@ export default function DeanTaskCompliancePage() {
         <p className="text-sm text-slate-500 mt-1">Monitor faculty completion against the same task workflow used in the Activities page.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <div className="rounded-xl border border-violet-100 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Total Faculty</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{compliance.length}</p>
+      <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">Essential Filters</h2>
+            <p className="mt-1 text-xs text-slate-500">Use only key filters to monitor tasks quickly.</p>
+          </div>
+          <button
+            type="button"
+            onClick={clearAllFilters}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset Filters
+          </button>
         </div>
-        <div className="rounded-xl border border-violet-100 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Completed</p>
-          <p className="mt-1 text-2xl font-bold text-violet-700">{completedFaculty.length}</p>
-        </div>
-        <div className="rounded-xl border border-violet-100 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Pending</p>
-          <p className="mt-1 text-2xl font-bold text-amber-600">{pendingFaculty.length}</p>
-        </div>
-        <div className="rounded-xl border border-violet-100 bg-white p-4 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Avg Completion</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{averageCompletion}%</p>
-        </div>
-        <div className="rounded-xl border border-violet-100 bg-white p-4 shadow-sm sm:col-span-2 lg:col-span-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Workflow Scope</p>
-          <p className="mt-1 text-sm font-semibold text-slate-900">
-            {taskOptions.length} tracked tasks ({taskOptions.filter((t) => t.type === 'paper').length} Paper, {taskOptions.filter((t) => t.type === 'patent').length} Patent)
-          </p>
-        </div>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 mb-6">
-        <ChartCard title="Completion Status Split" subtitle="Faculty distribution by status">
-          <DonutChart data={statusDonutData} height={260} />
-        </ChartCard>
-        <ChartCard title="Pending Tasks by Department" subtitle="Higher bar means more pending work">
-          <ComparisonBarChart
-            data={pendingByDepartment}
-            xKey="department"
-            bars={[{ key: 'pending', color: '#7c3aed', name: 'Pending Tasks' }]}
-            height={260}
-          />
-        </ChartCard>
-      </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Department</span>
+            <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="input-base">
+              {departmentOptions.map((dep) => (
+                <option key={dep} value={dep}>{dep === 'all' ? 'All Departments' : dep}</option>
+              ))}
+            </select>
+          </label>
 
-      <div className="mb-6">
-        <ChartCard
-          title="Monthly Completion Rate by Task"
-          subtitle={`Month-wise completion trend for ${selectedTaskLabel}`}
-          action={(
-            <select
-              value={effectiveTaskKey}
-              onChange={(e) => setSelectedTaskKey(e.target.value)}
-              className="rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200"
-            >
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Designation</span>
+            <select value={selectedDesignation} onChange={(e) => setSelectedDesignation(e.target.value)} className="input-base">
+              {designationOptions.map((designation) => (
+                <option key={designation} value={designation}>{designation === 'all' ? 'All Designations' : designation}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Task</span>
+            <select value={selectedTaskFilter} onChange={(e) => setSelectedTaskFilter(e.target.value)} className="input-base">
+              <option value="all">All Tasks</option>
               {taskOptions.map((task) => (
                 <option key={task.key} value={task.key}>{task.label}</option>
               ))}
             </select>
-          )}
-        >
-          <MultiLineChart
-            data={monthlyTaskRates}
-            xKey="month"
-            lines={[
-              { key: 'completionRate', color: '#7c3aed', name: 'Completion %' },
-            ]}
-            height={280}
-          />
-        </ChartCard>
-      </div>
+          </label>
 
-      <div className="mb-6">
-        <ChartCard
-          title="Month-wise Due Task Tracking"
-          subtitle={`Tasks due in ${MONTH_OPTIONS[selectedMonth]} and their completion rate`}
-          action={(
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200"
-            >
-              {MONTH_OPTIONS.map((month, idx) => (
-                <option key={month} value={idx}>{month}</option>
-              ))}
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Paper Target</span>
+            <select value={selectedTargetFilter} onChange={(e) => setSelectedTargetFilter(e.target.value as 'all' | '1' | '2')} className="input-base">
+              <option value="all">All Targets</option>
+              <option value="1">Paper 1</option>
+              <option value="2" disabled={paperTargets < 2}>Paper 2</option>
             </select>
-          )}
-        >
-          {dueTaskRateRows.length > 0 ? (
-            <ComparisonBarChart
-              data={dueTaskRateRows.map((row) => ({
-                task: row.task.length > 18 ? `${row.task.slice(0, 18)}...` : row.task,
-                completionRate: row.completionRate,
-              }))}
-              xKey="task"
-              bars={[{ key: 'completionRate', color: '#7c3aed', name: 'Completion %' }]}
-              height={280}
-            />
-          ) : (
-            <div className="rounded-xl border border-dashed border-violet-200 bg-violet-50 p-4 text-sm text-slate-600">
-              No configured tasks are due in {MONTH_OPTIONS[selectedMonth]}. Update deadlines in Workflow Deadline Settings to track this month.
-            </div>
-          )}
-        </ChartCard>
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Status</span>
+            <select value={selectedStatusFilter} onChange={(e) => setSelectedStatusFilter(e.target.value as TaskStatusFilter)} className="input-base">
+              <option value="all">All Statuses</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="near-deadline">Near deadline</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </label>
+        </div>
       </div>
 
-      {dueTaskRateRows.length > 0 ? (
-        <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-5">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">Tasks Due in {MONTH_OPTIONS[selectedMonth]}</h3>
-          <div className="space-y-2">
-            {dueTaskRateRows.map((row) => (
-              <div key={`${row.task}-${row.deadline}`} className="flex flex-col gap-2 rounded-xl border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{row.task}</p>
-                  <p className="text-xs text-slate-500">Deadline: {row.deadline}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
-                    {row.completionRate}%
-                  </span>
-                  <span className="text-xs text-slate-500">{row.completedFaculty} done • {row.pendingFaculty} pending</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-5">
+      <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
           <div className="inline-flex rounded-xl border border-violet-200 bg-violet-50 p-1">
             <button
@@ -408,8 +377,8 @@ export default function DeanTaskCompliancePage() {
 
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={facultySearch}
+            onChange={(e) => setFacultySearch(e.target.value)}
             placeholder="Search faculty by name, department, or email"
             className="input-base max-w-md"
           />
@@ -422,9 +391,7 @@ export default function DeanTaskCompliancePage() {
                 <th className="px-3 py-2 text-left">Faculty</th>
                 <th className="px-3 py-2 text-left">Department</th>
                 <th className="px-3 py-2 text-left">Designation</th>
-                <th className="px-3 py-2 text-center">Completed</th>
-                <th className="px-3 py-2 text-center">Pending</th>
-                <th className="px-3 py-2 text-center">Rate</th>
+                <th className="px-3 py-2 text-left">Pending Task / Deadline</th>
               </tr>
             </thead>
             <tbody>
@@ -436,18 +403,25 @@ export default function DeanTaskCompliancePage() {
                   </td>
                   <td className="px-3 py-3 text-slate-700">{row.department}</td>
                   <td className="px-3 py-3 text-slate-700">{row.designation}</td>
-                  <td className="px-3 py-3 text-center text-violet-700 font-semibold">{row.completedTasks}</td>
-                  <td className="px-3 py-3 text-center text-amber-700 font-semibold">{row.pendingTasks}</td>
-                  <td className="px-3 py-3 text-center">
-                    <span className="inline-flex rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
-                      {row.completionRate}%
-                    </span>
+                  <td className="px-3 py-3 text-slate-700">
+                    {selectedTask ? (
+                      <div>
+                        <p className="font-medium text-slate-900">{selectedTask.label}</p>
+                        <p className="text-xs text-amber-700">Status: Pending</p>
+                        <p className="text-xs text-slate-500">Deadline: {new Date(selectedTask.deadlineISO).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="font-medium text-slate-900">Pending Task</p>
+                        <p className="text-xs text-slate-500">Select a task to view the exact deadline</p>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
               {visibleRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-3 py-8 text-center text-slate-500">
                     No faculty found for this filter.
                   </td>
                 </tr>

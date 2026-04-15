@@ -19,7 +19,6 @@ import {
   CheckCircle2,
   Circle,
   Clock3,
-  Eye,
   FlaskConical,
   FileText,
   Lock,
@@ -417,7 +416,6 @@ function WorkflowCard({
   steps,
   completed,
   onComplete,
-  onViewSubmission,
 }: {
   title: string
   subtitle: string
@@ -425,7 +423,6 @@ function WorkflowCard({
   steps: WorkflowStep[]
   completed: Record<string, boolean>
   onComplete: (step: WorkflowStep) => void
-  onViewSubmission: (step: WorkflowStep) => void
 }) {
   const currentStepIndex = steps.findIndex((step) => !completed[step.id])
 
@@ -524,16 +521,7 @@ function WorkflowCard({
                             {!isUnlocked ? <Lock className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
                             {isCurrent ? 'Complete Current Task' : 'Complete'}
                           </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => onViewSubmission(step)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            View Submission
-                          </button>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -551,12 +539,8 @@ export default function ActivitiesPage() {
   const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [completed, setCompleted] = useState<Record<string, boolean>>({})
-  const [stepData, setStepData] = useState<Record<string, Record<string, string>>>({})
   const [deadlineMap, setDeadlineMap] = useState<Record<string, string>>(DEFAULT_WORKFLOW_DEADLINE_MAP)
   const [paperTargets, setPaperTargets] = useState<number>(DEFAULT_WORKFLOW_SETTINGS.paperTargets)
-  const [activeStep, setActiveStep] = useState<WorkflowStep | null>(null)
-  const [viewStep, setViewStep] = useState<WorkflowStep | null>(null)
-  const [draftForm, setDraftForm] = useState<Record<string, string>>({})
   const { checkAndSendAlerts } = useDeadlineAlerts()
 
   const paperWorkflowGroups = useMemo(() => {
@@ -597,10 +581,8 @@ export default function ActivitiesPage() {
     try {
       const parsed = JSON.parse(raw) as {
         completed?: Record<string, boolean>
-        stepData?: Record<string, Record<string, string>>
       }
       setCompleted(parsed.completed || {})
-      setStepData(parsed.stepData || {})
     } catch {
       localStorage.removeItem(STORAGE_KEY)
     }
@@ -666,8 +648,8 @@ export default function ActivitiesPage() {
   }, [allSteps, completed, checkAndSendAlerts])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ completed, stepData }))
-  }, [completed, stepData])
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ completed }))
+  }, [completed])
 
   const completedCount = useMemo(
     () => allSteps.filter((step) => completed[step.id]).length,
@@ -722,37 +704,16 @@ export default function ActivitiesPage() {
     [allSteps],
   )
 
-  const openModalForStep = (step: WorkflowStep) => {
-    setActiveStep(step)
-    setDraftForm(stepData[step.id] || {})
-  }
-
-  const submitStep = async () => {
-    if (!activeStep) return
-
-    const missing = activeStep.fields.find((field) => field.required && !(draftForm[field.key] || '').trim())
-    if (missing) {
-      toast.error(`Please fill ${missing.label}`)
-      return
-    }
-
-    const submittedStep = activeStep
-
-    setStepData((prev) => ({
-      ...prev,
-      [submittedStep.id]: draftForm,
-    }))
+  const completeStep = async (step: WorkflowStep) => {
     setCompleted((prev) => ({
       ...prev,
-      [submittedStep.id]: true,
+      [step.id]: true,
     }))
-    setActiveStep(null)
-    setDraftForm({})
     toast.success('Task completed successfully')
 
     try {
       await client.post('/alerts/task-completed', {
-        taskTitle: submittedStep.title,
+        taskTitle: step.title,
         completedAt: new Date().toISOString(),
         facultyName: user?.name,
         facultyEmail: user?.email,
@@ -882,8 +843,7 @@ export default function ActivitiesPage() {
               icon={<FileText className="h-5 w-5" />}
               steps={group.steps}
               completed={completed}
-              onComplete={openModalForStep}
-              onViewSubmission={(step) => setViewStep(step)}
+              onComplete={completeStep}
             />
           ))}
         </div>
@@ -896,29 +856,7 @@ export default function ActivitiesPage() {
           icon={<FlaskConical className="h-5 w-5" />}
           steps={patentSteps}
           completed={completed}
-          onComplete={openModalForStep}
-          onViewSubmission={(step) => setViewStep(step)}
-        />
-      ) : null}
-
-      {activeStep ? (
-        <DynamicModal
-          step={activeStep}
-          values={draftForm}
-          onChange={(key, value) => setDraftForm((prev) => ({ ...prev, [key]: value }))}
-          onClose={() => {
-            setActiveStep(null)
-            setDraftForm({})
-          }}
-          onSubmit={submitStep}
-        />
-      ) : null}
-
-      {viewStep ? (
-        <SubmissionViewModal
-          step={viewStep}
-          values={stepData[viewStep.id] || {}}
-          onClose={() => setViewStep(null)}
+          onComplete={completeStep}
         />
       ) : null}
     </div>

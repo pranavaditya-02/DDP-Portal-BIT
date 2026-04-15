@@ -648,3 +648,31 @@
 {"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-07 09:36:13"}
 {"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-07 09:36:14"}
 {"level":"info","message":"POST /api/alerts/check-and-send","service":"faculty-tracking-api","timestamp":"2026-04-07 09:36:54"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-08 14:14:37"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-08 14:14:37"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-08 14:14:37"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-08 14:14:39"}
+{"level":"info","message":"POST /api/alerts/check-and-send","service":"faculty-tracking-api","timestamp":"2026-04-08 14:18:59"}
+{"level":"info","message":"POST /api/alerts/task-completed","service":"faculty-tracking-api","timestamp":"2026-04-08 14:22:57"}
+{"level":"info","message":"Task completion notification sent to pranavaditya.cs23@bitsathy.ac.in","messageId":"<b55b8230-5ffc-cd65-a7c2-00356a665832@gmail.com>","service":"faculty-tracking-api","taskTitle":"Idea Selection","timestamp":"2026-04-08 14:23:03"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-08 15:16:28"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-08 15:16:28"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-08 15:16:28"}
+{"code":"ETIMEDOUT","errorno":"ETIMEDOUT","fatal":true,"level":"warn","message":"MySQL verification failed on startup: connect ETIMEDOUT","service":"faculty-tracking-api","stack":"Error: connect ETIMEDOUT\n    at PoolConnection._handleTimeoutError (F:\\faculty-achievement-dashboard\\backend\\node_modules\\mysql2\\lib\\base\\connection.js:244:17)\n    at listOnTimeout (node:internal/timers:608:17)\n    at process.processTimers (node:internal/timers:543:7)","syscall":"connect","timestamp":"2026-04-08 15:16:38"}
+{"level":"info","message":"POST /api/alerts/task-completed","service":"faculty-tracking-api","timestamp":"2026-04-08 15:22:34"}
+{"code":"EDNS","command":"CONN","errno":-3008,"hostname":"smtp.gmail.com","level":"error","message":"Failed to send task completion notification to pranavaditya.cs23@bitsathy.ac.in: getaddrinfo ENOTFOUND smtp.gmail.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND smtp.gmail.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)","syscall":"getaddrinfo","timestamp":"2026-04-08 15:22:34"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-08 16:00:36"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-08 16:00:36"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-08 16:00:36"}
+{"code":"ENOTFOUND","errno":-3008,"fatal":true,"hostname":"gateway01.ap-northeast-1.prod.aws.tidbcloud.com","level":"warn","message":"MySQL verification failed on startup: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)","syscall":"getaddrinfo","timestamp":"2026-04-08 16:00:36"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 12:15:05"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 12:15:05"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 12:15:05"}
+{"code":"ETIMEDOUT","errorno":"ETIMEDOUT","fatal":true,"level":"warn","message":"MySQL verification failed on startup: connect ETIMEDOUT","service":"faculty-tracking-api","stack":"Error: connect ETIMEDOUT\n    at PoolConnection._handleTimeoutError (F:\\faculty-achievement-dashboard\\backend\\node_modules\\mysql2\\lib\\base\\connection.js:244:17)\n    at listOnTimeout (node:internal/timers:608:17)\n    at process.processTimers (node:internal/timers:543:7)","syscall":"connect","timestamp":"2026-04-11 12:15:15"}
+{"level":"info","message":"POST /api/alerts/check-and-send","service":"faculty-tracking-api","timestamp":"2026-04-11 12:16:27"}
+{"level":"info","message":"POST /api/alerts/task-completed","service":"faculty-tracking-api","timestamp":"2026-04-11 12:18:41"}
+{"code":"ESOCKET","command":"CONN","errno":-4077,"level":"error","message":"Failed to send task completion notification to pranavaditya.cs23@bitsathy.ac.in: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20)","syscall":"read","timestamp":"2026-04-11 12:19:25"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 13:15:13"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 13:15:13"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 13:15:13"}
+{"code":"ENOTFOUND","errno":-3008,"fatal":true,"hostname":"gateway01.ap-northeast-1.prod.aws.tidbcloud.com","level":"warn","message":"MySQL verification failed on startup: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)","syscall":"getaddrinfo","timestamp":"2026-04-11 13:15:13"}
