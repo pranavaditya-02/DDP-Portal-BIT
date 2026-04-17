@@ -3,19 +3,26 @@
 import React, { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
-import { Sidebar } from './Sidebar'
-import { Menu } from 'lucide-react'
+import { Sidebar } from '@/components/Sidebar'
+import { AlertTriangle, Menu } from 'lucide-react'
 import Link from 'next/link'
+import { hasRouteAccess, pickFirstAccessibleRoute } from '@/lib/route-access'
 
 const PUBLIC_PATHS = ['/login', '/register', '/']
 
 export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname()
-  const { isAuthenticated, _hasHydrated } = useAuthStore()
+  const { isAuthenticated, _hasHydrated, allowedRoutes, allowedResources } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  const firstAccessibleRoute = pickFirstAccessibleRoute({
+    resources: allowedResources,
+    routePaths: allowedRoutes,
+  }) || '/dashboard'
+
   const isPublicPage = PUBLIC_PATHS.includes(pathname)
+  const canAccessCurrentPage = isPublicPage || hasRouteAccess(pathname, allowedRoutes)
 
   // Wait for zustand to rehydrate from localStorage before deciding layout
   if (!_hasHydrated) {
@@ -30,6 +37,24 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
 
   if (!showSidebar) {
     return <main className="min-h-screen bg-slate-50">{children}</main>
+  }
+
+  if (!canAccessCurrentPage) {
+    const fallbackPath = firstAccessibleRoute
+    return (
+      <main className="min-h-screen bg-slate-50 p-6 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm">
+          <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
+          </div>
+          <h1 className="text-lg font-semibold text-slate-900">Unauthorized</h1>
+          <p className="text-sm text-slate-500 mt-1">You do not have access to this page for your assigned role.</p>
+          <Link href={fallbackPath} className="inline-flex mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
+            Go to Allowed Page
+          </Link>
+        </div>
+      </main>
+    )
   }
 
   // Desktop margin: collapsed → 72px, expanded → 260px
@@ -53,7 +78,7 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
       />
 
       {/* Main content area */}
-      <main className={`flex-1 min-h-screen transition-all duration-300 ease-in-out ml-0 ${desktopMargin} overflow-x-hidden`}>
+      <main className={`dashboard-main flex-1 min-h-screen transition-all duration-300 ease-in-out ml-0 ${desktopMargin} overflow-x-hidden`}>
         {/* Mobile top bar */}
         <div className="md:hidden sticky top-0 z-30 flex items-center gap-3 h-14 px-4 bg-white border-b border-slate-200 shadow-sm">
           <button
@@ -63,7 +88,7 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href={firstAccessibleRoute} className="flex items-center gap-2">
             <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">F</span>
             </div>

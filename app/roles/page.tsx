@@ -1,10 +1,7 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
-import {
-  roles as initialRoles, availableResources,
-  type Role, type Resource,
-} from '@/lib/mock-data'
+import React, { useEffect, useState, useMemo } from 'react'
+import { apiClient, getApiErrorMessage, type RoleRecord, type RoleResourceRecord, type UpsertRolePayload } from '@/lib/api'
 import toast from 'react-hot-toast'
 import {
   FileText, Award, Clipboard, Building2, GraduationCap, ShieldCheck,
@@ -30,6 +27,9 @@ function groupResources(resources: Resource[]) {
   return groups
 }
 
+type Resource = RoleResourceRecord
+type Role = RoleRecord
+
 const groupIcons: Record<string, React.ElementType> = {
   Overview: LayoutDashboard, Faculty: FileText, Department: Building2,
   College: GraduationCap, Management: Shield,
@@ -41,8 +41,8 @@ const groupColors: Record<string, string> = {
 }
 
 /* ====== Resource Tree Component ====== */
-function ResourceTree({ selected, onToggle }: { selected: Set<string>; onToggle: (id: string) => void }) {
-  const grouped = groupResources(availableResources)
+function ResourceTree({ selected, onToggle, resources }: { selected: Set<string>; onToggle: (id: string) => void; resources: Resource[] }) {
+  const grouped = groupResources(resources)
   const [expanded, setExpanded] = useState<Record<string, boolean>>(
     Object.fromEntries(Object.keys(grouped).map(g => [g, true]))
   )
@@ -59,7 +59,7 @@ function ResourceTree({ selected, onToggle }: { selected: Set<string>; onToggle:
     <div className="border border-slate-200 rounded-lg overflow-hidden">
       <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
         <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Assign Resources</span>
-        <span className="text-[11px] text-slate-400">Selected: {selected.size} of {availableResources.length}</span>
+        <span className="text-[11px] text-slate-400">Selected: {selected.size} of {resources.length}</span>
       </div>
       <div className="max-h-[320px] overflow-y-auto">
         {Object.entries(grouped).map(([group, resources]) => {
@@ -106,13 +106,13 @@ function ResourceTree({ selected, onToggle }: { selected: Set<string>; onToggle:
 }
 
 /* ====== Add/Edit Role Modal ====== */
-function RoleModal({ role, onClose, onSave }: {
+function RoleModal({ role, resources, onClose, onSave }: {
   role: Role | null
+  resources: Resource[]
   onClose: () => void
-  onSave: (role: Omit<Role, 'id' | 'createdAt' | 'usersCount'> & { id?: number }) => void
+  onSave: (role: UpsertRolePayload & { id?: number }) => void
 }) {
   const [name, setName] = useState(role?.name || '')
-  const [description, setDescription] = useState(role?.description || '')
   const [selectedResources, setSelectedResources] = useState<Set<string>>(new Set(role?.resources || []))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const handleToggle = (id: string) => {
@@ -127,7 +127,7 @@ function RoleModal({ role, onClose, onSave }: {
   }
   const handleSubmit = () => {
     if (!validate()) return
-    onSave({ id: role?.id, name: name.trim(), description: description.trim(), passwordPrefix: role?.passwordPrefix || '', editAccess: role?.editAccess ?? true, deleteAccess: role?.deleteAccess ?? false, status: role?.status ?? true, resources: Array.from(selectedResources), isSystem: role?.isSystem || false })
+    onSave({ id: role?.id, name: name.trim(), description: '', passwordPrefix: role?.passwordPrefix || '', editAccess: role?.editAccess ?? true, deleteAccess: role?.deleteAccess ?? false, status: role?.status ?? true, resources: Array.from(selectedResources), isSystem: role?.isSystem || false })
   }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
@@ -146,12 +146,8 @@ function RoleModal({ role, onClose, onSave }: {
             {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
-            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description of this role" className="input-base" />
-          </div>
-          <div>
             {errors.resources && <p className="text-xs text-red-500 mb-2 flex items-center gap-1"><Info className="w-3 h-3" /> {errors.resources}</p>}
-            <ResourceTree selected={selectedResources} onToggle={handleToggle} />
+            <ResourceTree selected={selectedResources} onToggle={handleToggle} resources={resources} />
           </div>
         </div>
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/50 flex items-center justify-end gap-3">
@@ -195,8 +191,31 @@ function DeleteConfirm({ role, onClose, onConfirm }: { role: Role; onClose: () =
 /* ROLES PAGE                                                          */
 /* ------------------------------------------------------------------ */
 export default function RolesPage() {
-  const [rolesList, setRolesList] = useState<Role[]>(initialRoles)
+  const [rolesList, setRolesList] = useState<Role[]>([])
+  const [resourcesList, setResourcesList] = useState<Resource[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
+    const loadRolesData = async () => {
+      try {
+        setIsLoading(true)
+        const [rolesResponse, resourcesResponse] = await Promise.all([
+          apiClient.getRoles(),
+          apiClient.getRoleResources(),
+        ])
+
+        setRolesList(rolesResponse.roles || [])
+        setResourcesList(resourcesResponse.resources || [])
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'Failed to load roles'))
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    useEffect(() => {
+      void loadRolesData()
+    }, [])
+
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingRole, setEditingRole] = useState<Role | null>(null)
   const [deletingRole, setDeletingRole] = useState<Role | null>(null)
@@ -205,33 +224,56 @@ export default function RolesPage() {
   const filtered = useMemo(() => {
     if (!search) return rolesList
     const q = search.toLowerCase()
-    return rolesList.filter(r => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q))
+    return rolesList.filter(r => r.name.toLowerCase().includes(q))
   }, [rolesList, search])
 
-  const handleSave = (data: Omit<Role, 'id' | 'createdAt' | 'usersCount'> & { id?: number }) => {
-    if (data.id) {
-      setRolesList(prev => prev.map(r => r.id === data.id ? { ...r, name: data.name, description: data.description, passwordPrefix: data.passwordPrefix, editAccess: data.editAccess, deleteAccess: data.deleteAccess, status: data.status, resources: data.resources } : r))
-      toast.success(`Role "${data.name}" updated successfully`)
-    } else {
-      const newId = Math.max(...rolesList.map(r => r.id)) + 1
-      setRolesList(prev => [...prev, { id: newId, name: data.name, description: data.description, passwordPrefix: data.passwordPrefix, editAccess: data.editAccess, deleteAccess: data.deleteAccess, status: data.status, resources: data.resources, isSystem: false, createdAt: new Date().toISOString().split('T')[0], usersCount: 0 }])
-      toast.success(`Role "${data.name}" created successfully`)
+  const handleSave = async (data: UpsertRolePayload & { id?: number }) => {
+    try {
+      if (data.id) {
+        await apiClient.updateRole(data.id, data)
+        toast.success(`Role "${data.name}" updated successfully`)
+      } else {
+        await apiClient.createRole(data)
+        toast.success(`Role "${data.name}" created successfully`)
+      }
+
+      await loadRolesData()
+      setShowAddModal(false)
+      setEditingRole(null)
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to save role'))
     }
-    setShowAddModal(false)
-    setEditingRole(null)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deletingRole) return
-    setRolesList(prev => prev.filter(r => r.id !== deletingRole.id))
-    toast.success(`Role "${deletingRole.name}" deleted`)
-    setDeletingRole(null)
+    try {
+      await apiClient.deleteRole(deletingRole.id)
+      toast.success(`Role "${deletingRole.name}" deleted`)
+      await loadRolesData()
+      setDeletingRole(null)
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to delete role'))
+    }
   }
 
-  const handleDuplicate = (role: Role) => {
-    const newId = Math.max(...rolesList.map(r => r.id)) + 1
-    setRolesList(prev => [...prev, { ...role, id: newId, name: `${role.name} (Copy)`, isSystem: false, createdAt: new Date().toISOString().split('T')[0], usersCount: 0 }])
-    toast.success(`Role duplicated as "${role.name} (Copy)"`)
+  const handleDuplicate = async (role: Role) => {
+    try {
+      await apiClient.createRole({
+        name: `${role.name} (Copy)`,
+        description: '',
+        passwordPrefix: role.passwordPrefix,
+        editAccess: role.editAccess,
+        deleteAccess: role.deleteAccess,
+        status: role.status,
+        resources: role.resources,
+        isSystem: false,
+      })
+      toast.success(`Role duplicated as "${role.name} (Copy)"`)
+      await loadRolesData()
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to duplicate role'))
+    }
   }
 
   return (
@@ -267,14 +309,15 @@ export default function RolesPage() {
                 <tr className="border-b border-slate-50 bg-slate-50/50">
                   <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">S.No</th>
                   <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Role Name</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Description</th>
                   <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Resources</th>
                   <th className="text-center px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-12 text-slate-400"><Shield className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No roles found</p></td></tr>
+                {isLoading ? (
+                  <tr><td colSpan={4} className="text-center py-12 text-slate-400"><p className="text-sm">Loading roles...</p></td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={4} className="text-center py-12 text-slate-400"><Shield className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No roles found</p></td></tr>
                 ) : (
                   filtered.map((role, idx) => (
                     <React.Fragment key={role.id}>
@@ -292,7 +335,6 @@ export default function RolesPage() {
                             <span className="text-sm font-medium text-slate-800">{role.name}</span>
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-sm text-slate-500 max-w-[240px] truncate">{role.description}</td>
                         <td className="px-5 py-4 text-center">
                           <button onClick={() => setExpandedRow(expandedRow === role.id ? null : role.id)} className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                             {role.resources.length} pages
@@ -303,16 +345,16 @@ export default function RolesPage() {
                           <div className="flex items-center justify-center gap-2">
                             <button onClick={() => setEditingRole(role)} title="Edit role" className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><Edit3 className="w-4 h-4" /></button>
                             <button onClick={() => handleDuplicate(role)} title="Duplicate role" className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><Copy className="w-4 h-4" /></button>
-                            <button onClick={() => !role.isSystem && setDeletingRole(role)} title={role.isSystem ? 'System roles cannot be deleted' : 'Delete role'} disabled={role.isSystem} className={`p-2 rounded-lg transition-colors ${role.isSystem ? 'text-slate-200 cursor-not-allowed' : 'hover:bg-red-50 text-slate-400 hover:text-red-500'}`}><Trash2 className="w-4 h-4" /></button>
+                            <button onClick={() => setDeletingRole(role)} title="Delete role" className="p-2 rounded-lg transition-colors hover:bg-red-50 text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </td>
                       </tr>
                       {expandedRow === role.id && (
-                        <tr><td colSpan={5} className="px-5 py-3 bg-slate-50/80">
+                        <tr><td colSpan={4} className="px-5 py-3 bg-slate-50/80">
                           <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Assigned Resources ({role.resources.length})</p>
                           <div className="flex flex-wrap gap-2">
                             {role.resources.map(resId => {
-                              const res = availableResources.find(r => r.id === resId)
+                              const res = resourcesList.find(r => r.id === resId)
                               if (!res) return null
                               const Icon = iconMap[res.icon] || FileText
                               return (
@@ -333,14 +375,14 @@ export default function RolesPage() {
           </div>
           <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <p className="text-xs text-slate-500">Showing {filtered.length} of {rolesList.length} roles</p>
-            <p className="text-[10px] text-slate-400">System roles cannot be deleted but can be edited</p>
+            <p className="text-[10px] text-slate-400">Roles and page access are loaded from backend database</p>
           </div>
         </div>
       </div>
 
       {/* Modals */}
       {(showAddModal || editingRole) && (
-        <RoleModal role={editingRole} onClose={() => { setShowAddModal(false); setEditingRole(null) }} onSave={handleSave} />
+        <RoleModal role={editingRole} resources={resourcesList} onClose={() => { setShowAddModal(false); setEditingRole(null) }} onSave={handleSave} />
       )}
       {deletingRole && (
         <DeleteConfirm role={deletingRole} onClose={() => setDeletingRole(null)} onConfirm={handleDelete} />

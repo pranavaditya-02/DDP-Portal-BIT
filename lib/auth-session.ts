@@ -51,7 +51,8 @@ export const decodeAuthToken = (token: string): AuthUser | null => {
     const payload = JSON.parse(decodeBase64Url(parts[1])) as AuthTokenPayload
     if (payload.exp && payload.exp * 1000 <= Date.now()) return null
 
-    const username = String(payload.username || payload.name || payload.email || '').trim()
+    const username = String(payload.username || payload.email || '').trim()
+    const name = String(payload.name || payload.username || payload.email || '').trim()
     const email = String(payload.email || '').trim()
     if (!email) return null
 
@@ -61,7 +62,7 @@ export const decodeAuthToken = (token: string): AuthUser | null => {
     return {
       id: Number(payload.id || 0),
       username: username || email.split('@')[0] || email,
-      name: username || email.split('@')[0] || email,
+      name: name || email.split('@')[0] || email,
       email,
       roleId: Number(payload.roleId || 0),
       roleName: roleName || roles[0] || 'faculty',

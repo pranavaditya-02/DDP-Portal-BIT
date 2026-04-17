@@ -5,19 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { apiClient } from '@/lib/api';
-import { useRoles } from '@/hooks/useRoles';
 import { AUTH_COOKIE_NAME } from '@/lib/auth-session';
 import { clearAuthCookie } from '@/app/actions';
-import { motion } from 'framer-motion';
 import { LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { hasRouteAccess, pickFirstAccessibleRoute, routeToLabel } from '@/lib/route-access';
 
 export const Navigation: React.FC = () => {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
-  const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } = useRoles();
+  const { user, logout, allowedRoutes, allowedResources } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
-  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance();
 
   const handleLogout = async () => {
     await apiClient.logout().catch(() => undefined);
@@ -31,88 +28,26 @@ export const Navigation: React.FC = () => {
     return null;
   }
 
-  const navItems = [
-    // Faculty items
-    {
-      label: 'Dashboard',
-      href: isStudent() ? '/student/dashboard' : '/dashboard',
-      show: !isDean(),
-    },
-    {
-      label: 'Overview',
-      href: '/student/overview',
-      show: isStudent(),
-    },
-    {
-      label: 'Student Workflow',
-      href: '/students',
-      show: isStudent(),
-    },
-    {
-      label: 'Activity Master',
-      href: '/student/activity/master',
-      show: isStudent(),
-    },
-    {
-      label: 'Activity Logger',
-      href: '/student/activity/logger',
-      show: canAccessLogger,
-    },
-    {
-      label: 'My Activities',
-      href: '/activities',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Submit Activity',
-      href: '/activities/submit',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Submit Achievements',
-      href: '/achievements/submit',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Submit Action Plan',
-      href: '/action-plan/submit',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Department',
-      href: '/department',
-      show: isHod(),
-    },
-    {
-      label: 'Faculty Leaderboard',
-      href: '/leaderboard',
-      show: isHod(),
-    },
-    {
-      label: 'College Dashboard',
-      href: '/college',
-      show: isDean(),
-    },
-    {
-      label: 'Verification Queue',
-      href: '/verification',
-      show: isVerification(),
-    },
-    {
-      label: 'User Management',
-      href: '/users',
-      show: isMaintenance(),
-    },
-  ];
+  const visibleNavItems = allowedResources.length > 0
+    ? allowedResources
+        .filter((item) => item?.href)
+        .map((item) => ({ href: item.href, label: item.label || routeToLabel(item.href) }))
+    : allowedRoutes
+        .filter((href) => !href.includes('['))
+        .map((href) => ({ href, label: routeToLabel(href) }))
+        .filter((item) => hasRouteAccess(item.href, allowedRoutes));
 
-  const visibleNavItems = navItems.filter((item) => item.show);
+  const homeHref = pickFirstAccessibleRoute({
+    resources: allowedResources,
+    routePaths: allowedRoutes,
+  }) || '/dashboard';
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center space-x-2">
+          <Link href={homeHref} className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-900 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">F</span>
             </div>
@@ -124,14 +59,14 @@ export const Navigation: React.FC = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {visibleNavItems.map((item, idx) => (
-              <motion.div key={idx} whileHover={{ y: -2 }}>
+              <div key={idx} className="transition-transform duration-150 hover:-translate-y-0.5">
                 <Link
                   href={item.href}
                   className="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
                 >
                   {item.label}
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
 
@@ -158,14 +93,12 @@ export const Navigation: React.FC = () => {
             </div>
 
             {/* Logout Button */}
-            <motion.button
+            <button
               onClick={handleLogout}
               className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <LogOut className="w-5 h-5 text-red-600" />
-            </motion.button>
+            </button>
 
             {/* Mobile Menu Button */}
             <button
@@ -179,10 +112,7 @@ export const Navigation: React.FC = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+          <div
             className="md:hidden pb-4 space-y-1"
           >
             {visibleNavItems.map((item, idx) => (
@@ -201,7 +131,7 @@ export const Navigation: React.FC = () => {
             >
               Logout
             </button>
-          </motion.div>
+          </div>
         )}
       </div>
     </nav>

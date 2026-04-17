@@ -8,8 +8,16 @@ instrumentation-client.ts
 # Common ignores
 node_modules/
 .next/
+.env
+.env.*
 .env*.local
+backend/.env
+backend/.env.*
+!.env.example
+!backend/.env.example
 .DS_Store
 # Backend local secrets and logs
 backend/.env
 backend/logs/*.log
+assets/dumps
+assets/.docx_extract

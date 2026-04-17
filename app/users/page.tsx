@@ -1,20 +1,19 @@
 'use client'
 
-import React, { useState, useMemo, useRef, useCallback } from 'react'
-import { systemUsers, type SystemUser } from '@/lib/mock-data'
-import { roles } from '@/lib/mock-data'
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react'
+import { type SystemUser } from '@/lib/mock-data'
 import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
+import { apiClient, getApiErrorMessage, type UserDepartmentOption, type UserRoleOption, type UserDesignationOption } from '@/lib/api'
 import {
   Users, Search, Plus, Edit3, Trash2, X, Check,
   UserCheck, UserX, ChevronDown, Info, Mail,
   Building2, Shield, User, KeyRound, Upload,
   FileSpreadsheet, AlertCircle, Download, Hash,
+  Loader,
 } from 'lucide-react'
 
 // ─── helpers ────────────────────────────────────────────────
-const DEPARTMENTS = ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL', 'Admin']
-
 const roleColors: Record<string, string> = {
   faculty: 'bg-blue-50 text-blue-700 border-blue-200',
   hod: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -23,20 +22,22 @@ const roleColors: Record<string, string> = {
   maintenance: 'bg-red-50 text-red-700 border-red-200',
 }
 
-const roleLabel: Record<string, string> = {
-  faculty: 'Faculty',
-  hod: 'HOD',
-  dean: 'Dean',
-  verification: 'Verification',
-  maintenance: 'Maintenance',
+const getRoleLabel = (role: string) => {
+  const normalized = role.toLowerCase()
+  if (normalized === 'faculty') return 'Faculty'
+  if (normalized === 'hod') return 'HOD'
+  if (normalized === 'dean') return 'Dean'
+  if (normalized === 'verification') return 'Verification'
+  if (normalized === 'maintenance') return 'Maintenance'
+  return role
 }
 
-function RoleBadge({ role }: { role: string }) {
+function RoleBadge({ role, roleLabels }: { role: string; roleLabels: Record<string, string> }) {
   const color = roleColors[role] ?? 'bg-slate-50 text-slate-700 border-slate-200'
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${color}`}>
       <Shield className="w-2.5 h-2.5" />
-      {roleLabel[role] ?? role}
+      {roleLabels[role] ?? getRoleLabel(role)}
     </span>
   )
 }
@@ -53,22 +54,38 @@ interface UserFormData {
 }
 
 function UserModal({
-  user, onClose, onSave,
+  user, onClose, onSave, departmentOptions, roleOptions, roleLabels, designationOptions,
 }: {
   user: SystemUser | null
   onClose: () => void
   onSave: (data: UserFormData) => void
+  departmentOptions: UserDepartmentOption[]
+  roleOptions: UserRoleOption[]
+  roleLabels: Record<string, string>
+  designationOptions: string[]
 }) {
   const [form, setForm] = useState<UserFormData>({
     facultyId: user?.facultyId ?? '',
     name: user?.name ?? '',
     email: user?.email ?? '',
-    department: user?.department ?? 'CSE',
-    designation: user?.designation ?? '',
-    role: user?.role ?? 'faculty',
+    department: user?.department ?? departmentOptions[0]?.code ?? '',
+    designation: user?.designation ?? designationOptions[0] ?? '',
+    role: user?.role ?? roleOptions[0]?.value ?? 'faculty',
     status: user?.status ?? 'active',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({})
+
+  useEffect(() => {
+    if (!form.department && departmentOptions.length > 0) {
+      setForm(prev => ({ ...prev, department: departmentOptions[0].code }))
+    }
+    if (!form.role && roleOptions.length > 0) {
+      setForm(prev => ({ ...prev, role: roleOptions[0].value }))
+    }
+    if (!form.designation && designationOptions.length > 0) {
+      setForm(prev => ({ ...prev, designation: designationOptions[0] }))
+    }
+  }, [departmentOptions, roleOptions, designationOptions, form.department, form.role, form.designation])
 
   const set = (field: keyof UserFormData, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -90,7 +107,7 @@ function UserModal({
     if (validate()) onSave(form)
   }
 
-  const currentRole = roles.find(r => r.name.toLowerCase() === form.role)
+  const currentRoleLabel = roleLabels[form.role] ?? getRoleLabel(form.role)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
@@ -169,13 +186,22 @@ function UserModal({
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Designation <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={form.designation}
-              onChange={e => set('designation', e.target.value)}
-              placeholder="e.g. Associate Professor"
-              className={`input-base ${errors.designation ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
-            />
+            <div className="relative">
+              <select
+                value={form.designation}
+                onChange={e => set('designation', e.target.value)}
+                className={`input-base appearance-none pr-8 ${errors.designation ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              >
+                {designationOptions.length === 0 ? (
+                  <option value="">No designations available</option>
+                ) : (
+                  designationOptions.map((designation) => (
+                    <option key={designation} value={designation}>{designation}</option>
+                  ))
+                )}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
             {errors.designation && <p className="text-xs text-red-500 mt-1">{errors.designation}</p>}
           </div>
 
@@ -190,7 +216,7 @@ function UserModal({
                   onChange={e => set('department', e.target.value)}
                   className="input-base pl-9 appearance-none pr-8"
                 >
-                  {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                  {departmentOptions.map(d => <option key={d.id} value={d.code}>{d.code}</option>)}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
@@ -205,8 +231,8 @@ function UserModal({
                   onChange={e => set('role', e.target.value)}
                   className="input-base pl-9 appearance-none pr-8"
                 >
-                  {Object.entries(roleLabel).map(([val, label]) => (
-                    <option key={val} value={val}>{label}</option>
+                  {roleOptions.map((role) => (
+                    <option key={role.id} value={role.value}>{role.label}</option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -215,10 +241,10 @@ function UserModal({
           </div>
 
           {/* Role info */}
-          {currentRole && (
+          {form.role && (
             <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
               <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-blue-700">{currentRole.description} — access to {currentRole.resources.length} resource{currentRole.resources.length !== 1 ? 's' : ''}.</p>
+              <p className="text-xs text-blue-700">This user will be assigned the {currentRoleLabel} role.</p>
             </div>
           )}
 
@@ -313,10 +339,13 @@ interface ParsedRow {
 }
 
 const REQUIRED_COLS = ['facultyId', 'name', 'email', 'department', 'designation', 'role']
-const VALID_ROLES = Object.keys(roleLabel)
 const VALID_STATUS = ['active', 'inactive']
 
-function validateRow(row: Record<string, string>): ParsedRow {
+function validateRow(
+  row: Record<string, string>,
+  validDepartments: string[],
+  roleValueMap: Map<string, string>
+): ParsedRow {
   const get = (...keys: string[]) => {
     for (const k of keys) {
       const val = (row[k] ?? '').toString().trim()
@@ -331,7 +360,8 @@ function validateRow(row: Record<string, string>): ParsedRow {
   const email = get('email', 'Email')
   const department = get('department', 'Department', 'dept', 'Dept')
   const designation = get('designation', 'Designation')
-  const role = get('role', 'Role').toLowerCase()
+  const roleRaw = get('role', 'Role')
+  const role = roleRaw.toLowerCase()
   const status = get('status', 'Status').toLowerCase() || 'active'
 
   if (!facultyId) errs.push('Faculty ID missing')
@@ -339,19 +369,33 @@ function validateRow(row: Record<string, string>): ParsedRow {
   if (!email) errs.push('Email missing')
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.push('Invalid email')
   if (!department) errs.push('Department missing')
-  else if (!DEPARTMENTS.map(d => d.toLowerCase()).includes(department.toLowerCase())) errs.push(`Unknown dept "${department}"`)
+  else if (!validDepartments.includes(department.toLowerCase())) errs.push(`Unknown dept "${department}"`)
   if (!designation) errs.push('Designation missing')
   if (!role) errs.push('Role missing')
-  else if (!VALID_ROLES.includes(role)) errs.push(`Unknown role "${role}"`)
+
+  const normalizedRole = roleValueMap.get(role)
+  if (role && !normalizedRole) errs.push(`Unknown role "${roleRaw}"`)
   if (status && !VALID_STATUS.includes(status)) errs.push(`Unknown status "${status}"`)
 
-  return { facultyId, name, email, department, designation, role, status: VALID_STATUS.includes(status) ? status : 'active', _errors: errs }
+  return {
+    facultyId,
+    name,
+    email,
+    department,
+    designation,
+    role: normalizedRole || role,
+    status: VALID_STATUS.includes(status) ? status : 'active',
+    _errors: errs,
+  }
 }
 
-function BulkImportModal({ existingUsers, onClose, onImport }: {
+function BulkImportModal({ existingUsers, onClose, onImport, departmentOptions, roleOptions, roleLabels }: {
   existingUsers: SystemUser[]
   onClose: () => void
   onImport: (users: Omit<SystemUser, 'id' | 'joinedDate'>[]) => void
+  departmentOptions: UserDepartmentOption[]
+  roleOptions: UserRoleOption[]
+  roleLabels: Record<string, string>
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
@@ -359,11 +403,26 @@ function BulkImportModal({ existingUsers, onClose, onImport }: {
   const [rows, setRows] = useState<ParsedRow[]>([])
   const [parsed, setParsed] = useState(false)
 
+  const validRoles = useMemo(
+    () => roleOptions.map((r) => r.dbName.toLowerCase()),
+    [roleOptions]
+  )
+  const roleValueMap = useMemo(() => {
+    const map = new Map<string, string>()
+    roleOptions.forEach((role) => {
+      map.set(role.value.toLowerCase(), role.value)
+      map.set(role.label.toLowerCase(), role.value)
+      map.set(role.dbName.toLowerCase(), role.value)
+    })
+    return map
+  }, [roleOptions])
+  const validDepartments = useMemo(() => departmentOptions.map((d) => d.code.toLowerCase()), [departmentOptions])
+
   const parseData = useCallback((data: Record<string, string>[]) => {
-    const result = data.map(r => validateRow(r))
+    const result = data.map(r => validateRow(r, validDepartments, roleValueMap))
     setRows(result)
     setParsed(true)
-  }, [])
+  }, [validDepartments, roleValueMap])
 
   const handleFile = useCallback((file: File) => {
     if (!file) return
@@ -440,8 +499,8 @@ function BulkImportModal({ existingUsers, onClose, onImport }: {
   const downloadTemplate = () => {
     const ws = XLSX.utils.aoa_to_sheet([
       ['facultyId', 'name', 'email', 'department', 'designation', 'role', 'status'],
-      ['BIT-CSE-099', 'Dr. Sample Name', 'sample@bit.edu', 'CSE', 'Assistant Professor', 'faculty', 'active'],
-      ['BIT-IT-099', 'Prof. Another User', 'another@bit.edu', 'IT', 'Associate Professor', 'hod', 'active'],
+      ['BIT-CSE-099', 'Dr. Sample Name', 'sample@bit.edu', departmentOptions[0]?.code ?? 'CSE', 'Assistant Professor', roleOptions[0]?.value ?? 'faculty', 'active'],
+      ['BIT-IT-099', 'Prof. Another User', 'another@bit.edu', departmentOptions[1]?.code ?? departmentOptions[0]?.code ?? 'IT', 'Associate Professor', roleOptions[1]?.value ?? roleOptions[0]?.value ?? 'hod', 'active'],
     ])
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Users')
@@ -479,7 +538,7 @@ function BulkImportModal({ existingUsers, onClose, onImport }: {
             <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
             <div className="text-xs text-blue-700 space-y-0.5">
               <p>Required columns: <span className="font-semibold">{REQUIRED_COLS.join(', ')}</span></p>
-              <p>Valid roles: {VALID_ROLES.join(', ')} &nbsp;|&nbsp; Valid departments: {DEPARTMENTS.join(', ')}</p>
+              <p>Valid roles: {validRoles.join(', ')} &nbsp;|&nbsp; Valid departments: {validDepartments.join(', ')}</p>
             </div>
           </div>
 
@@ -578,7 +637,7 @@ function BulkImportModal({ existingUsers, onClose, onImport }: {
                           <p className="text-[11px] text-slate-400">{r.email}</p>
                         </div>
                         <span className="text-[10px] font-mono text-slate-400 hidden sm:block">{r.facultyId}</span>
-                        <RoleBadge role={r.role} />
+                        <RoleBadge role={r.role} roleLabels={roleLabels} />
                       </div>
                     ))}
                   </div>
@@ -607,7 +666,11 @@ function BulkImportModal({ existingUsers, onClose, onImport }: {
 
 // ─── Main Page ────────────────────────────────────────────────
 export default function UsersPage() {
-  const [userList, setUserList] = useState<SystemUser[]>(systemUsers)
+  const [userList, setUserList] = useState<SystemUser[]>([])
+  const [departmentOptions, setDepartmentOptions] = useState<UserDepartmentOption[]>([])
+  const [roleOptions, setRoleOptions] = useState<UserRoleOption[]>([])
+  const [designationOptions, setDesignationOptions] = useState<UserDesignationOption[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -615,6 +678,60 @@ export default function UsersPage() {
   const [showBulkModal, setShowBulkModal] = useState(false)
   const [editUser, setEditUser] = useState<SystemUser | null>(null)
   const [deleteUser, setDeleteUser] = useState<SystemUser | null>(null)
+
+  const roleLabels = useMemo(
+    () => Object.fromEntries(roleOptions.map((role) => [role.value, role.label])) as Record<string, string>,
+    [roleOptions]
+  )
+
+  const designationNames = useMemo(() => {
+    const metadataNames = designationOptions
+      .map((designation) => designation.name?.trim())
+      .filter((designation): designation is string => Boolean(designation))
+
+    if (metadataNames.length > 0) return metadataNames
+
+    if (editUser?.designation?.trim()) {
+      return [editUser.designation.trim()]
+    }
+
+    return []
+  }, [designationOptions, editUser])
+
+  // Fetch users and metadata on mount
+  useEffect(() => {
+    loadInitialData()
+  }, [])
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true)
+      const [usersData, metadata] = await Promise.all([
+        apiClient.getAllUsers(),
+        apiClient.getUsersMetadata(),
+      ])
+      setUserList(usersData.users || [])
+      setDepartmentOptions(metadata.departments || [])
+      setRoleOptions(metadata.roles || [])
+      setDesignationOptions(metadata.designations || [])
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to load users'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true)
+      const data = await apiClient.getAllUsers()
+      setUserList(data.users || [])
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to load users'))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filtered = useMemo(() => {
     return userList.filter(u => {
@@ -633,46 +750,80 @@ export default function UsersPage() {
     total: userList.length,
     active: userList.filter(u => u.status === 'active').length,
     inactive: userList.filter(u => u.status === 'inactive').length,
-    byRole: Object.entries(roleLabel).map(([key, label]) => ({
-      key, label, count: userList.filter(u => u.role === key).length,
+    byRole: (roleOptions.length > 0
+      ? roleOptions.map((role) => ({ key: role.value, label: role.label }))
+      : Array.from(new Set(userList.map((u) => u.role))).map((role) => ({ key: role, label: getRoleLabel(role) }))
+    ).map(({ key, label }) => ({
+      key,
+      label,
+      count: userList.filter(u => u.role === key).length,
     })),
-  }), [userList])
+  }), [userList, roleOptions])
 
-  const handleSave = (data: UserFormData) => {
-    if (editUser) {
-      setUserList(prev => prev.map(u => u.id === editUser.id ? { ...u, ...data } : u))
-      toast.success('User updated successfully')
-      setEditUser(null)
-    } else {
-      const newUser: SystemUser = {
-        ...data,
-        id: Math.max(0, ...userList.map(u => u.id)) + 1,
-        joinedDate: new Date().toISOString().split('T')[0],
+  const handleSave = async (data: UserFormData) => {
+    try {
+      if (editUser) {
+        await apiClient.updateUser(editUser.id, {
+          facultyId: data.facultyId,
+          email: data.email,
+          name: data.name,
+          department: data.department,
+          designation: data.designation,
+          role: data.role,
+          status: data.status,
+        })
+        toast.success('User updated successfully')
+        setEditUser(null)
+      } else {
+        await apiClient.createUser({
+          facultyId: data.facultyId,
+          email: data.email,
+          name: data.name,
+          department: data.department,
+          designation: data.designation,
+          role: data.role,
+          status: data.status,
+        })
+        toast.success('User added successfully')
+        setShowAddModal(false)
       }
-      setUserList(prev => [newUser, ...prev])
-      toast.success('User added successfully')
-      setShowAddModal(false)
+      await loadUsers()
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to save user'))
     }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteUser) return
-    setUserList(prev => prev.filter(u => u.id !== deleteUser.id))
-    toast.success(`${deleteUser.name} has been removed`)
-    setDeleteUser(null)
+    try {
+      await apiClient.deleteUser(deleteUser.id)
+      toast.success(`${deleteUser.name} has been removed`)
+      await loadUsers()
+      setDeleteUser(null)
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to delete user'))
+    }
   }
 
-  const handleBulkImport = (newUsers: Omit<SystemUser, 'id' | 'joinedDate'>[]) => {
-    const today = new Date().toISOString().split('T')[0]
-    let nextId = Math.max(0, ...userList.map(u => u.id)) + 1
-    const usersToAdd: SystemUser[] = newUsers.map(u => ({
-      ...u,
-      id: nextId++,
-      joinedDate: today,
-    }))
-    setUserList(prev => [...usersToAdd, ...prev])
-    toast.success(`${usersToAdd.length} user${usersToAdd.length !== 1 ? 's' : ''} imported successfully`)
-    setShowBulkModal(false)
+  const handleBulkImport = async (newUsers: Omit<SystemUser, 'id' | 'joinedDate'>[]) => {
+    try {
+      await apiClient.bulkImportUsers(
+        newUsers.map(u => ({
+          facultyId: u.facultyId,
+          email: u.email,
+          name: u.name,
+          department: u.department,
+          designation: u.designation,
+          role: u.role,
+          status: u.status,
+        }))
+      )
+      toast.success(`${newUsers.length} user${newUsers.length !== 1 ? 's' : ''} imported successfully`)
+      await loadUsers()
+      setShowBulkModal(false)
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to import users'))
+    }
   }
 
   return (
@@ -734,7 +885,7 @@ export default function UsersPage() {
           <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="input-base pl-9 pr-8 appearance-none min-w-[140px]">
             <option value="all">All Roles</option>
-            {Object.entries(roleLabel).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+            {roleOptions.map((role) => <option key={role.id} value={role.value}>{role.label}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
         </div>
@@ -764,9 +915,18 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-400 text-sm">
+                  <td colSpan={6} className="text-center py-12">
+                    <div className="flex items-center justify-center gap-2 text-slate-400">
+                      <Loader className="w-4 h-4 animate-spin" />
+                      <span>Loading users...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-slate-400 text-sm">
                     No users match your search.
                   </td>
                 </tr>
@@ -793,7 +953,7 @@ export default function UsersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <RoleBadge role={u.role} />
+                    <RoleBadge role={u.role} roleLabels={roleLabels} />
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
@@ -839,6 +999,10 @@ export default function UsersPage() {
           user={editUser}
           onClose={() => { setShowAddModal(false); setEditUser(null) }}
           onSave={handleSave}
+          departmentOptions={departmentOptions}
+          roleOptions={roleOptions}
+          roleLabels={roleLabels}
+          designationOptions={designationNames}
         />
       )}
       {deleteUser && (
@@ -849,6 +1013,9 @@ export default function UsersPage() {
           existingUsers={userList}
           onClose={() => setShowBulkModal(false)}
           onImport={handleBulkImport}
+          departmentOptions={departmentOptions}
+          roleOptions={roleOptions}
+          roleLabels={roleLabels}
         />
       )}
     </div>

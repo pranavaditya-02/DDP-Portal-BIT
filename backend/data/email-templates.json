@@ -1,0 +1,34 @@
+[
+  {
+    "id": "deadline-reminder",
+    "name": "Deadline Reminder",
+    "type": "deadline-reminder",
+    "subject": "Deadline Reminder: {{taskTitle}} due in {{daysRemaining}} day(s)",
+    "content": "Dear {{facultyName}},\n\nThis is a reminder that your task \"{{taskTitle}}\" is due on {{deadlineDate}}.\n\nYou have {{daysRemaining}} day(s) to complete and submit this task.\n\nImportant Details:\n- Task: {{taskTitle}}\n- Deadline: {{deadlineDate}}\n- Status: {{taskStatus}}\n\nPlease log in to the Faculty Achievement Dashboard to submit your work before the deadline.\n\nDashboard Link: {{dashboardLink}}\n\nThis is an automated email. Please do not reply to this message.",
+    "placeholders": ["facultyName", "taskTitle", "daysRemaining", "deadlineDate", "taskStatus", "dashboardLink"]
+  },
+  {
+    "id": "submission-confirmation",
+    "name": "Submission Confirmation",
+    "type": "submission-confirmation",
+    "subject": "Submission Confirmed: {{taskTitle}}",
+    "content": "Dear {{facultyName}},\n\nYour submission for \"{{taskTitle}}\" has been received successfully.\n\nSubmission Details:\n- Task: {{taskTitle}}\n- Submission Date: {{submissionDate}}\n- Reference ID: {{submissionId}}\n\nYour submission is now under review. You will be notified once it has been verified.\n\nThis is an automated email. Please do not reply to this message.",
+    "placeholders": ["facultyName", "taskTitle", "submissionDate", "submissionId"]
+  },
+  {
+    "id": "approval-notification",
+    "name": "Approval Notification",
+    "type": "approval-notification",
+    "subject": "{{taskTitle}} - Approved",
+    "content": "Dear {{facultyName}},\n\nGreat news! Your submission for \"{{taskTitle}}\" has been approved.\n\nApproval Details:\n- Task: {{taskTitle}}\n- Points Earned: {{pointsEarned}}\n- Approval Date: {{approvalDate}}\n- Status: Approved\n\nYour achievement points have been updated in the system.\n\nThis is an automated email. Please do not reply to this message.",
+    "placeholders": ["facultyName", "taskTitle", "pointsEarned", "approvalDate"]
+  },
+  {
+    "id": "task-completion",
+    "name": "Task Completion",
+    "type": "task-completion",
+    "subject": "Task Completed: {{taskTitle}}",
+    "content": "Dear {{facultyName}},\n\nYour task \"{{taskTitle}}\" has been marked as completed in the Faculty Achievement Dashboard.\n\nFaculty Email: {{facultyEmail}}\nCompleted At: {{completedAt}}\n\nThis is an automated email. Please do not reply to this message.",
+    "placeholders": ["facultyName", "facultyEmail", "taskTitle", "completedAt"]
+  }
+]
