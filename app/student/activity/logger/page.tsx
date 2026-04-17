@@ -135,9 +135,13 @@ const getSeatsProgressTone = (seatsLeft: number, totalSeats: number) => {
 function EventCard({
   event,
   onOpenDetails,
+  registration,
+  showSubmitReport,
 }: {
   event: UiEvent
   onOpenDetails: (event: UiEvent) => void
+  registration?: EventRegistrationRecord | null
+  showSubmitReport?: boolean
 }) {
   const seatsLeft = Math.max(0, event.balanceCount ?? 0)
   const closed = isClosed(event)
@@ -190,13 +194,14 @@ function EventCard({
           <span>{Math.max(0, event.appliedCount ?? 0)} registered</span>
           <span>{Math.max(1, event.maximumCount || 1)} total seats</span>
         </div>
+        
       </div>
     </article>
   )
 }
 
 export default function Page() {
-  const { isStudent, isFaculty, isHod, isDean, isAdmin, isVerification, isMaintenance } = useRoles()
+  const { canAccessResource } = useRoles()
   const user = useAuthStore((state) => state.user)
   const [events, setEvents] = useState<UiEvent[]>([])
   const [myRegistrations, setMyRegistrations] = useState<EventRegistrationRecord[]>([])
@@ -226,7 +231,7 @@ export default function Page() {
 
         const [eventsResponse, myRegistrationsResponse] = await Promise.all([
           apiClient.getEvents({ sort: 'desc' }),
-          isStudent() ? apiClient.getMyRegistrations().catch(() => ({ registrations: [] })) : Promise.resolve({ registrations: [] }),
+          apiClient.getMyRegistrations().catch(() => ({ registrations: [] })),
         ])
 
         if (!isMounted) return
@@ -253,8 +258,15 @@ export default function Page() {
       isMounted = false
     }
   }, [])
+  
 
-  const canCreate = isAdmin()
+  const registrationByEventId = useMemo(() => {
+    const map = new Map<number, EventRegistrationRecord>()
+    myRegistrations.forEach((registration) => {
+      map.set(registration.eventId, registration)
+    })
+    return map
+  }, [myRegistrations])
 
   const categoryOptions = useMemo(() => {
     const items = Array.from(new Set(events.map((event) => event.eventCategory).filter((value): value is string => Boolean(value))))
@@ -268,24 +280,16 @@ export default function Page() {
 
   const filteredEvents = useMemo(() => {
     let data = [...events]
-    const myRegisteredEventIds = new Set(
-      myRegistrations.map((registration) => registration.eventId),
-    )
 
-    if (isStudent()) {
+    if (activeTab === 'all') {
       data = data.filter((event) => isActiveStatus(event))
-    }
-
-    if (isStudent() && activeTab === 'all') {
-      data = data.filter((event) => !myRegisteredEventIds.has(event.id))
-    }
-
-    if (activeTab === 'registered') {
-      data = data.filter((event) => myRegisteredEventIds.has(event.id))
-    }
-
-    if (activeTab === 'completed') {
-      data = data.filter((event) => isCompleted(event))
+    } else if (activeTab === 'registered') {
+      data = data.filter((event) => registrationByEventId.has(event.id) && !isCompleted(event))
+    } else if (activeTab === 'completed') {
+      data = data.filter((event) => {
+        const registration = registrationByEventId.get(event.id)
+        return registration?.status === 'approved' && isCompleted(event)
+      })
     }
 
     if (category !== 'all') {
@@ -310,22 +314,18 @@ export default function Page() {
     }
 
     return data
-  }, [activeTab, category, deferredSearch, delivery, events, isStudent(), level, myRegistrations])
+  }, [activeTab, category, deferredSearch, delivery, events, registrationByEventId, level])
 
   const counts = useMemo(
-    () => {
-      const myRegisteredEventIds = new Set(
-        myRegistrations.map((registration) => registration.eventId),
-      )
-
-      const baseEvents = isStudent() ? events.filter((event) => isActiveStatus(event)) : events
-      return {
-        all: isStudent() ? baseEvents.filter((event) => !myRegisteredEventIds.has(event.id)).length : baseEvents.length,
-        registered: isStudent() ? baseEvents.filter((event) => myRegisteredEventIds.has(event.id)).length : baseEvents.filter((event) => event.appliedCount > 0).length,
-        completed: baseEvents.filter((event) => isCompleted(event)).length,
-      }
-    },
-    [events, isStudent(), myRegistrations]
+    () => ({
+      all: events.filter((event) => isActiveStatus(event)).length,
+      registered: events.filter((event) => registrationByEventId.has(event.id) && !isCompleted(event)).length,
+      completed: events.filter((event) => {
+        const registration = registrationByEventId.get(event.id)
+        return registration?.status === 'approved' && isCompleted(event)
+      }).length,
+    }),
+    [events, registrationByEventId]
   )
 
   const activeCount = filteredEvents.filter((event) => isActiveStatus(event)).length
@@ -398,14 +398,14 @@ export default function Page() {
     }
   }
 
-  const canAccessMaster = isStudent() || isFaculty() || isHod() || isDean() || isAdmin() || isVerification() || isMaintenance()
+  const canAccessMaster = canAccessResource('/student/activity/logger')
 
   if (!canAccessMaster) {
     return (
       <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
         <div className="mx-auto max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-6">
           <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
-          <p className="mt-2 text-sm text-rose-800">Activity Master is available for student, faculty, HOD, dean, verification, and admin roles.</p>
+          <p className="mt-2 text-sm text-rose-800">You do not have permission to access Activity Logger.</p>
           <Link href="/dashboard" className="mt-4 inline-flex rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-900">
             Go to Dashboard
           </Link>
@@ -416,26 +416,12 @@ export default function Page() {
 
   return (
     <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
-      <div className="w-full">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        
-
-        <div className="flex flex-wrap gap-3">
-          {canCreate ? (
-            <Link href="/students/create-event" className="btn-primary whitespace-nowrap">
-              Create Event
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
-          {isVerification() ? (
-            <Link href="/students/verification-panel" className="btn-outline whitespace-nowrap">
-              Verification Panel
-            </Link>
-          ) : null}
-        </div>
+      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold text-slate-900">Activity Logger</h1>
+            <p className="text-sm text-slate-600">View all events and their registrations</p>
+          </div>
       </div>
-      </div>
-
       {errorMessage ? <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 shadow-sm">{errorMessage}</div> : null}
 
       {selectedEvent && registrationForm ? (
@@ -576,7 +562,7 @@ export default function Page() {
                             href="/activities/submit"
                             className="inline-flex min-h-[48px] items-center justify-center rounded-[12px] bg-[#7D53F6] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A45D6]"
                           >
-                            Submit
+                            Submit report
                           </Link>
                         ) : isEventAlreadyRegistered ? (
                           null
@@ -684,7 +670,13 @@ export default function Page() {
         <>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} onOpenDetails={openEventDetails} />
+            <EventCard
+              key={event.id}
+              event={event}
+              onOpenDetails={openEventDetails}
+              registration={registrationByEventId.get(event.id)}
+              showSubmitReport={activeTab === 'registered'}
+            />
           ))}
         </div>
         </>

@@ -230,11 +230,13 @@ function normalizeApiUrl(rawUrl?: string) {
 
   if (urlValue.startsWith('/')) {
     const pathname = urlValue.replace(/\/+$/, '') || '/';
-    const apiPath = pathname === '/' ? '/api' : pathname.toLowerCase().endsWith('/auth') ? pathname.replace(/\/auth$/i, '') || '/api' : pathname;
-    if (typeof window !== 'undefined') {
-      return `${window.location.origin}${apiPath}`;
+    if (pathname === '/' ) {
+      return '/api';
     }
-    return apiPath;
+    if (pathname.toLowerCase().endsWith('/auth')) {
+      return pathname.replace(/\/auth$/i, '') || '/api';
+    }
+    return pathname;
   }
 
   let normalizedUrl = urlValue;
@@ -491,7 +493,7 @@ export const apiClient = {
   },
 
   createPatentReport: async (formData: FormData) => {
-    const response = await client.post('/patent-report', formData, {
+    const response = await client.post('/patent-tracker', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -505,7 +507,7 @@ export const apiClient = {
   },
 
   getPatentReports: async () => {
-    const response = await client.get('/patent-report');
+    const response = await client.get('/patent-tracker');
     return response.data;
   },
 

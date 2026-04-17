@@ -14,8 +14,8 @@ import {
 import { CalendarDays, RotateCcw, Save, Search, ShieldAlert, Settings } from 'lucide-react'
 
 export default function ActivitiesAdminPage() {
-  const { isMaintenance } = useRoles()
-  const isAdmin = isMaintenance()
+  const { canAccessResource } = useRoles()
+  const isAdmin = canAccessResource('/activities/admin')
 
   const [deadlineMap, setDeadlineMap] = useState<Record<string, string>>(() => {
     if (typeof window === 'undefined') return DEFAULT_WORKFLOW_DEADLINE_MAP

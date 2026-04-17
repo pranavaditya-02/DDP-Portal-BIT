@@ -30,7 +30,7 @@ export default function VerificationEventPage() {
   const params = useParams()
   const router = useRouter()
   const roleUtils = useRoles()
-  const canVerify = roleUtils.isVerification() || roleUtils.isAdmin()
+  const canVerify = roleUtils.canAccessResource('/student/activity/verification-panel')
 
   const eventId = Number(params?.id)
 

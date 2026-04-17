@@ -215,7 +215,7 @@ function RegistrationRow({ registration }: { registration: EventRegistrationReco
 }
 
 export default function Page() {
-  const { isAdmin, isFaculty, isHod, isDean, isVerification, isMaintenance } = useRoles()
+  const { canAccessResource } = useRoles()
   const [events, setEvents] = useState<UiEvent[]>([])
   const [registrations, setRegistrations] = useState<EventRegistrationRecord[]>([])
   const [activeTab, setActiveTab] = useState<TabKey>('active')
@@ -371,14 +371,16 @@ export default function Page() {
     }
   }, [registrations])
   const selectedEventImage = selectedEvent ? getCardImage(selectedEvent) : cardImages[0]
-  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance()
+  const canCreate = canAccessResource('/student/activity/create-event')
+  const canAccessVerificationPanel = canAccessResource('/student/activity/verification-panel')
+  const canAccessLogger = canAccessResource('/student/activity/logger')
 
   if (!canAccessLogger) {
     return (
       <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
         <div className="mx-auto max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-6">
           <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
-          <p className="mt-2 text-sm text-rose-800">Activity Logger is available for faculty, HOD, dean, verification, and admin roles only.</p>
+          <p className="mt-2 text-sm text-rose-800">You do not have permission to access Activity Logger.</p>
           <Link href="/student/activity/master" className="mt-4 inline-flex rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-900">
             Go to Activity Master
           </Link>
@@ -580,9 +582,22 @@ export default function Page() {
         <>
           <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold text-slate-900">Activity Logger</h1>
+              <h1 className="text-3xl font-bold text-slate-900">Activity Master</h1>
               <p className="text-sm text-slate-600">View all events and their registrations</p>
             </div>
+          </div>
+          <div>
+            {canCreate ? (
+            <Link href="/students/create-event" className="btn-primary whitespace-nowrap">
+              Create Event
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : null}
+          {canAccessVerificationPanel ? (
+            <Link href="/students/verification-panel" className="btn-outline whitespace-nowrap">
+              Verification Panel
+            </Link>
+          ) : null}
           </div>
 
           <div className="mb-4">

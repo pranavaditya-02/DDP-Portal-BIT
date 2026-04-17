@@ -72,6 +72,8 @@ const CORE_RESOURCE_CATALOG: RoleResource[] = [
   { id: 'user-management', label: 'User Management', icon: 'Users', href: '/users', group: 'Management' },
   { id: 'role-management', label: 'Role Management', icon: 'Shield', href: '/roles', group: 'Management' },
   { id: 'workflow-deadlines', label: 'Workflow Deadlines', icon: 'Calendar', href: '/activities/admin', group: 'Management' },
+  { id: 'college-task-compliance', label: 'Task Compliance Analytics', icon: 'Users', href: '/college/task-compliance', group: 'College' },
+  { id: 'student-activity-create-event', label: 'Create Event', icon: 'Clipboard', href: '/student/activity/create-event', group: 'Student' },
   { id: 'email-templates', label: 'Email Templates', icon: 'Mail', href: '/activities/admin/mail-alerts', group: 'Management' },
 ]
 
@@ -96,19 +98,19 @@ const DEFAULT_ROLE_PROFILES: Record<string, DefaultRoleProfile> = {
     passwordPrefix: 'hd',
     editAccess: true,
     deleteAccess: true,
-    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard'],
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'student-activity-logger'],
   },
   DEAN: {
     passwordPrefix: 'dn',
     editAccess: true,
     deleteAccess: true,
-    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'college-overview'],
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'college-overview', 'college-task-compliance', 'student-activity-logger'],
   },
   IQAC: {
     passwordPrefix: 'vc',
     editAccess: true,
     deleteAccess: false,
-    resources: ['dashboard', 'verification-queue', 'verification-panel'],
+    resources: ['dashboard', 'verification-queue', 'verification-panel', 'student-activity-logger'],
   },
   ADMIN: {
     passwordPrefix: 'ad',
