@@ -22,17 +22,20 @@ export const DEFAULT_WORKFLOW_SETTINGS: WorkflowSettings = {
 }
 
 export const WORKFLOW_DEADLINE_ITEMS: WorkflowDeadlineItem[] = [
-  { id: 'paper-idea-selection', title: 'Idea Selection', type: 'paper', defaultDeadlineISO: '2026-07-31' },
-  { id: 'paper-literature-review', title: 'Literature Review', type: 'paper', defaultDeadlineISO: '2026-09-30' },
-  { id: 'paper-implementation', title: 'Implementation', type: 'paper', defaultDeadlineISO: '2026-12-31' },
-  { id: 'paper-writing', title: 'Paper Writing', type: 'paper', defaultDeadlineISO: '2027-02-28' },
-  { id: 'paper-submission', title: 'Submission', type: 'paper', defaultDeadlineISO: '2027-03-31' },
-  { id: 'paper-acceptance', title: 'Acceptance', type: 'paper', defaultDeadlineISO: '2027-05-15' },
-  { id: 'patent-idea-finalization', title: 'Idea Finalization', type: 'patent', defaultDeadlineISO: '2026-07-31' },
-  { id: 'patent-prior-art-search', title: 'Prior Art Search', type: 'patent', defaultDeadlineISO: '2026-09-30' },
-  { id: 'patent-prototype-development', title: 'Prototype Development', type: 'patent', defaultDeadlineISO: '2026-12-31' },
-  { id: 'patent-drafting', title: 'Drafting', type: 'patent', defaultDeadlineISO: '2027-02-28' },
-  { id: 'patent-filing', title: 'Filing', type: 'patent', defaultDeadlineISO: '2027-04-30' },
+  { id: 'paper-title-finalization', title: 'Title Finalization', type: 'paper', defaultDeadlineISO: '2026-06-01' },
+  { id: 'paper-abstract-preparation', title: 'Abstract Preparation', type: 'paper', defaultDeadlineISO: '2026-06-15' },
+  { id: 'paper-first-draft-preparation', title: 'First Draft Preparation', type: 'paper', defaultDeadlineISO: '2026-06-29' },
+  { id: 'paper-revised-draft-preparation', title: 'Revised Draft Preparation', type: 'paper', defaultDeadlineISO: '2026-07-13' },
+  { id: 'paper-manuscript-submission', title: 'Manuscript Submission', type: 'paper', defaultDeadlineISO: '2026-07-20' },
+  {
+    id: 'patent-title-finalization-with-bit-patent-office-approval',
+    title: 'Title Finalization with BIT Patent Office Approval',
+    type: 'patent',
+    defaultDeadlineISO: '2026-07-01',
+  },
+  { id: 'patent-initial-draft-preparation', title: 'Initial Patent Draft Preparation', type: 'patent', defaultDeadlineISO: '2026-07-25' },
+  { id: 'patent-revised-draft-preparation', title: 'Revised Patent Draft Preparation', type: 'patent', defaultDeadlineISO: '2026-08-20' },
+  { id: 'patent-final-submission-of-patent-application', title: 'Final Submission of Patent Application', type: 'patent', defaultDeadlineISO: '2026-08-31' },
 ]
 
 export const DEFAULT_WORKFLOW_DEADLINE_MAP: Record<string, string> = WORKFLOW_DEADLINE_ITEMS.reduce((acc, item) => {

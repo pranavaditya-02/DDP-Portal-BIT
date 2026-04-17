@@ -25,8 +25,8 @@ import {
   Bell,
 } from 'lucide-react'
 
-type TabKey = 'all' | 'paper' | 'patent'
-type WorkflowType = 'paper' | 'patent'
+type TabKey = 'all' | 'paper' | 'patent' | 'proposal'
+type WorkflowType = 'paper' | 'patent' | 'proposal'
 type FieldType = 'text' | 'select' | 'date' | 'file' | 'textarea'
 
 type DynamicField = {
@@ -55,63 +55,64 @@ const TAB_OPTIONS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'paper', label: 'Paper' },
   { key: 'patent', label: 'Patent' },
+  { key: 'proposal', label: 'Funding Proposal' },
 ]
 
 const PAPER_STEPS: WorkflowStep[] = [
   {
-    id: 'paper-idea-selection',
-    baseId: 'paper-idea-selection',
-    title: 'Idea Selection',
-    deadlineLabel: 'July 31',
-    deadlineISO: '2026-07-31',
+    id: 'paper-title-finalization',
+    baseId: 'paper-title-finalization',
+    title: 'Title Finalization',
+    deadlineLabel: 'June 01',
+    deadlineISO: '2026-06-01',
     type: 'paper',
     fields: [
-      { key: 'researchTitle', label: 'Research Title', type: 'text', required: true, placeholder: 'Enter research title' },
-      { key: 'domain', label: 'Domain', type: 'select', required: true, options: ['AI', 'ML', 'Data Science', 'IoT', 'Cyber Security', 'Cloud'] },
+      { key: 'paperTitle', label: 'Paper Title', type: 'text', required: true, placeholder: 'Enter finalized title' },
+      { key: 'approvalStatus', label: 'Approval Status', type: 'select', required: true, options: ['Draft', 'Department Approved', 'Finalized'] },
     ],
   },
   {
-    id: 'paper-literature-review',
-    baseId: 'paper-literature-review',
-    title: 'Literature Review',
-    deadlineLabel: 'Sept 30',
-    deadlineISO: '2026-09-30',
+    id: 'paper-abstract-preparation',
+    baseId: 'paper-abstract-preparation',
+    title: 'Abstract Preparation',
+    deadlineLabel: 'June 15',
+    deadlineISO: '2026-06-15',
     type: 'paper',
     fields: [
-      { key: 'reviewSummary', label: 'Review Summary', type: 'textarea', required: true, placeholder: 'Write key findings and gaps' },
-      { key: 'referenceCount', label: 'No. of References', type: 'text', required: true, placeholder: 'e.g., 25' },
+      { key: 'abstractText', label: 'Abstract Draft', type: 'textarea', required: true, placeholder: 'Write your abstract draft' },
+      { key: 'keywords', label: 'Keywords', type: 'text', required: true, placeholder: 'e.g., AI, optimization, analytics' },
     ],
   },
   {
-    id: 'paper-implementation',
-    baseId: 'paper-implementation',
-    title: 'Implementation',
-    deadlineLabel: 'Dec 31',
-    deadlineISO: '2026-12-31',
+    id: 'paper-first-draft-preparation',
+    baseId: 'paper-first-draft-preparation',
+    title: 'First Draft Preparation',
+    deadlineLabel: 'June 29',
+    deadlineISO: '2026-06-29',
     type: 'paper',
     fields: [
-      { key: 'methodology', label: 'Methodology', type: 'text', required: true, placeholder: 'Describe approach used' },
-      { key: 'progressNotes', label: 'Progress Notes', type: 'textarea', required: true, placeholder: 'Current implementation status' },
+      { key: 'draftVersion', label: 'Draft Version', type: 'text', required: true, placeholder: 'e.g., v1.0' },
+      { key: 'draftUpload', label: 'Upload First Draft', type: 'file', required: true },
     ],
   },
   {
-    id: 'paper-writing',
-    baseId: 'paper-writing',
-    title: 'Paper Writing',
-    deadlineLabel: 'Feb 28',
-    deadlineISO: '2027-02-28',
+    id: 'paper-revised-draft-preparation',
+    baseId: 'paper-revised-draft-preparation',
+    title: 'Revised Draft Preparation',
+    deadlineLabel: 'July 13',
+    deadlineISO: '2026-07-13',
     type: 'paper',
     fields: [
-      { key: 'draftVersion', label: 'Draft Version', type: 'text', required: true, placeholder: 'e.g., v1.2' },
-      { key: 'manuscriptUpload', label: 'Upload Draft', type: 'file', required: true },
+      { key: 'revisionSummary', label: 'Revision Summary', type: 'textarea', required: true, placeholder: 'Summarize revisions made' },
+      { key: 'revisedDraftUpload', label: 'Upload Revised Draft', type: 'file', required: true },
     ],
   },
   {
-    id: 'paper-submission',
-    baseId: 'paper-submission',
-    title: 'Submission',
-    deadlineLabel: 'Mar 31',
-    deadlineISO: '2027-03-31',
+    id: 'paper-manuscript-submission',
+    baseId: 'paper-manuscript-submission',
+    title: 'Manuscript Submission',
+    deadlineLabel: 'July 20',
+    deadlineISO: '2026-07-20',
     type: 'paper',
     fields: [
       { key: 'paperTitle', label: 'Paper Title', type: 'text', required: true, placeholder: 'Enter paper title' },
@@ -120,75 +121,51 @@ const PAPER_STEPS: WorkflowStep[] = [
       { key: 'submissionDate', label: 'Submission Date', type: 'date', required: true },
     ],
   },
-  {
-    id: 'paper-acceptance',
-    baseId: 'paper-acceptance',
-    title: 'Acceptance',
-    deadlineLabel: 'May 15',
-    deadlineISO: '2027-05-15',
-    type: 'paper',
-    fields: [
-      { key: 'acceptanceProof', label: 'Acceptance Proof Upload', type: 'file', required: true },
-      { key: 'journalName', label: 'Journal Name', type: 'text', required: true, placeholder: 'Enter journal name' },
-    ],
-  },
 ]
 
 const PATENT_STEPS: WorkflowStep[] = [
   {
-    id: 'patent-idea-finalization',
-    baseId: 'patent-idea-finalization',
-    title: 'Idea Finalization',
-    deadlineLabel: 'July 31',
-    deadlineISO: '2026-07-31',
+    id: 'patent-title-finalization-with-bit-patent-office-approval',
+    baseId: 'patent-title-finalization-with-bit-patent-office-approval',
+    title: 'Title Finalization with BIT Patent Office Approval',
+    deadlineLabel: 'July 01',
+    deadlineISO: '2026-07-01',
     type: 'patent',
     fields: [
       { key: 'patentTitle', label: 'Patent Title', type: 'text', required: true, placeholder: 'Enter patent title' },
-      { key: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Brief description of the invention' },
+      { key: 'bitApprovalReference', label: 'BIT Approval Reference', type: 'text', required: true, placeholder: 'Enter approval reference/details' },
     ],
   },
   {
-    id: 'patent-prior-art-search',
-    baseId: 'patent-prior-art-search',
-    title: 'Prior Art Search',
-    deadlineLabel: 'Sept 30',
-    deadlineISO: '2026-09-30',
+    id: 'patent-initial-draft-preparation',
+    baseId: 'patent-initial-draft-preparation',
+    title: 'Initial Patent Draft Preparation',
+    deadlineLabel: 'July 25',
+    deadlineISO: '2026-07-25',
     type: 'patent',
     fields: [
-      { key: 'databaseUsed', label: 'Database Used', type: 'text', required: true, placeholder: 'e.g., Google Patents, WIPO' },
-      { key: 'searchSummary', label: 'Search Summary', type: 'textarea', required: true, placeholder: 'Provide novelty summary' },
+      { key: 'draftUpload', label: 'Upload Initial Draft', type: 'file', required: true },
+      { key: 'draftNotes', label: 'Draft Notes', type: 'textarea', required: true, placeholder: 'Key points covered in the initial draft' },
     ],
   },
   {
-    id: 'patent-prototype-development',
-    baseId: 'patent-prototype-development',
-    title: 'Prototype Development',
-    deadlineLabel: 'Dec 31',
-    deadlineISO: '2026-12-31',
+    id: 'patent-revised-draft-preparation',
+    baseId: 'patent-revised-draft-preparation',
+    title: 'Revised Patent Draft Preparation',
+    deadlineLabel: 'Aug 20',
+    deadlineISO: '2026-08-20',
     type: 'patent',
     fields: [
-      { key: 'prototypeStatus', label: 'Prototype Status', type: 'text', required: true, placeholder: 'Current build status' },
-      { key: 'prototypeEvidence', label: 'Upload Prototype Evidence', type: 'file', required: true },
+      { key: 'revisionSummary', label: 'Revision Summary', type: 'textarea', required: true, placeholder: 'Mention revisions done after review' },
+      { key: 'revisedDraftUpload', label: 'Upload Revised Draft', type: 'file', required: true },
     ],
   },
   {
-    id: 'patent-drafting',
-    baseId: 'patent-drafting',
-    title: 'Drafting',
-    deadlineLabel: 'Feb 28',
-    deadlineISO: '2027-02-28',
-    type: 'patent',
-    fields: [
-      { key: 'claimsDrafted', label: 'Claims Drafted', type: 'text', required: true, placeholder: 'Enter number of claims' },
-      { key: 'draftUpload', label: 'Upload Draft Document', type: 'file', required: true },
-    ],
-  },
-  {
-    id: 'patent-filing',
-    baseId: 'patent-filing',
-    title: 'Filing',
-    deadlineLabel: 'Apr 30',
-    deadlineISO: '2027-04-30',
+    id: 'patent-final-submission-of-patent-application',
+    baseId: 'patent-final-submission-of-patent-application',
+    title: 'Final Submission of Patent Application',
+    deadlineLabel: 'Aug 31',
+    deadlineISO: '2026-08-31',
     type: 'patent',
     fields: [
       { key: 'patentType', label: 'Patent Type', type: 'select', required: true, options: ['Provisional', 'Complete'] },
@@ -197,6 +174,78 @@ const PATENT_STEPS: WorkflowStep[] = [
     ],
   },
 ]
+
+const PROPOSAL_STEPS: WorkflowStep[] = [
+  {
+    id: 'proposal-title-finalization',
+    baseId: 'proposal-title-finalization',
+    title: 'Title Finalization',
+    deadlineLabel: 'June 01',
+    deadlineISO: '2026-06-01',
+    type: 'proposal',
+    fields: [
+      { key: 'proposalTitle', label: 'Proposal Title', type: 'text', required: true, placeholder: 'Enter proposal title' },
+      { key: 'themeArea', label: 'Theme Area', type: 'text', required: true, placeholder: 'Enter focus/theme area' },
+    ],
+  },
+  {
+    id: 'proposal-concept-presentation-rnd-approval',
+    baseId: 'proposal-concept-presentation-rnd-approval',
+    title: 'Concept Presentation & R&D Cell Approval',
+    deadlineLabel: 'June 16',
+    deadlineISO: '2026-06-16',
+    type: 'proposal',
+    fields: [
+      { key: 'presentationDate', label: 'Presentation Date', type: 'date', required: true },
+      { key: 'rndApprovalProof', label: 'R&D Approval Proof', type: 'file', required: true },
+    ],
+  },
+  {
+    id: 'proposal-initial-draft-preparation',
+    baseId: 'proposal-initial-draft-preparation',
+    title: 'Initial Proposal Draft Preparation',
+    deadlineLabel: 'July 11',
+    deadlineISO: '2026-07-11',
+    type: 'proposal',
+    fields: [
+      { key: 'draftVersion', label: 'Draft Version', type: 'text', required: true, placeholder: 'e.g., v1.0' },
+      { key: 'initialDraftUpload', label: 'Upload Initial Draft', type: 'file', required: true },
+    ],
+  },
+  {
+    id: 'proposal-revised-draft-preparation',
+    baseId: 'proposal-revised-draft-preparation',
+    title: 'Revised Proposal Draft Preparation',
+    deadlineLabel: 'July 30',
+    deadlineISO: '2026-07-30',
+    type: 'proposal',
+    fields: [
+      { key: 'revisionSummary', label: 'Revision Summary', type: 'textarea', required: true, placeholder: 'Mention revisions after feedback' },
+      { key: 'revisedDraftUpload', label: 'Upload Revised Draft', type: 'file', required: true },
+    ],
+  },
+  {
+    id: 'proposal-final-submission',
+    baseId: 'proposal-final-submission',
+    title: 'Final Proposal Submission',
+    deadlineLabel: 'Based on call received from the agencies',
+    deadlineISO: '',
+    type: 'proposal',
+    fields: [
+      { key: 'agencyName', label: 'Agency Name', type: 'text', required: true, placeholder: 'Enter funding agency name' },
+      { key: 'callReference', label: 'Call Reference', type: 'text', required: true, placeholder: 'Enter call reference number' },
+      { key: 'submissionDate', label: 'Submission Date', type: 'date', required: true },
+      { key: 'proposalUpload', label: 'Upload Final Proposal', type: 'file', required: true },
+    ],
+  },
+]
+
+const PROPOSAL_SLOT_2_DEFAULTS: Record<string, string> = {
+  'proposal-title-finalization': '2026-08-01',
+  'proposal-concept-presentation-rnd-approval': '2026-08-16',
+  'proposal-initial-draft-preparation': '2026-09-11',
+  'proposal-revised-draft-preparation': '2026-09-30',
+}
 
 function classNames(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(' ')
@@ -207,6 +256,10 @@ function buildPaperTaskId(baseId: string, targetIndex: number) {
 }
 
 function formatDeadline(deadlineISO: string) {
+  if (!deadlineISO || Number.isNaN(new Date(deadlineISO).getTime())) {
+    return 'Based on call received from agencies'
+  }
+
   return new Date(deadlineISO).toLocaleDateString('en-US', {
     day: '2-digit',
     month: 'short',
@@ -215,6 +268,14 @@ function formatDeadline(deadlineISO: string) {
 }
 
 function getUrgency(deadlineISO: string) {
+  if (!deadlineISO || Number.isNaN(new Date(deadlineISO).getTime())) {
+    return {
+      label: 'Call based',
+      dotClass: 'bg-slate-400',
+      badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
+    }
+  }
+
   const now = new Date()
   const deadline = new Date(deadlineISO)
   const msInDay = 1000 * 60 * 60 * 24
@@ -572,7 +633,37 @@ export default function ActivitiesPage() {
     [deadlineMap],
   )
 
-  const allSteps = useMemo(() => [...paperSteps, ...patentSteps], [paperSteps, patentSteps])
+  const proposalWorkflowGroups = useMemo(() => {
+    return Array.from({ length: 2 }, (_, index) => {
+      const slotIndex = index + 1
+      return {
+        slotIndex,
+        steps: PROPOSAL_STEPS.map((step) => {
+          const slotDeadline = slotIndex === 1
+            ? step.deadlineISO
+            : PROPOSAL_SLOT_2_DEFAULTS[step.baseId] || step.deadlineISO
+
+          return {
+            ...step,
+            id: buildPaperTaskId(step.baseId, slotIndex),
+            baseId: step.baseId,
+            targetIndex: slotIndex,
+            deadlineISO:
+              deadlineMap[getPaperDeadlineKey(step.baseId, slotIndex)] ||
+              (slotIndex === 1 ? deadlineMap[step.baseId] : undefined) ||
+              slotDeadline,
+          }
+        }),
+      }
+    })
+  }, [deadlineMap])
+
+  const proposalSteps = useMemo(
+    () => proposalWorkflowGroups.flatMap((group) => group.steps),
+    [proposalWorkflowGroups],
+  )
+
+  const allSteps = useMemo(() => [...paperSteps, ...patentSteps, ...proposalSteps], [paperSteps, patentSteps, proposalSteps])
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -607,7 +698,7 @@ export default function ActivitiesPage() {
     try {
       const parsed = JSON.parse(raw) as { paperTargets?: number }
       const count = parsed.paperTargets || DEFAULT_WORKFLOW_SETTINGS.paperTargets
-      setPaperTargets(count >= 2 ? 2 : 1)
+      setPaperTargets(Math.max(1, Math.min(4, count)))
     } catch {
       localStorage.removeItem(WORKFLOW_SETTINGS_STORAGE_KEY)
     }
@@ -666,6 +757,11 @@ export default function ActivitiesPage() {
     [completed, patentSteps],
   )
 
+  const proposalCompletedCount = useMemo(
+    () => proposalSteps.filter((step) => completed[step.id]).length,
+    [completed, proposalSteps],
+  )
+
   const progressContext = useMemo(() => {
     if (activeTab === 'paper') {
       const total = paperSteps.length
@@ -689,6 +785,17 @@ export default function ActivitiesPage() {
       }
     }
 
+    if (activeTab === 'proposal') {
+      const total = proposalSteps.length
+      const percent = total === 0 ? 0 : Math.round((proposalCompletedCount / total) * 100)
+      return {
+        label: 'Funding Proposal Workflow Progress',
+        completed: proposalCompletedCount,
+        total,
+        percent,
+      }
+    }
+
     const total = allSteps.length
     const percent = total === 0 ? 0 : Math.round((completedCount / total) * 100)
     return {
@@ -697,10 +804,16 @@ export default function ActivitiesPage() {
       total,
       percent,
     }
-  }, [activeTab, allSteps.length, completedCount, paperCompletedCount, paperSteps.length, patentCompletedCount, patentSteps.length])
+  }, [activeTab, allSteps.length, completedCount, paperCompletedCount, paperSteps.length, patentCompletedCount, patentSteps.length, proposalCompletedCount, proposalSteps.length])
 
   const mergedTimeline = useMemo(
-    () => [...allSteps].sort((a, b) => new Date(a.deadlineISO).getTime() - new Date(b.deadlineISO).getTime()),
+    () => [...allSteps].sort((a, b) => {
+      const at = new Date(a.deadlineISO).getTime()
+      const bt = new Date(b.deadlineISO).getTime()
+      const safeA = Number.isNaN(at) ? Number.POSITIVE_INFINITY : at
+      const safeB = Number.isNaN(bt) ? Number.POSITIVE_INFINITY : bt
+      return safeA - safeB
+    }),
     [allSteps],
   )
 
@@ -801,10 +914,14 @@ export default function ActivitiesPage() {
                           <span
                             className={classNames(
                               'rounded-full px-2.5 py-1 font-medium',
-                              item.type === 'paper' ? 'bg-violet-50 text-violet-700' : 'bg-indigo-50 text-indigo-700',
+                              item.type === 'paper'
+                                ? 'bg-violet-50 text-violet-700'
+                                : item.type === 'patent'
+                                  ? 'bg-indigo-50 text-indigo-700'
+                                  : 'bg-emerald-50 text-emerald-700',
                             )}
                           >
-                            {item.type === 'paper' ? 'Paper' : 'Patent'}
+                            {item.type === 'paper' ? 'Paper' : item.type === 'patent' ? 'Patent' : 'Funding Proposal'}
                           </span>
                         </div>
                       </div>
@@ -858,6 +975,22 @@ export default function ActivitiesPage() {
           completed={completed}
           onComplete={completeStep}
         />
+      ) : null}
+
+      {activeTab === 'proposal' ? (
+        <div className="space-y-6">
+          {proposalWorkflowGroups.map((group) => (
+            <WorkflowCard
+              key={`proposal-slot-${group.slotIndex}`}
+              title={`Funding Proposal Submission Workflow - Slot ${group.slotIndex}`}
+              subtitle="Plan and submit proposal milestones aligned to agency call cycles."
+              icon={<Bell className="h-5 w-5" />}
+              steps={group.steps}
+              completed={completed}
+              onComplete={completeStep}
+            />
+          ))}
+        </div>
       ) : null}
     </div>
   )

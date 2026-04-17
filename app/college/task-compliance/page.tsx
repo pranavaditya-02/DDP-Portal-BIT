@@ -132,12 +132,12 @@ function buildComplianceData(totalTasks: number): FacultyCompliance[] {
 }
 
 export default function DeanTaskCompliancePage() {
-  const { isDean } = useRoles()
+  const { isDean, isAdmin } = useRoles()
   const [activeTab, setActiveTab] = useState<TabKey>('pending')
   const [facultySearch, setFacultySearch] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all')
   const [selectedDesignation, setSelectedDesignation] = useState<string>('all')
-  const [selectedTargetFilter, setSelectedTargetFilter] = useState<'all' | '1' | '2'>('all')
+  const [selectedTargetFilter, setSelectedTargetFilter] = useState<string>('all')
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<TaskStatusFilter>('all')
   const [selectedTaskFilter, setSelectedTaskFilter] = useState<string>('all')
   const [paperTargets] = useState<number>(() => {
@@ -147,7 +147,7 @@ export default function DeanTaskCompliancePage() {
       if (!raw) return DEFAULT_WORKFLOW_SETTINGS.paperTargets
       const parsed = JSON.parse(raw) as { paperTargets?: number }
       const count = parsed.paperTargets || DEFAULT_WORKFLOW_SETTINGS.paperTargets
-      return count >= 2 ? 2 : 1
+      return Math.max(1, Math.min(4, count))
     } catch {
       return DEFAULT_WORKFLOW_SETTINGS.paperTargets
     }
@@ -260,7 +260,7 @@ export default function DeanTaskCompliancePage() {
     setSelectedTaskFilter('all')
   }
 
-  if (!isDean()) {
+  if (!isDean() && !isAdmin()) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
         <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
@@ -331,10 +331,12 @@ export default function DeanTaskCompliancePage() {
 
           <label className="block">
             <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Paper Target</span>
-            <select value={selectedTargetFilter} onChange={(e) => setSelectedTargetFilter(e.target.value as 'all' | '1' | '2')} className="input-base">
+            <select value={selectedTargetFilter} onChange={(e) => setSelectedTargetFilter(e.target.value)} className="input-base">
               <option value="all">All Targets</option>
               <option value="1">Paper 1</option>
               <option value="2" disabled={paperTargets < 2}>Paper 2</option>
+              <option value="3" disabled={paperTargets < 3}>Paper 3</option>
+              <option value="4" disabled={paperTargets < 4}>Paper 4</option>
             </select>
           </label>
 

@@ -3,34 +3,88 @@
 import React from "react"
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { apiClient } from '@/lib/api'
-import toast, { Toaster } from 'react-hot-toast'
+import type { AuthUser } from '@/lib/auth-session'
+import { Toaster } from 'react-hot-toast'
 
-export function Providers({ children }: { children: React.ReactNode }) {
+const PUBLIC_PATHS = ['/', '/login', '/register']
+
+export function Providers({ children, initialUser }: { children: React.ReactNode; initialUser: AuthUser | null }) {
+  const pathname = usePathname()
+
   useEffect(() => {
-    // Verify token on app load
+    const shouldLoadRoleAccess = () => {
+      const state = useAuthStore.getState()
+      return state.allowedRoutes.length === 0 && state.allowedResources.length === 0
+    }
+
+    const loadRoleAccess = async () => {
+      try {
+        const access = await apiClient.getMyRoleAccess()
+        useAuthStore.getState().setAllowedRoutes(access.routePaths || [])
+        useAuthStore.getState().setAllowedResources(access.resources || [])
+      } catch {
+        useAuthStore.getState().setAllowedRoutes([])
+        useAuthStore.getState().setAllowedResources([])
+      }
+    }
+
+    const currentUser = useAuthStore.getState().user
+
+    if (initialUser) {
+      useAuthStore.setState({
+        user: initialUser,
+        isAuthenticated: true,
+        _hasHydrated: true,
+      })
+      if (shouldLoadRoleAccess()) {
+        void loadRoleAccess()
+      }
+      return
+    }
+
+    if (currentUser) {
+      useAuthStore.setState({
+        isAuthenticated: true,
+        _hasHydrated: true,
+      })
+      if (shouldLoadRoleAccess()) {
+        void loadRoleAccess()
+      }
+      return
+    }
+
+    if (PUBLIC_PATHS.includes(pathname)) {
+      useAuthStore.setState({
+        _hasHydrated: true,
+        allowedRoutes: [],
+        allowedResources: [],
+      })
+      return
+    }
+
     const verifyAuth = async () => {
-      const token = useAuthStore.getState().token
-      if (!token) return
-
-      // Skip API verification for demo tokens — they are client-side only
-      if (token.startsWith('demo-')) return
-
       try {
         const response = await apiClient.getMe()
         useAuthStore.setState({
           user: response.user,
           isAuthenticated: true,
+          _hasHydrated: true,
         })
+        if (shouldLoadRoleAccess()) {
+          await loadRoleAccess()
+        }
       } catch (error) {
         console.error('Auth verification failed:', error)
         useAuthStore.getState().logout()
       }
     }
 
+    void
     verifyAuth()
-  }, [])
+  }, [initialUser, pathname])
 
   return (
     <>

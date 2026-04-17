@@ -16,3 +16,8 @@ backend/.env.*
 !.env.example
 !backend/.env.example
 .DS_Store
+# Backend local secrets and logs
+backend/.env
+backend/logs/*.log
+assets/dumps
+assets/.docx_extract

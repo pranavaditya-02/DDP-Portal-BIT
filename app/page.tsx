@@ -1,30 +1,38 @@
-'use client'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { AUTH_COOKIE_NAME, decodeAuthToken, getPostLoginRoute } from '@/lib/auth-session'
+import { pickFirstAccessibleRoute } from '@/lib/route-access'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
+export default async function Page() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value || null
+  const user = token ? decodeAuthToken(token) : null
 
-export default function Page() {
-  const router = useRouter()
-  const { isAuthenticated, user } = useAuthStore()
+  if (!user) {
+    redirect('/login')
+  }
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      if (user?.roles?.includes('dean')) {
-        router.push('/college')
-      } else if (user?.roles?.includes('student')) {
-        router.push('/student/dashboard')
-      } else {
-        router.push('/dashboard')
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '')
+
+  try {
+    const response = await fetch(`${apiBase}/roles/me/access`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (response.ok) {
+      const access = (await response.json()) as { resources?: Array<{ href: string; label: string; group: string }>; routePaths?: string[] }
+      const target = pickFirstAccessibleRoute(access)
+      if (target) {
+        redirect(target)
       }
-    } else {
-      router.push('/login')
     }
-  }, [isAuthenticated, user, router])
+  } catch {
+    // Fall back to role-based route if access endpoint is unreachable.
+  }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full" />
-    </div>
-  )
+  redirect(getPostLoginRoute(user.roles))
 }

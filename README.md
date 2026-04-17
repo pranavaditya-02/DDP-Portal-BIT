@@ -123,11 +123,12 @@ Create [backend/.env](backend/.env) locally (already gitignored) with these mini
 ```env
 PORT=5000
 NODE_ENV=development
-JWT_SECRET=change-me
+JWT_SECRET=use-a-random-32-plus-character-secret
+JWT_EXPIRY=12h
+JWT_ISSUER=faculty-tracking-api
+JWT_AUDIENCE=faculty-tracking-client
 ALLOWED_ORIGINS=http://localhost:3000
-
-AUTH_BYPASS=true
-AUTH_BYPASS_ROLES=admin,faculty,verification,hod,dean,student
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 
 MYSQL_HOST=127.0.0.1
 MYSQL_PORT=3306
@@ -154,8 +155,9 @@ ALERT_NOTIFY_EMAIL=recipient@example.com
 
 Auth:
 - POST /api/auth/register
-- POST /api/auth/login
+- POST /api/auth/google
 - POST /api/auth/verify
+- POST /api/auth/logout
 - GET /api/auth/me
 
 Activities:
