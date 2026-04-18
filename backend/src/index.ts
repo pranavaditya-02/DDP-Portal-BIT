@@ -13,13 +13,20 @@ import internshipTrackerRoutes from './routes/internshipTracker.routes';
 import internshipReportRoutes from './routes/internshipReport.routes';
 import patentTrackerRoutes from './routes/patentTracker.routes';
 import studentsRoutes from './routes/students.routes';
-import industriesRoutes from './routes/industries.routes';
+
+import patentReportRoutes from './routes/patentReport.routes';
 import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
+import journalPublicationRoutes from './routes/journalPublication.routes';
+import facultyActivitiesRoutes from './facultyActivities/facultyActivities.routes';
+import onlineCourseRoutes from './routes/onlineCourse.routes';
+import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
+
 import usersRoutes from './routes/users.routes';
 import rolesRoutes from './routes/roles.routes';
 import workflowTargetsRoutes from './routes/workflowTargets.routes';
-import { verifyMysqlConnection } from './database/mysql';
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -106,6 +113,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // Routes
+import industriesRoutes from './routes/industries.routes';
+import facultiesRoutes from './routes/faculties.routes';
+
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/import', importRoutes);
@@ -113,10 +123,67 @@ app.use('/api/alerts', alertsRoutes);
 app.use('/api/internship-tracker', internshipTrackerRoutes);
 app.use('/api/internship-report', internshipReportRoutes);
 app.use('/api/patent-tracker', patentTrackerRoutes);
+app.use('/api/patent-report', patentReportRoutes);
 app.use('/api/students', studentsRoutes);
 app.use('/api/industries', industriesRoutes);
+app.use('/api/faculties', facultiesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationRoutes);
+app.use('/api/journal-publications', journalPublicationRoutes);
+app.use('/api/faculty-activities', facultyActivitiesRoutes);
+app.use('/api/online/course', onlineCourseRoutes);
+
+const fetchStudents = async (_req: express.Request, res: express.Response) => {
+  try {
+    const pool = getMysqlPool();
+    const [rows] = await pool.query(`SELECT id, student_name FROM students ORDER BY student_name ASC`);
+    return res.json(rows);
+  } catch (error) {
+    logger.error('Error fetching students route:', error);
+    return res.status(500).json({ error: 'Failed to fetch students' });
+  }
+};
+
+const fetchActiveSpecialLabs = async (_req: express.Request, res: express.Response) => {
+  try {
+    const pool = getMysqlPool();
+    const [rows] = await pool.query(`SELECT id, name AS specialLabName, is_active FROM special_labs WHERE is_active = TRUE ORDER BY name ASC`);
+    return res.json(rows);
+  } catch (error) {
+    logger.error('Error fetching special labs route:', error);
+    return res.status(500).json({ error: 'Failed to fetch special labs' });
+  }
+};
+
+const fetchDepartments = async (_req: express.Request, res: express.Response) => {
+  try {
+    const pool = getMysqlPool();
+    const [rows] = await pool.query(`SELECT id, dept_name AS dept_name, status FROM departments ORDER BY dept_name ASC`);
+    return res.json(rows);
+  } catch (error) {
+    logger.error('Error fetching departments route:', error);
+    return res.status(500).json({ error: 'Failed to fetch departments' });
+  }
+};
+
+const fetchActiveCourses = async (_req: express.Request, res: express.Response) => {
+  try {
+    const pool = getMysqlPool();
+    const [rows] = await pool.query(`SELECT id, course_name AS name, is_active FROM online_courses WHERE is_active = TRUE ORDER BY course_name ASC`);
+    return res.json(rows);
+  } catch (error) {
+    logger.error('Error fetching active courses route:', error);
+    return res.status(500).json({ error: 'Failed to fetch active courses' });
+  }
+};
+
+app.get('/students', fetchStudents);
+app.get('/api/students', fetchStudents);
+app.get('/speciallabs/active', fetchActiveSpecialLabs);
+app.get('/api/speciallabs/active', fetchActiveSpecialLabs);
+app.get('/departments', fetchDepartments);
+app.get('/api/departments', fetchDepartments);
+app.get('/api/courses/active', fetchActiveCourses);
 app.use('/api/users', usersRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/workflow-targets', workflowTargetsRoutes);

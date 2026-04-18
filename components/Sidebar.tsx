@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
+import { useRoles } from "@/hooks/useRoles";
+import { studentNavItems } from "@/lib/student-navigation";
 import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
 import { clearAuthCookie } from "@/app/actions";
 import { pickFirstAccessibleRoute, shouldHideInNavigation } from "@/lib/route-access";

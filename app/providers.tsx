@@ -3,6 +3,7 @@
 import React from "react"
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { apiClient } from '@/lib/api'
 import type { AuthUser } from '@/lib/auth-session'

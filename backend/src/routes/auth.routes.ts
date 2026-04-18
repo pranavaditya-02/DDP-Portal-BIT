@@ -14,6 +14,14 @@ declare global {
   }
 }
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { id: number; username: string; email: string; name: string; roleId: number; roleName: string; roles: string[]; facultyId?: string | null };
+    }
+  }
+}
+
 const router = express.Router();
 
 // Validation schemas
