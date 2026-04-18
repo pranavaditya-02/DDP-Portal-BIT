@@ -15,18 +15,6 @@ export const Navigation: React.FC = () => {
   const { user, logout, allowedRoutes, allowedResources } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogout = async () => {
-    await apiClient.logout().catch(() => undefined);
-    await clearAuthCookie().catch(() => undefined);
-    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    logout();
-    router.push('/login');
-  };
-
-  if (!user) {
-    return null;
-  }
-
   const visibleNavItems = useMemo(() => {
     if (allowedResources.length > 0) {
       return allowedResources
@@ -46,6 +34,18 @@ export const Navigation: React.FC = () => {
     resources: allowedResources,
     routePaths: allowedRoutes,
   }) || '/dashboard';
+
+  const handleLogout = async () => {
+    await apiClient.logout().catch(() => undefined);
+    await clearAuthCookie().catch(() => undefined);
+    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    logout();
+    router.push('/login');
+  };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
@@ -67,7 +67,7 @@ export const Navigation: React.FC = () => {
               <div key={idx} className="transition-transform duration-150 hover:-translate-y-0.5">
                 <Link
                   href={item.href}
-                  prefetch
+                  prefetch={false}
                   className="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
                 >
                   {item.label}
@@ -125,7 +125,7 @@ export const Navigation: React.FC = () => {
               <Link
                 key={idx}
                 href={item.href}
-                prefetch
+                prefetch={false}
                 onClick={() => setIsOpen(false)}
                 className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-100"
               >

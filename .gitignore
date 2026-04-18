@@ -19,5 +19,3 @@ backend/.env.*
 # Backend local secrets and logs
 backend/.env
 backend/logs/*.log
-assets/dumps
-assets/.docx_extract

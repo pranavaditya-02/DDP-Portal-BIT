@@ -7,7 +7,7 @@ import { useAuthStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
 import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
 import { clearAuthCookie } from "@/app/actions";
-import { pickFirstAccessibleRoute, shouldHideInNavigation } from "@/lib/route-access";
+import { getDisplayGroupName, getGroupSortRank, pickFirstAccessibleRoute, shouldHideInNavigation } from "@/lib/route-access";
 import {
   LayoutDashboard,
   FileText,
@@ -63,7 +63,6 @@ const iconMap: Record<string, React.ElementType> = {
   Mail,
 };
 
-const groupOrder = ["Overview", "Student", "Faculty", "Department", "College", "Management", "Other"];
 const VERIFICATION_REFRESH_INTERVAL_MS = 120000;
 const MIN_MANUAL_REFRESH_GAP_MS = 10000;
 
@@ -117,6 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const pathname = usePathname();
   const { user, logout, allowedResources, allowedRoutes } = useAuthStore();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [expandedNavGroups, setExpandedNavGroups] = useState<Record<string, boolean>>({});
   const [verificationQueuePendingCount, setVerificationQueuePendingCount] = useState(0);
   const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
   const pendingCountLastFetchedAtRef = useRef(0);
@@ -131,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: resource.id,
           label: resource.label,
           href: normalizePath(resource.href),
-          group: resource.group || routeToGroup(resource.href),
+          group: getDisplayGroupName(resource.href, resource.group || routeToGroup(resource.href)),
           icon: iconMap[resource.icon] || routeToIcon(resource.href),
         }))
         .sort((a, b) => a.href.localeCompare(b.href));
@@ -145,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         id: href.slice(1).replace(/\//g, ".") || "dashboard",
         label: routeToLabel(href),
         href,
-        group: routeToGroup(href),
+        group: getDisplayGroupName(href, routeToGroup(href)),
         icon: routeToIcon(href),
       }))
       .sort((a, b) => a.href.localeCompare(b.href));
@@ -160,12 +160,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const roles = (user?.roles || []).map((role) => role.toLowerCase());
     return roles.includes("verification") || roles.includes("maintenance") || roles.includes("admin");
   }, [user]);
-
-  useEffect(() => {
-    for (const item of baseItems.slice(0, 12)) {
-      router.prefetch(item.href);
-    }
-  }, [baseItems, router]);
 
   useEffect(() => {
     if (!hasVerificationPages || !canReadVerificationQueues) {
@@ -273,11 +267,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     return Array.from(grouped.entries())
       .sort((a, b) => {
-        const ai = groupOrder.indexOf(a[0]);
-        const bi = groupOrder.indexOf(b[0]);
-        if (ai === -1 && bi === -1) return a[0].localeCompare(b[0]);
-        if (ai === -1) return 1;
-        if (bi === -1) return -1;
+        const ai = getGroupSortRank(a[0]);
+        const bi = getGroupSortRank(b[0]);
+        if (ai === bi) return a[0].localeCompare(b[0]);
         return ai - bi;
       })
       .map(([title, items]) => ({
@@ -285,6 +277,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: items.sort((a, b) => a.label.localeCompare(b.label)),
       }));
   }, [navItems]);
+
+  useEffect(() => {
+    setExpandedNavGroups((prev) => {
+      const next: Record<string, boolean> = {};
+      for (const group of navGroups) {
+        next[group.title] = prev[group.title] ?? true;
+      }
+      return next;
+    });
+  }, [navGroups]);
+
+  const toggleNavGroup = (title: string) => {
+    setExpandedNavGroups((prev) => ({
+      ...prev,
+      [title]: !(prev[title] ?? true),
+    }));
+  };
 
   const handleLogout = async () => {
     await apiClient.logout().catch(() => undefined);
@@ -333,6 +342,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <Link
           href={homeHref}
+          prefetch={false}
           className="flex items-center gap-3 overflow-hidden"
         >
           <div className="w-9 h-9 bg-[#7D53F6] rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -362,26 +372,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
-        {navGroups.map((group) => (
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-4 scrollbar-thin">
+        {navGroups.map((group) => {
+          const isFacultySubgroup = group.title.startsWith("Faculty / ");
+          const groupLabel = isFacultySubgroup ? group.title.replace("Faculty / ", "") : group.title;
+          const isExpanded = expandedNavGroups[group.title] ?? true;
+          return (
           <div key={group.title}>
             {!collapsed && (
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2 px-3">
-                {group.title}
-              </p>
+              <button
+                type="button"
+                onClick={() => toggleNavGroup(group.title)}
+                className="w-full flex items-center justify-between mb-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-[#5F6B85] bg-slate-200/60 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors"
+              >
+                <span className={`truncate ${isFacultySubgroup ? "pl-0.5" : ""}`}>{groupLabel}</span>
+                <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180 text-[#7D53F6]" : "text-slate-400"}`} />
+              </button>
             )}
-            <div className="space-y-1">
-              {group.items.map((item) => {
+            {(collapsed || isExpanded) && (
+              <div className={`space-y-1 transition-all duration-200 ${isFacultySubgroup && !collapsed ? "pl-1" : ""}`}>
+                {group.items.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
                 return (
                   <Link
                     key={item.id}
                     href={item.href}
-                    prefetch
+                    prefetch={false}
                     onClick={() => setMobileOpen(false)}
                     className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                      collapsed ? "justify-center px-2" : "px-3"
+                      collapsed ? "justify-center px-2" : isFacultySubgroup ? "px-3.5" : "px-3"
                     } ${
                       active
                         ? "bg-[#7D53F6] text-white shadow-sm"
@@ -410,10 +430,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     )}
                   </Link>
                 );
-              })}
-            </div>
+                })}
+              </div>
+            )}
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="border-t border-slate-200 p-3">
