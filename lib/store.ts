@@ -1,13 +1,25 @@
 import { create } from 'zustand'
 import type { AuthUser } from './auth-session'
 
+export interface AccessResource {
+  id: string
+  label: string
+  icon: string
+  href: string
+  group: string
+}
+
 export interface AuthState {
   user: AuthUser | null
+  allowedRoutes: string[]
+  allowedResources: AccessResource[]
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
   _hasHydrated: boolean
   setUser: (user: AuthUser | null) => void
+  setAllowedRoutes: (routes: string[]) => void
+  setAllowedResources: (resources: AccessResource[]) => void
   setLoading: (isLoading: boolean) => void
   setError: (error: string | null) => void
   logout: () => void
@@ -32,6 +44,8 @@ export const useSidebarStore = create<SidebarState>()((set) => ({
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
+  allowedRoutes: [],
+  allowedResources: [],
   isAuthenticated: false,
   isLoading: false,
   error: null,
@@ -43,6 +57,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       isAuthenticated: !!user,
     }),
 
+  setAllowedRoutes: (routes) => set({ allowedRoutes: Array.from(new Set(routes)) }),
+  setAllowedResources: (resources) => set({
+    allowedResources: resources.filter((resource) => resource?.href).map((resource) => ({
+      ...resource,
+      href: resource.href.replace(/\/+$/, '') || '/',
+    })),
+  }),
+
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
 
@@ -50,6 +72,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({
       user: null,
       isAuthenticated: false,
+      allowedRoutes: [],
+      allowedResources: [],
       error: null,
       isLoading: false,
       _hasHydrated: true,

@@ -94,7 +94,7 @@ router.get('/my', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-router.get('/verification', authenticateToken, requireRole('verification', 'maintenance'), async (req, res) => {
+router.get('/verification', authenticateToken, requireRole('verification', 'maintenance', 'admin'), async (req, res) => {
   try {
     const query = listQuerySchema.parse(req.query);
     const registrations = await registrationService.listRegistrations(query.status);
@@ -109,7 +109,7 @@ router.get('/verification', authenticateToken, requireRole('verification', 'main
   }
 });
 
-router.post('/:registrationId/approve', authenticateToken, requireRole('verification', 'maintenance'), async (req: AuthRequest, res) => {
+router.post('/:registrationId/approve', authenticateToken, requireRole('verification', 'maintenance', 'admin'), async (req: AuthRequest, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -135,7 +135,7 @@ router.post('/:registrationId/approve', authenticateToken, requireRole('verifica
   }
 });
 
-router.post('/:registrationId/reject', authenticateToken, requireRole('verification', 'maintenance'), async (req: AuthRequest, res) => {
+router.post('/:registrationId/reject', authenticateToken, requireRole('verification', 'maintenance', 'admin'), async (req: AuthRequest, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
@@ -9,10 +9,10 @@ import { useRoles } from "@/hooks/useRoles";
 import { studentNavItems } from "@/lib/student-navigation";
 import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
 import { clearAuthCookie } from "@/app/actions";
+import { pickFirstAccessibleRoute, shouldHideInNavigation } from "@/lib/route-access";
 import {
   LayoutDashboard,
   FileText,
-  PlusCircle,
   Building2,
   Trophy,
   GraduationCap,
@@ -28,8 +28,6 @@ import {
   Award,
   Clipboard,
   X,
-  Newspaper,
-  Monitor,
   Calendar,
   ClipboardCheck,
   PenTool,
@@ -38,6 +36,8 @@ import {
   Video,
   UserCheck,
   Book,
+  Settings,
+  Mail,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -47,18 +47,74 @@ interface SidebarProps {
   setMobileOpen: (v: boolean) => void;
 }
 
-interface NavItem {
+type DynamicNavItem = {
+  id: string;
   label: string;
   href: string;
+  group: string;
   icon: React.ElementType;
-  show: boolean;
   badge?: number;
-}
+};
 
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
+const iconMap: Record<string, React.ElementType> = {
+  LayoutDashboard,
+  FileText,
+  Award,
+  Clipboard,
+  Building2,
+  Trophy,
+  GraduationCap,
+  ShieldCheck,
+  Users,
+  Shield,
+  Settings,
+  Calendar,
+  Mail,
+};
+
+const groupOrder = ["Overview", "Student", "Faculty", "Department", "College", "Management", "Other"];
+const VERIFICATION_REFRESH_INTERVAL_MS = 120000;
+const MIN_MANUAL_REFRESH_GAP_MS = 10000;
+
+const normalizePath = (value: string) => {
+  if (!value || value === "/") return "/";
+  return value.replace(/\/+$/, "");
+};
+
+const isDynamicPatternRoute = (value: string) => /\[[^\]]+\]/.test(value);
+
+const routeToLabel = (route: string) => {
+  const parts = route.split("/").filter(Boolean);
+  const tail = parts[parts.length - 1] || "dashboard";
+  return tail
+    .replace(/\[(\.\.\.)?([^\]]+)\]/g, "$2")
+    .split(/[-_.]/)
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
+const routeToGroup = (route: string) => {
+  if (route.startsWith("/student")) return "Student";
+  if (route.startsWith("/achievements") || route.startsWith("/activities") || route.startsWith("/action-plan") || route.startsWith("/faculty")) return "Faculty";
+  if (route.startsWith("/department") || route.startsWith("/leaderboard")) return "Department";
+  if (route.startsWith("/college")) return "College";
+  if (route.startsWith("/verification") || route.startsWith("/roles") || route.startsWith("/users")) return "Management";
+  return "Other";
+};
+
+const routeToIcon = (route: string) => {
+  if (route.includes("dashboard")) return LayoutDashboard;
+  if (route.startsWith("/achievements")) return Award;
+  if (route.startsWith("/action-plan") || route.startsWith("/student/activity")) return Clipboard;
+  if (route.startsWith("/department")) return Building2;
+  if (route.startsWith("/leaderboard")) return Trophy;
+  if (route.startsWith("/college")) return GraduationCap;
+  if (route.startsWith("/verification")) return ShieldCheck;
+  if (route.startsWith("/users")) return Users;
+  if (route.startsWith("/roles")) return Shield;
+  return FileText;
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
@@ -68,30 +124,60 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
-  const {
-    isFaculty,
-    isHod,
-    isDean,
-    isStudent,
-    isVerification,
-    isMaintenance,
-    isAdmin,
-  } =
-    useRoles();
+  const { user, logout, allowedResources, allowedRoutes } = useAuthStore();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [activityExpanded, setActivityExpanded] = useState(false);
-  const [achievementsExpanded, setAchievementsExpanded] = useState(false);
-  const [owiExpanded, setOwiExpanded] = useState(false);
-  const [rndExpanded, setRndExpanded] = useState(false);
-  const [studentExpanded, setStudentExpanded] = useState(false);
   const [verificationQueuePendingCount, setVerificationQueuePendingCount] = useState(0);
   const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
-  const isVerificationUser = isVerification();
-  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isAdmin();
+  const pendingCountLastFetchedAtRef = useRef(0);
+
+  const baseItems = useMemo<DynamicNavItem[]>(() => {
+    if (allowedResources.length > 0) {
+      return allowedResources
+        .filter((resource) => Boolean(resource.href))
+        .filter((resource) => !isDynamicPatternRoute(resource.href))
+        .filter((resource) => !shouldHideInNavigation(resource.href))
+        .map((resource) => ({
+          id: resource.id,
+          label: resource.label,
+          href: normalizePath(resource.href),
+          group: resource.group || routeToGroup(resource.href),
+          icon: iconMap[resource.icon] || routeToIcon(resource.href),
+        }))
+        .sort((a, b) => a.href.localeCompare(b.href));
+    }
+
+    return Array.from(new Set(allowedRoutes.map((route) => normalizePath(route))))
+      .filter((href) => href !== "/" && href !== "/login" && href !== "/register")
+      .filter((href) => !isDynamicPatternRoute(href))
+      .filter((href) => !shouldHideInNavigation(href))
+      .map((href) => ({
+        id: href.slice(1).replace(/\//g, ".") || "dashboard",
+        label: routeToLabel(href),
+        href,
+        group: routeToGroup(href),
+        icon: routeToIcon(href),
+      }))
+      .sort((a, b) => a.href.localeCompare(b.href));
+  }, [allowedResources, allowedRoutes]);
+
+  const hasVerificationPages = useMemo(
+    () => baseItems.some((item) => item.href === "/verification" || item.href === "/verification-panel"),
+    [baseItems],
+  );
+
+  const canReadVerificationQueues = useMemo(() => {
+    const roles = (user?.roles || []).map((role) => role.toLowerCase());
+    return roles.includes("verification") || roles.includes("maintenance") || roles.includes("admin");
+  }, [user]);
 
   useEffect(() => {
-    if (!isVerificationUser) {
+    for (const item of baseItems.slice(0, 12)) {
+      router.prefetch(item.href);
+    }
+  }, [baseItems, router]);
+
+  useEffect(() => {
+    if (!hasVerificationPages || !canReadVerificationQueues) {
       setVerificationQueuePendingCount(0);
       setVerificationPanelPendingCount(0);
       return;
@@ -118,7 +204,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       return 0;
     };
 
-    const loadPendingCount = async () => {
+    const loadPendingCount = async (force = false) => {
+      if (!force && document.visibilityState !== "visible") {
+        return;
+      }
+
+      const now = Date.now();
+      if (!force && now - pendingCountLastFetchedAtRef.current < MIN_MANUAL_REFRESH_GAP_MS) {
+        return;
+      }
+
       try {
         const [queueResponse, panelResponse] = await Promise.all([
           apiClient.getPendingActivities(),
@@ -129,6 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         setVerificationQueuePendingCount(getListCount(queueResponse));
         setVerificationPanelPendingCount(getListCount(panelResponse));
+        pendingCountLastFetchedAtRef.current = now;
       } catch {
         if (!active) return;
         setVerificationQueuePendingCount(0);
@@ -136,23 +232,68 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
     };
 
-    void loadPendingCount();
+    void loadPendingCount(true);
 
     const handlePendingRefresh = () => {
-      void loadPendingCount();
+      void loadPendingCount(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void loadPendingCount(true);
+      }
     };
 
     window.addEventListener("verification-pending-updated", handlePendingRefresh);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     const timer = window.setInterval(() => {
       void loadPendingCount();
-    }, 30000);
+    }, VERIFICATION_REFRESH_INTERVAL_MS);
 
     return () => {
       active = false;
       window.removeEventListener("verification-pending-updated", handlePendingRefresh);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.clearInterval(timer);
     };
-  }, [isVerificationUser, pathname]);
+  }, [canReadVerificationQueues, hasVerificationPages]);
+
+  const navItems = useMemo(() => {
+    return baseItems.map((item) => {
+      if (item.href === "/verification") {
+        return { ...item, badge: verificationQueuePendingCount };
+      }
+      if (item.href === "/verification-panel") {
+        return { ...item, badge: verificationPanelPendingCount };
+      }
+      return item;
+    });
+  }, [baseItems, verificationQueuePendingCount, verificationPanelPendingCount]);
+
+  const navGroups = useMemo(() => {
+    const grouped = new Map<string, DynamicNavItem[]>();
+
+    for (const item of navItems) {
+      const groupName = item.group || "Other";
+      const list = grouped.get(groupName) || [];
+      list.push(item);
+      grouped.set(groupName, list);
+    }
+
+    return Array.from(grouped.entries())
+      .sort((a, b) => {
+        const ai = groupOrder.indexOf(a[0]);
+        const bi = groupOrder.indexOf(b[0]);
+        if (ai === -1 && bi === -1) return a[0].localeCompare(b[0]);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      })
+      .map(([title, items]) => ({
+        title,
+        items: items.sort((a, b) => a.label.localeCompare(b.label)),
+      }));
+  }, [navItems]);
 
   const handleLogout = async () => {
     await apiClient.logout().catch(() => undefined);
@@ -164,230 +305,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   if (!user) return null;
 
-  const navGroups: NavGroup[] = [
-    {
-      title: "Overview",
-      items: [
-        {
-          label: "Dashboard",
-          href: "/dashboard",
-          icon: LayoutDashboard,
-          show: !isDean() && !isStudent(),
-        },
-
-      ],
-    },
-    {
-      title: "Student",
-      items: [
-        {
-          label: "Dashboard",
-          href: "/student/dashboard",
-          icon: LayoutDashboard,
-          show: isStudent(),
-        },
-        {
-          label: "Activity Master",
-          href: "/student/activity/master",
-          icon: Clipboard,
-          show: isStudent(),
-        },
-        {
-          label: "Activity Logger",
-          href: "/student/activity/logger",
-          icon: PlusCircle,
-          show: false,
-        },
-        {
-          label: "Create Event",
-          href: "/student/activity/create-event",
-          icon: Calendar,
-          show: isAdmin(),
-        },
-
-        ...studentNavItems.map((item) => ({
-          label: item.label,
-          href: `/student/${item.slug}`,
-          icon: FileText,
-          show: isStudent() && item.slug !== 'activity-logger',
-        })),
-      ],
-    },
-    {
-      title: "Logger",
-      items: [
-        {
-          label: "Activity Logger",
-          href: "/student/activity/logger",
-          icon: PlusCircle,
-          show: canAccessLogger,
-        },
-      ],
-    },
-    {
-      title: "Faculty",
-      items: [
-        {
-          label: "My Activities",
-          href: "/activities",
-          icon: FileText,
-          show: isFaculty() && !isDean(),
-        },
-        {
-          label: "Submit Achievements",
-          href: "/achievements/submit",
-          icon: Award,
-          show: isFaculty() && !isDean(),
-        },
-        {
-          label: "Submit Action Plan",
-          href: "/action-plan/submit",
-          icon: Clipboard,
-          show: isFaculty() && !isDean(),
-        },
-      ],
-    },
-    {
-      title: "Department",
-      items: [
-        {
-          label: "Department",
-          href: "/department",
-          icon: Building2,
-          show: isHod(),
-        },
-        {
-          label: "Leaderboard",
-          href: "/leaderboard",
-          icon: Trophy,
-          show: isHod(),
-        },
-      ],
-    },
-    {
-      title: "College",
-      items: [
-        {
-          label: "College Overview",
-          href: "/college",
-          icon: GraduationCap,
-          show: isDean(),
-        },
-        {
-          label: "Department",
-          href: "/department",
-          icon: Building2,
-          show: isDean(),
-        },
-        {
-          label: "Leaderboard",
-          href: "/leaderboard",
-          icon: Trophy,
-          show: isDean(),
-        },
-      ],
-    },
-    {
-      title: "Management",
-      items: [
-        {
-          label: "Verification Queue",
-          href: "/verification",
-          icon: ShieldCheck,
-          show: isVerificationUser,
-          badge: verificationQueuePendingCount,
-        },
-        {
-          label: "Verification Panel",
-          href: "/verification-panel",
-          icon: ShieldCheck,
-          show: isVerificationUser,
-          badge: verificationPanelPendingCount,
-        },
-        {
-          label: "User Management",
-          href: "/users",
-          icon: Users,
-          show: isMaintenance(),
-        },
-        {
-          label: "Role Management",
-          href: "/roles",
-          icon: Shield,
-          show: isMaintenance(),
-        },
-      ],
-    },
-  ];
-
-  const achievementItems = [
-    { id: "awards", label: "Notable Achievements and Awards", icon: Trophy },
-    { id: "econtent", label: "E-Content Developed", icon: Monitor },
-    { id: "eventAttended", label: "Events Attended", icon: Users },
-    { id: "eventOrganized", label: "Events Organized", icon: Calendar },
-    { id: "examiner", label: "External Examiner", icon: ClipboardCheck },
-    { id: "guestLecture", label: "Guest Lecture Delivered", icon: Mic },
-    { id: "internationalVisit", label: "International Visit", icon: Plane },
-    { id: "reviewer", label: "Journal Reviewer", icon: PenTool },
-    { id: "newsletter", label: "Newsletter", icon: Newspaper },
-    { id: "onlineCourse", label: "Online Courses", icon: Video },
-    { id: "papers", label: "Paper Presentation", icon: FileText },
-    { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
-  ];
-
-  const studentItems = [
-    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
-    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
-    { id: "industries", label: "Industries", icon: Building2, href: "/student/industries" },
-    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
-    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
-    { id: "patentTracker", label: "Patent Tracker", icon: ClipboardCheck, href: "/student/patent/tracker" },
-    { id: "patentReport", label: "Patent Report", icon: ClipboardCheck, href: "/student/patent/report" },
-    { id: "onlineCourse", label: "Online Course", icon: Video, href: "/student/online-course" },
-    { id: "competitionReport", label: "Competition Report", icon: Trophy, href: "/student/competition-report" },
-    { id: "journalPublication", label: "Journal Publication", icon: PenTool, href: "/student/journal-publication" },
-    { id: "bookPublication", label: "Book Chapter Publication", icon: Book, href: "/student/book-publication" },
-  ];
-
-  const owiItems = [
-    { label: "COE", slug: "coe" },
-    { label: "External VIP Visit", slug: "external-vip-visit" },
-    { label: "Faculty Industry Projects", slug: "faculty-industry-projects" },
-    {
-      label: "Faculty Trained by Industry",
-      slug: "faculty-trained-by-industry",
-    },
-    { label: "Industry Advisors", slug: "industry-advisors" },
-    { label: "IRP Visit", slug: "irp-visit" },
-    { label: "Laboratory by Industry", slug: "laboratory-by-industry" },
-    { label: "MoU", slug: "mou" },
-    { label: "Professional Membership", slug: "professional-membership" },
-    { label: "Students Industrial Visit", slug: "students-industrial-visit" },
-    { label: "Technical Societies", slug: "technical-societies" },
-    { label: "Training to Industry", slug: "training-to-industry" },
-  ];
-
-  const rndItems = [
-    {
-      label: "Journal Publications - Applied",
-      slug: "journal-publications/applied",
-    },
-    {
-      label: "Journal Publications - Published",
-      slug: "journal-publications/published",
-    },
-    {
-      label: "Book Publications Proposal Applied Proposal Sanctionaed",
-      slug: "book-publications-proposal-applied-proposal-sanctionaed",
-    },
-  ];
-
-  // Filter groups: only show groups that have at least one visible item
-  const visibleGroups = navGroups
-    .map((g) => ({ ...g, items: g.items.filter((i) => i.show) }))
-    .filter((g) => g.items.length > 0);
-
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => {
+    const normalizedHref = normalizePath(href);
+    const normalizedPathname = normalizePath(pathname);
+    return normalizedPathname === normalizedHref;
+  };
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
@@ -397,9 +319,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       student: "bg-indigo-100 text-indigo-700",
       verification: "bg-amber-500/20 text-amber-300",
       maintenance: "bg-red-500/20 text-red-300",
+      admin: "bg-red-500/20 text-red-300",
     };
     return colors[role] || "bg-slate-100 text-slate-600";
   };
+
+  const homeHref = pickFirstAccessibleRoute({
+    resources: allowedResources,
+    routePaths: allowedRoutes,
+  }) || "/dashboard";
 
   return (
     <aside
@@ -409,12 +337,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0`}
     >
-      {/* Header / Logo */}
       <div
         className={`flex items-center h-16 border-b border-slate-200 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}
       >
         <Link
-          href="/dashboard"
+          href={homeHref}
           className="flex items-center gap-3 overflow-hidden"
         >
           <div className="w-9 h-9 bg-[#7D53F6] rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -426,7 +353,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
           )}
         </Link>
-        {/* Desktop collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="hidden md:flex p-1.5 rounded-md hover:bg-purple-50 transition-colors text-slate-400 hover:text-[#7D53F6]"
@@ -437,7 +363,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <ChevronLeft className="w-4 h-4" />
           )}
         </button>
-        {/* Mobile close button */}
         <button
           onClick={() => setMobileOpen(false)}
           className="md:hidden p-1.5 rounded-md hover:bg-purple-50 transition-colors text-slate-400 hover:text-[#7D53F6]"
@@ -446,9 +371,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
-        {visibleGroups.map((group) => (
+        {navGroups.map((group) => (
           <div key={group.title}>
             {!collapsed && (
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2 px-3">
@@ -461,8 +385,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 const active = isActive(item.href);
                 return (
                   <Link
-                    key={item.href}
+                    key={item.id}
                     href={item.href}
+                    prefetch
                     onClick={() => setMobileOpen(false)}
                     className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${collapsed ? "justify-center px-2" : "px-3"
                       } ${active
@@ -496,233 +421,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         ))}
-
-        {/* Activity Section */}
-        {(isFaculty() || isVerificationUser) && !isDean() && !collapsed && (
-          <div>
-            <button
-              onClick={() => setActivityExpanded(!activityExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <Clipboard className="w-5 h-5 flex-shrink-0" />
-                <span>Faculty Achievements</span>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${activityExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-            {activityExpanded && (
-              <div className="space-y-3 mt-2 ml-2">
-                {/* Faculty Achievements Section */}
-                <div>
-                  <button
-                    onClick={() => setAchievementsExpanded(!achievementsExpanded)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Trophy className="w-5 h-5 flex-shrink-0" />
-                      <span>Activity</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {achievementsExpanded && (
-                    <div className="space-y-1 mt-2 ml-2">
-                      {achievementItems.map((item) => {
-                        const Icon = item.icon;
-                        const href =
-                          item.id === "awards"
-                            ? "/achievements/notable-achievements-and-awards"
-                            : item.id === "econtent"
-                              ? "/achievements/e-content-developed"
-                              : item.id === "eventAttended"
-                                ? "/achievements/events-attended"
-                                : item.id === "eventOrganized"
-                                  ? "/achievements/events-organized"
-                                  : item.id === "examiner"
-                                    ? "/achievements/external-examiner"
-                                    : item.id === "guestLecture"
-                                      ? "/achievements/guest-lecture-delivered"
-                                      : item.id === "internationalVisit"
-                                        ? "/achievements/international-visit"
-                                        : item.id === "newsletter"
-                                          ? "/achievements/newsletter"
-                                          : item.id === "reviewer"
-                                            ? "/achievements/journal-reviewer"
-                                            : item.id === "onlineCourse"
-                                              ? "/achievements/online-course"
-                                              : item.id === "papers"
-                                                ? "/achievements/paper-presentation"
-                                                : item.id === "resourcePerson"
-                                                  ? "/achievements/resource-person"
-                                                  : null;
-
-                        if (href) {
-                          return (
-                            <Link
-                              key={item.id}
-                              href={href}
-                              onClick={() => setMobileOpen(false)}
-                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${pathname === href
-                                  ? "bg-blue-600/20 text-blue-400"
-                                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                                }`}
-                            >
-                              <Icon className="w-4 h-4 flex-shrink-0" />
-                              <span className="flex-1 text-left truncate">
-                                {item.label}
-                              </span>
-                            </Link>
-                          );
-                        }
-
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setMobileOpen(false)}
-                            className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors"
-                          >
-                            <Icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="flex-1 text-left truncate">
-                              {item.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* OWI (Outside World Interaction) Section */}
-                <div>
-                  <button
-                    onClick={() => setOwiExpanded(!owiExpanded)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Users className="w-5 h-5 flex-shrink-0" />
-                      <span>OWI </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {owiExpanded && (
-                    <div className="space-y-1 mt-2 ml-2">
-                      {owiItems.map((item) => {
-                        const href = `/faculty/outside-world/${item.slug}`;
-                        const active = isActive(href);
-                        return (
-                          <Link
-                            key={item.slug}
-                            href={href}
-                            onClick={() => setMobileOpen(false)}
-                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${active
-                                ? "bg-blue-600/20 text-blue-400"
-                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                              }`}
-                          >
-                            {active && (
-                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
-                            )}
-                            <span className="flex-1 truncate">{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* R&D Section */}
-                <div>
-                  <button
-                    onClick={() => setRndExpanded(!rndExpanded)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 flex-shrink-0" />
-                      <span>R&amp;D</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${rndExpanded ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {rndExpanded && (
-                    <div className="space-y-1 mt-2 ml-2">
-                      {rndItems.map((item) => {
-                        const href = `/faculty/r-and-d/${item.slug}`;
-                        const active = isActive(href);
-                        return (
-                          <Link
-                            key={item.slug}
-                            href={href}
-                            onClick={() => setMobileOpen(false)}
-                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${active
-                                ? "bg-blue-600/20 text-blue-400"
-                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                              }`}
-                          >
-                            {active && (
-                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
-                            )}
-                            <span className="flex-1 truncate">{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
-            {/* Student Achievements Section */}
-            <div>
-              <button
-                onClick={() => setStudentExpanded(!studentExpanded)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-              >
-                <div className="flex items-center gap-3">
-                  <Clipboard className="w-5 h-5 flex-shrink-0" />
-                  <span>Student Achievements</span>
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
-                />
-              </button>
-              {studentExpanded && (
-                <div className="space-y-1 mt-2 ml-2">
-                  {studentItems.filter((item) => item.id !== "activityMaster" || isStudent())
-                    .map((item) => {
-                      const Icon = item.icon;
-                      if (!item.href) return null;
-                      return (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          onClick={() => setMobileOpen(false)}
-                          className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${pathname === item.href
-                              ? "bg-blue-600/20 text-blue-400"
-                              : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                            }`}
-                        >
-                          <Icon className="w-4 h-4 flex-shrink-0" />
-                          <span className="flex-1 text-left truncate">{item.label}</span>
-                        </Link>
-                      );
-                    })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </nav>
 
-
-      {/* User Profile Section */}
       <div className="border-t border-slate-200 p-3">
-        {/* Roles */}
         {!collapsed && (
           <div className="flex flex-wrap gap-1 mb-3 px-1">
             {user.roles.map((role) => (
@@ -736,7 +437,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* User Info */}
         <div
           className={`flex items-center gap-3 p-2 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer ${collapsed ? "justify-center" : ""}`}
           onClick={() => setProfileOpen(!profileOpen)}
@@ -765,7 +465,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* Profile dropdown */}
         {profileOpen && !collapsed && (
           <div className="overflow-hidden animate-fade-in">
             <div className="pt-2 space-y-1">
@@ -788,7 +487,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* Collapsed logout */}
         {collapsed && (
           <button
             onClick={handleLogout}

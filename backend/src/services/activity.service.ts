@@ -1,7 +1,14 @@
 import { logger } from '../utils/logger';
 
 export class ActivityService {
+  private readonly warnedPrismaDisabledMethods = new Set<string>();
+
   private logPrismaDisabled(method: string): void {
+    if (this.warnedPrismaDisabledMethods.has(method)) {
+      return;
+    }
+
+    this.warnedPrismaDisabledMethods.add(method);
     logger.warn(`ActivityService.${method} called while Prisma is disabled.`);
   }
 

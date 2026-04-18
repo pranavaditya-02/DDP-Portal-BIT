@@ -1,5 +1,95 @@
 import axios, { AxiosInstance } from 'axios';
 
+export interface RoleResourceRecord {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+  group: string;
+}
+
+export interface RoleAccessSummary {
+  resources: RoleResourceRecord[];
+  routePaths: string[];
+}
+
+export interface RoleRecord {
+  id: number;
+  name: string;
+  description: string;
+  passwordPrefix: string;
+  editAccess: boolean;
+  deleteAccess: boolean;
+  status: boolean;
+  resources: string[];
+  isSystem: boolean;
+  createdAt: string;
+  usersCount: number;
+}
+
+export interface UserDepartmentOption {
+  id: number;
+  code: string;
+  name: string;
+}
+
+export interface UserRoleOption {
+  id: number;
+  value: string;
+  label: string;
+  dbName: string;
+}
+
+export interface UserDesignationOption {
+  id: number;
+  name: string;
+}
+
+export interface UsersLookupMetadata {
+  departments: UserDepartmentOption[];
+  roles: UserRoleOption[];
+  designations: UserDesignationOption[];
+}
+
+export interface DesignationTargetRuleRecord {
+  designationId: number;
+  designationName: string;
+  facultyCount: number;
+  academicYear: string;
+  targets: Record<string, number>;
+}
+
+export interface WorkflowPlanTaskRecord {
+  id: string;
+  baseId: string;
+  title: string;
+  type: 'paper' | 'patent' | 'proposal';
+  slotNo: number;
+  deadlineISO: string;
+  completed: boolean;
+}
+
+export interface WorkflowPlanRecord {
+  academicYear: string;
+  paperTargets: number;
+  proposalSlots: number;
+  patentEnabled: boolean;
+  deadlineMap: Record<string, string>;
+  completedTaskIds: string[];
+  tasks: WorkflowPlanTaskRecord[];
+}
+
+export interface UpsertRolePayload {
+  name: string;
+  description: string;
+  passwordPrefix?: string;
+  editAccess: boolean;
+  deleteAccess: boolean;
+  status: boolean;
+  resources: string[];
+  isSystem?: boolean;
+}
+
 export interface EventMasterRecord {
   id: number;
   maximumCount: number;
@@ -166,6 +256,8 @@ const client: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+let unauthorizedHandlingInProgress = false;
+
 // Response interceptor to handle errors
 client.interceptors.response.use(
   (response) => response,
@@ -173,15 +265,19 @@ client.interceptors.response.use(
     const status = error.response?.status;
     const message = error.response?.data?.error;
 
-    if ((status === 401 || status === 403) && typeof window !== 'undefined') {
+    if (status === 401 && typeof window !== 'undefined' && !unauthorizedHandlingInProgress) {
+      unauthorizedHandlingInProgress = true;
+
       void fetch(`${apiBaseURL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       }).catch(() => undefined)
-
-      if (message?.toString().toLowerCase().includes('invalid') || message?.toString().toLowerCase().includes('expired') || status === 401) {
-        window.location.href = '/login';
-      }
+        .finally(() => {
+          if (message?.toString().toLowerCase().includes('invalid') || message?.toString().toLowerCase().includes('expired') || status === 401) {
+            window.location.href = '/login';
+          }
+          unauthorizedHandlingInProgress = false;
+        });
     }
 
     return Promise.reject(error);
@@ -219,7 +315,7 @@ export const apiClient = {
     return response.data;
   },
 
-  loginWithGoogle: async (credential: string) => {
+  loginWithGoogle: async (credential: string): Promise<{ message: string; user: any; access?: RoleAccessSummary; defaultRoute?: string }> => {
     const response = await client.post('/auth/google', {
       credential,
     });
@@ -549,6 +645,161 @@ export const apiClient = {
 
   rejectRegistration: async (registrationId: number, reason: string): Promise<{ message: string; registration: EventRegistrationRecord }> => {
     const response = await client.post(`/registrations/${registrationId}/reject`, { reason });
+    return response.data;
+  },
+
+  // User Management endpoints
+  getAllUsers: async (): Promise<{ users: any[] }> => {
+    const response = await client.get('/users');
+    return response.data;
+  },
+
+  getUsersMetadata: async (): Promise<UsersLookupMetadata> => {
+    const response = await client.get('/users/metadata');
+    return response.data;
+  },
+
+  getUserById: async (id: number) => {
+    const response = await client.get(`/users/${id}`);
+    return response.data;
+  },
+
+  createUser: async (data: {
+    facultyId: string;
+    email: string;
+    name: string;
+    department: string;
+    designation: string;
+    role: string;
+    status: 'active' | 'inactive';
+  }) => {
+    const response = await client.post('/users', data);
+    return response.data;
+  },
+
+  updateUser: async (id: number, data: {
+    facultyId?: string;
+    email?: string;
+    name?: string;
+    department?: string;
+    designation?: string;
+    role?: string;
+    status?: 'active' | 'inactive';
+  }) => {
+    const response = await client.put(`/users/${id}`, data);
+    return response.data;
+  },
+
+  deleteUser: async (id: number) => {
+    const response = await client.delete(`/users/${id}`);
+    return response.data;
+  },
+
+  bulkImportUsers: async (users: {
+    facultyId: string;
+    email: string;
+    name: string;
+    department: string;
+    designation: string;
+    role: string;
+    status: 'active' | 'inactive';
+  }[]) => {
+    const response = await client.post('/users/bulk/import', { users });
+    return response.data;
+  },
+
+  checkDuplicateUsers: async (facultyId: string, email: string) => {
+    const response = await client.post('/users/check/duplicates', {
+      facultyId,
+      email,
+    });
+    return response.data;
+  },
+
+  // Role Management endpoints
+  getRoles: async (): Promise<{ roles: RoleRecord[] }> => {
+    const response = await client.get('/roles');
+    return response.data;
+  },
+
+  getRoleResources: async (): Promise<{ resources: RoleResourceRecord[] }> => {
+    const response = await client.get('/roles/resources');
+    return response.data;
+  },
+
+  getMyRoleAccess: async (): Promise<RoleAccessSummary> => {
+    const response = await client.get('/roles/me/access');
+    return response.data;
+  },
+
+  createRole: async (data: UpsertRolePayload): Promise<{ message: string; role: RoleRecord }> => {
+    const response = await client.post('/roles', data);
+    return response.data;
+  },
+
+  updateRole: async (id: number, data: UpsertRolePayload): Promise<{ message: string; role: RoleRecord }> => {
+    const response = await client.put(`/roles/${id}`, data);
+    return response.data;
+  },
+
+  deleteRole: async (id: number): Promise<{ message: string }> => {
+    const response = await client.delete(`/roles/${id}`);
+    return response.data;
+  },
+
+  getWorkflowDesignationRules: async (academicYear = '2026-27'): Promise<{ academicYear: string; rules: DesignationTargetRuleRecord[] }> => {
+    const response = await client.get('/workflow-targets/designation-rules', {
+      params: { academicYear },
+    });
+    return response.data;
+  },
+
+  updateWorkflowDesignationTargets: async (
+    designationId: number,
+    data: { academicYear: string; targets: Record<string, number> },
+  ) => {
+    const response = await client.put(`/workflow-targets/designation-rules/${designationId}`, data);
+    return response.data;
+  },
+
+  rebuildWorkflowAssignments: async (data: { academicYear: string; designationId?: number }) => {
+    const response = await client.post('/workflow-targets/assignments/rebuild', data);
+    return response.data;
+  },
+
+  getWorkflowDeadlines: async (academicYear = '2026-27'): Promise<{ academicYear: string; settings: Record<string, string> }> => {
+    const response = await client.get('/workflow-targets/admin/deadlines', {
+      params: { academicYear },
+    });
+    return response.data;
+  },
+
+  updateWorkflowDeadlines: async (data: { academicYear: string; settings: Record<string, string> }) => {
+    const response = await client.put('/workflow-targets/admin/deadlines', data);
+    return response.data;
+  },
+
+  getMyWorkflowPlan: async (academicYear = '2026-27'): Promise<WorkflowPlanRecord> => {
+    const response = await client.get('/workflow-targets/me/workflow', {
+      params: { academicYear },
+    });
+    return response.data;
+  },
+
+  completeMyWorkflowTask: async (data: {
+    academicYear?: string;
+    workflowType: 'paper' | 'patent' | 'proposal';
+    slotNo: number;
+    taskCode: string;
+    payload?: Record<string, unknown>;
+  }) => {
+    const response = await client.post('/workflow-targets/me/workflow/complete', {
+      academicYear: data.academicYear || '2026-27',
+      workflowType: data.workflowType,
+      slotNo: data.slotNo,
+      taskCode: data.taskCode,
+      payload: data.payload,
+    });
     return response.data;
   },
 };

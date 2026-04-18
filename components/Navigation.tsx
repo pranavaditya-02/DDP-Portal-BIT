@@ -1,21 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { apiClient } from '@/lib/api';
+<<<<<<< HEAD
 import { useRoles } from '@/hooks/useRoles';
 import { AUTH_COOKIE_NAME } from '@/lib/auth-session';
 import { clearAuthCookie } from '@/app/actions';
 import { motion } from 'framer-motion';
 import { LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+=======
+import { AUTH_COOKIE_NAME } from '@/lib/auth-session';
+import { clearAuthCookie } from '@/app/actions';
+import { LogOut, Menu, X } from 'lucide-react';
+import { hasRouteAccess, pickFirstAccessibleRoute, routeToLabel, shouldHideInNavigation } from '@/lib/route-access';
+>>>>>>> main
 
 export const Navigation: React.FC = () => {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
-  const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } = useRoles();
+  const { user, logout, allowedRoutes, allowedResources } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance();
 
@@ -31,6 +37,7 @@ export const Navigation: React.FC = () => {
     return null;
   }
 
+<<<<<<< HEAD
   const navItems = [
     // Faculty items
     {
@@ -104,15 +111,34 @@ export const Navigation: React.FC = () => {
       show: isMaintenance(),
     },
   ];
+=======
+  const visibleNavItems = useMemo(() => {
+    if (allowedResources.length > 0) {
+      return allowedResources
+        .filter((item) => item?.href)
+        .map((item) => ({ href: item.href, label: item.label || routeToLabel(item.href) }))
+        .filter((item) => !shouldHideInNavigation(item.href));
+    }
+>>>>>>> main
 
-  const visibleNavItems = navItems.filter((item) => item.show);
+    return allowedRoutes
+      .filter((href) => !href.includes('['))
+      .map((href) => ({ href, label: routeToLabel(href) }))
+      .filter((item) => hasRouteAccess(item.href, allowedRoutes))
+      .filter((item) => !shouldHideInNavigation(item.href));
+  }, [allowedResources, allowedRoutes]);
+
+  const homeHref = pickFirstAccessibleRoute({
+    resources: allowedResources,
+    routePaths: allowedRoutes,
+  }) || '/dashboard';
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center space-x-2">
+          <Link href={homeHref} prefetch className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-900 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">F</span>
             </div>
@@ -124,14 +150,15 @@ export const Navigation: React.FC = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {visibleNavItems.map((item, idx) => (
-              <motion.div key={idx} whileHover={{ y: -2 }}>
+              <div key={idx} className="transition-transform duration-150 hover:-translate-y-0.5">
                 <Link
                   href={item.href}
+                  prefetch
                   className="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
                 >
                   {item.label}
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
 
@@ -158,14 +185,12 @@ export const Navigation: React.FC = () => {
             </div>
 
             {/* Logout Button */}
-            <motion.button
+            <button
               onClick={handleLogout}
               className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <LogOut className="w-5 h-5 text-red-600" />
-            </motion.button>
+            </button>
 
             {/* Mobile Menu Button */}
             <button
@@ -179,16 +204,14 @@ export const Navigation: React.FC = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+          <div
             className="md:hidden pb-4 space-y-1"
           >
             {visibleNavItems.map((item, idx) => (
               <Link
                 key={idx}
                 href={item.href}
+                prefetch
                 onClick={() => setIsOpen(false)}
                 className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-100"
               >
@@ -201,7 +224,7 @@ export const Navigation: React.FC = () => {
             >
               Logout
             </button>
-          </motion.div>
+          </div>
         )}
       </div>
     </nav>

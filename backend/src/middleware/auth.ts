@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 import { logger } from '../utils/logger';
+import sessionService from '../services/session.service';
+
 
 export const AUTH_COOKIE_NAME = 'ddp_auth_token';
 
@@ -26,8 +28,29 @@ interface JWTPayload {
   roleName: string;
   roles: string[];
   facultyId?: string | null;
+  sid: string;
+  sub?: string;
+  iss?: string;
+  aud?: string | string[];
+  iat?: number;
   exp?: number;
 }
+
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET?.trim()
+  if (!secret) {
+    throw new Error('JWT_SECRET is required and must not be empty')
+  }
+
+  if (secret.length < 32 || secret === 'your_jwt_secret_key_change_in_production') {
+    throw new Error('JWT_SECRET must be at least 32 characters and not use default placeholder value')
+  }
+
+  return secret
+}
+
+const getJwtIssuer = () => process.env.JWT_ISSUER || 'faculty-tracking-api'
+const getJwtAudience = () => process.env.JWT_AUDIENCE || 'faculty-tracking-client'
 
 const parseCookies = (cookieHeader?: string) => {
   if (!cookieHeader) return {} as Record<string, string>
@@ -43,7 +66,7 @@ const parseCookies = (cookieHeader?: string) => {
   }, {})
 }
 
-const extractToken = (req: Request) => {
+export const extractToken = (req: Request) => {
   const authorizationHeader = req.headers['authorization']
   if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
     return authorizationHeader.slice(7)
@@ -61,19 +84,33 @@ export const authenticateToken = (
   const token = extractToken(req);
 
   if (!token) {
-    logger.warn('No token provided');
+    logger.debug('No token provided');
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, user) => {
-    if (err) {
-      logger.warn('Invalid token:', err.message);
-      return res.status(403).json({ error: 'Invalid or expired token' });
-    }
+  const decoded = verifyToken(token)
+  if (!decoded) {
+    logger.debug('Invalid token received')
+    return res.status(403).json({ error: 'Invalid or expired token' })
+  }
 
-    req.user = user as AuthRequest['user'];
-    next();
-  });
+  if (!sessionService.isSessionActive(decoded.sid, decoded.id)) {
+    logger.debug(`Inactive session rejected for user ${decoded.email}`)
+    return res.status(401).json({ error: 'Session expired or revoked' })
+  }
+
+  req.user = {
+    id: decoded.id,
+    username: decoded.username,
+    email: decoded.email,
+    name: decoded.name,
+    roleId: decoded.roleId,
+    roleName: decoded.roleName,
+    roles: decoded.roles,
+    facultyId: decoded.facultyId,
+  }
+
+  next()
 };
 
 export const requireRole = (...roles: string[]) => {
@@ -92,18 +129,29 @@ export const requireRole = (...roles: string[]) => {
   };
 };
 
-export const generateToken = (payload: JWTPayload): string => {
-  const secret: Secret = process.env.JWT_SECRET || 'secret';
-  const options: SignOptions = {
+export const generateToken = (payload: Omit<JWTPayload, 'sid'>, sessionId: string): string => {
+  return jwt.sign({ ...payload, sid: sessionId }, getJwtSecret(), {
+    algorithm: 'HS256',
+    issuer: getJwtIssuer(),
+    audience: getJwtAudience(),
+    subject: String(payload.id),
     expiresIn: process.env.JWT_EXPIRY || '24h',
-  };
-
-  return jwt.sign(payload, secret, options);
+  } as SignOptions);
 };
 
 export const verifyToken = (token: string): JWTPayload | null => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'secret') as JWTPayload;
+    const decoded = jwt.verify(token, getJwtSecret(), {
+      algorithms: ['HS256'],
+      issuer: getJwtIssuer(),
+      audience: getJwtAudience(),
+    }) as JWTPayload
+
+    if (!decoded.sid) {
+      return null
+    }
+
+    return decoded
   } catch (error) {
     logger.error('Token verification failed:', error);
     return null;

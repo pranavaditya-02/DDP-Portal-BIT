@@ -79,7 +79,7 @@ router.post(
 router.get(
   '/pending',
   authenticateToken,
-  requireRole('verification'),
+  requireRole('verification', 'admin'),
   async (req: AuthRequest, res) => {
     try {
       const { departmentId } = req.query;
@@ -98,7 +98,7 @@ router.get(
 router.post(
   '/:activityId/approve',
   authenticateToken,
-  requireRole('verification'),
+  requireRole('verification', 'admin'),
   async (req: AuthRequest, res) => {
     try {
       if (!req.user) {
@@ -132,7 +132,7 @@ router.post(
 router.post(
   '/:activityId/reject',
   authenticateToken,
-  requireRole('verification'),
+  requireRole('verification', 'admin'),
   async (req: AuthRequest, res) => {
     try {
       if (!req.user) {

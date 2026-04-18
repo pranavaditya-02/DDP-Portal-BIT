@@ -1,352 +1,229 @@
-# Faculty Achievement Tracking System
+# Faculty Achievement Dashboard
 
-A **production-ready, role-based** faculty achievement tracking dashboard inspired by IndiGo Airlines' design aesthetic. Features comprehensive permission management, real-time updates, and seamless multi-role support.
+Faculty Achievement Dashboard is a full-stack academic workflow platform for tracking faculty achievements, departmental performance, and institutional compliance timelines.
 
-## 🎯 Key Highlights
+It combines a modern Next.js frontend with a role-aware backend API to support multiple user types including faculty, HOD, dean, verification teams, maintenance/admin users, and students.
 
-- **Hybrid RBAC**: Backend enforces permissions, frontend adapts UI dynamically
-- **Multi-Role Support**: Single user can have multiple roles simultaneously
-- **Real-Time Updates**: WebSocket-powered notifications and live features
-- **Dynamic Permissions**: Role assignments change without redeployment
-- **IndiGo Design**: Clean, professional navy blue aesthetic with smooth animations
-- **Production-Ready**: Security, performance, and scalability built-in
+## Why This Project Exists
 
-## 🚀 Quick Start
+Academic performance tracking is often spread across spreadsheets, emails, and manual follow-ups. This project centralizes those workflows into one platform with:
+- Submission and tracking of achievement activities
+- Department and college-level visibility
+- Verification and approval flows
+- Deadline reminders and alert automation
+- CSV-assisted data ingestion for legacy records
 
-### Using Docker (Recommended)
+## Core Capabilities
 
-```bash
-# Start all services (PostgreSQL, Redis, Backend, Frontend)
-docker-compose up
+- Multi-role dashboard experience with route-level navigation
+- Faculty activity submission and personal progress tracking
+- Verification queue for approve/reject workflows
+- Department and college analytics views
+- Deadline alert engine with email notifications
+- Admin email template management
+- CSV import pipeline for events-attended data
 
-# Services available at:
-# Frontend: http://localhost:3000
-# Backend:  http://localhost:5000
-# Database: localhost:5432
-# Redis:    localhost:6379
+## Architecture Overview
+
+The system uses a split frontend-backend architecture.
+
+Frontend:
+- Next.js App Router pages in [app](app)
+- Shared UI and navigation components in [components](components)
+- Role and state handling via [lib/store.ts](lib/store.ts) and [hooks/useRoles.ts](hooks/useRoles.ts)
+
+Backend:
+- Express API entry at [backend/src/index.ts](backend/src/index.ts)
+- Route modules in [backend/src/routes](backend/src/routes)
+- Business services in [backend/src/services](backend/src/services)
+- MySQL connection utilities in [backend/src/database/mysql.ts](backend/src/database/mysql.ts)
+
+Data and utilities:
+- Institutional assets in [assets](assets)
+- Supporting scripts in [scripts](scripts)
+
+## Tech Stack
+
+Frontend stack:
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Zustand
+- Axios
+- Recharts
+- Framer Motion
+
+Backend stack:
+- Node.js
+- Express
+- TypeScript
+- JWT-based auth middleware
+- MySQL via mysql2
+- Nodemailer
+- Multer (multipart file upload)
+- Zod validation
+
+Tooling and project infrastructure:
+- npm package management
+- ESLint (backend)
+- Docker Compose file available for containerized setup baseline
+
+## Project Structure
+
+```text
+app/                             Next.js pages (dashboard, college, department, student, achievements)
+components/                      Shared UI and navigation components
+hooks/                           Custom hooks (roles, alerts, data)
+lib/                             API client, store, helpers, workflow definitions
+backend/                         Express backend project
+backend/src/routes/              auth, activities, import, alerts routes
+backend/src/services/            auth, alerts, import, email services
+backend/src/database/            MySQL connection helpers
+assets/                          CSV/SQL/JSON datasets and generated files
+scripts/                         Data extraction and verification scripts
 ```
 
-### Manual Setup
+## Getting Started
+
+## 1. Run Frontend
+
+From repository root:
 
 ```bash
-# Backend
-cd backend
 npm install
-cp .env.example .env
-npm run db:migrate
 npm run dev
+```
 
-# Frontend (new terminal)
+Frontend URL: http://localhost:3000
+
+You can test quickly using demo login buttons on [app/login/page.tsx](app/login/page.tsx).
+
+## 2. Run Backend
+
+From [backend](backend):
+
+```bash
 npm install
-cp .env.local.example .env.local
 npm run dev
 ```
 
-See [SETUP.md](./SETUP.md) for detailed instructions.
+Backend URL: http://localhost:5000
 
-## 📁 Project Structure
+Health endpoint:
 
-```
-faculty-tracking-system/
-├── app/                          # Frontend (Next.js 16)
-│   ├── dashboard/                # Role-based dashboards
-│   ├── login/                    # Authentication
-│   ├── activities/               # Activity management
-│   ├── verification/             # Verification queue
-│   ├── users/                    # User management
-│   ├── globals.css               # IndiGo design tokens
-│   └── layout.tsx                # Root layout
-│
-├── components/                   # Reusable components
-│   ├── Navigation.tsx            # Role-aware navigation
-│   ├── RoleGuard.tsx            # Conditional rendering
-│   └── ui/                       # shadcn/ui components
-│
-├── lib/                          # Client utilities
-│   ├── api.ts                    # Axios client with auth
-│   ├── store.ts                  # Zustand auth store
-│   └── utils.ts                  # Helper functions
-│
-├── hooks/                        # Custom hooks
-│   └── useRoles.ts              # Role checking utilities
-│
-├── backend/                      # Express.js backend
-│   ├── src/
-│   │   ├── middleware/           # Auth & authorization
-│   │   ├── routes/               # API endpoints
-│   │   ├── services/             # Business logic
-│   │   ├── database/             # Prisma client
-│   │   └── index.ts              # Server entry
-│   ├── prisma/
-│   │   └── schema.prisma         # Database schema
-│   └── .env.example              # Environment template
-│
-├── docker-compose.yml            # Docker services
-├── ARCHITECTURE.md               # System design
-├── SETUP.md                      # Setup guide
-└── README.md                     # This file
+```text
+GET /api/health
 ```
 
-## 🏗️ Architecture
+## 3. Configure Environment Variables
 
-### Role-Based Access Control Flow
+Create [backend/.env](backend/.env) locally (already gitignored) with these minimum keys:
 
-```
-User Request
-    ↓
-[Frontend] Check roles in JWT token
-    ↓ (render UI conditionally)
-[Frontend] Send request with JWT
-    ↓
-[Backend] Authenticate token
-    ↓
-[Backend] Check role authorization
-    ↓
-[Backend] Filter data based on role
-    ↓
-[Response] Only authorized data returned
-```
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=use-a-random-32-plus-character-secret
+JWT_EXPIRY=12h
+JWT_ISSUER=faculty-tracking-api
+JWT_AUDIENCE=faculty-tracking-client
+ALLOWED_ORIGINS=http://localhost:3000
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 
-### Example: Faculty vs HOD
-
-**Faculty User Sees:**
-- My Activities (own only)
-- Submit Activity
-- My Progress
-
-**HOD Sees:**
-- Faculty Leaderboard
-- Department Dashboard
-- Faculty Oversight
-- Activity Distribution Charts
-- *Plus* all Faculty features
-
-**No Code Changes Needed**: Add 'hod' role in database → UI auto-adapts!
-
-## 🔐 Security Features
-
-### Backend (Server-Side)
-
-- ✅ JWT authentication with role extraction
-- ✅ Middleware-enforced authorization
-- ✅ Role-based data filtering at query level
-- ✅ Password hashing with bcrypt
-- ✅ SQL injection prevention (Prisma parameterized queries)
-- ✅ CORS configuration by environment
-- ✅ Audit logging for sensitive operations
-
-### Frontend (Client-Side)
-
-- ✅ RoleGuard component for conditional rendering
-- ✅ Secure token storage (localStorage + httpOnly ready)
-- ✅ Automatic logout on unauthorized (401/403)
-- ✅ Protected routes with role checks
-- ✅ Zod validation for API responses
-
-## 👥 Role System
-
-| Role | Capabilities | Example Users |
-|------|-------------|---------------|
-| **Faculty** | Submit activities, view own data, track progress | Dr. Rajesh, Dr. Priya |
-| **HOD** | Department oversight, faculty management | Dr. Suresh (Dept Head) |
-| **Dean** | College-wide dashboards, all departments | Dean Kumar |
-| **Verification** | Approve/reject activities, queue management | Dr. Verification Team |
-| **Maintenance** | User management, system settings | System Admin |
-
-**Key Point**: Users can have multiple roles simultaneously!
-- Dr. Rajesh: `['faculty', 'hod']` → Sees faculty AND department features
-- Dr. Priya: `['faculty', 'verification']` → Can submit AND approve activities
-
-## 🎨 Design System - IndiGo Inspired
-
-### Colors
-- **Primary**: Deep Navy `#0B1B5E` (hero cards, main buttons)
-- **Secondary**: Medium Navy `#1E3A8A` (hover states)
-- **Accent**: Royal Blue `#3B82F6` (interactive elements)
-- **Status**: Green `#10B981` (success), Orange `#F59E0B` (warning), Red `#EF4444` (danger)
-
-### Typography
-- **Heading**: Inter (sans-serif)
-- **Numbers**: JetBrains Mono (tabular numerals)
-- **Font Scale**: Display (56px) → Small (12px)
-
-### Components
-- Statistics cards with hover lift animation
-- Smooth transitions (300ms ease)
-- Responsive grid layouts (mobile-first)
-- Role-based feature visibility
-
-## 📊 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Create new user
-- `POST /api/auth/login` - Login (returns JWT)
-- `POST /api/auth/verify` - Verify token validity
-- `GET /api/auth/me` - Get current user with roles
-
-### Activities
-- `GET /api/activities/my-activities` - User's activities (Faculty)
-- `POST /api/activities/submit` - Submit new activity (Faculty)
-- `GET /api/activities/pending` - Pending queue (Verification)
-- `POST /api/activities/:id/approve` - Approve activity (Verification)
-- `POST /api/activities/:id/reject` - Reject activity (Verification)
-- `GET /api/activities/department/:id` - Department activities (HOD/Dean)
-
-See [API Documentation](./backend/docs/API.md) for complete endpoint list.
-
-## 🗄️ Database Schema
-
-**Core Tables:**
-- `users` - User accounts
-- `roles` - Available roles (faculty, hod, dean, verification, maintenance)
-- `user_roles` - Many-to-many user↔role relationships
-- `departments` - Department information
-- `faculty_activities` - Activity submissions
-- `action_plans` - Faculty achievement goals
-- `department_index` - Performance metrics
-
-See [Prisma Schema](./backend/prisma/schema.prisma) for full details.
-
-## 🚀 Tech Stack
-
-### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS 3.4
-- **Animations**: Framer Motion
-- **State**: Zustand
-- **HTTP**: Axios
-- **Validation**: Zod + React Hook Form
-- **Notifications**: React Hot Toast
-- **Charts**: Recharts
-- **Icons**: Lucide React
-
-### Backend
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: PostgreSQL + Prisma
-- **Auth**: JWT (jsonwebtoken)
-- **Cache**: Redis
-- **Validation**: Zod
-- **Logging**: Winston
-
-## 📝 Demo Credentials
-
-```
-Email                   | Password    | Roles
-─────────────────────────────────────────────────
-faculty@example.com    | password123 | faculty
-hod@example.com        | password123 | faculty, hod
-dean@example.com       | password123 | dean
-verify@example.com     | password123 | verification
-admin@example.com      | password123 | maintenance
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=your_database
+MYSQL_SSL=false
 ```
 
-## 📚 Documentation
+Optional mail configuration:
 
-- **[SETUP.md](./SETUP.md)** - Complete setup & deployment guide
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design & role flow
-- **API Docs** - `backend/docs/API.md`
-- **Database Schema** - `backend/prisma/schema.prisma`
-
-## 🔄 How Role-Based UI Works
-
-### 1. User Logs In
-```typescript
-// Backend returns JWT with roles
-{ token: "jwt...", user: { id: 1, roles: ['faculty', 'hod'] } }
+```env
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@example.com
+SMTP_PASSWORD=app-password
+EMAIL_FROM=noreply@example.com
+ALERT_NOTIFY_EMAIL=recipient@example.com
 ```
 
-### 2. Frontend Stores Roles
-```typescript
-// Zustand store extracts and caches roles
-useAuthStore.setState({ user: { roles: ['faculty', 'hod'] } })
-```
+## API Surface
 
-### 3. Components Render Conditionally
-```tsx
-<RoleGuard role="hod">
-  <DepartmentDashboard />
-</RoleGuard>
+Auth:
+- POST /api/auth/register
+- POST /api/auth/google
+- POST /api/auth/verify
+- POST /api/auth/logout
+- GET /api/auth/me
 
-// Only renders if user has 'hod' role!
-```
+Activities:
+- GET /api/activities/my-activities
+- POST /api/activities/submit
+- GET /api/activities/pending
+- POST /api/activities/:activityId/approve
+- POST /api/activities/:activityId/reject
+- GET /api/activities/department/:departmentId
+- GET /api/activities/stats/department/:departmentId
 
-### 4. Adding New Role (No Redeployment!)
-```sql
--- Admin adds 'verification' role to user
-INSERT INTO user_roles (user_id, role_id, ...)
-VALUES (1, 4, ...)
+Import:
+- POST /api/import/events-attended/csv
 
--- User refreshes page → new JWT with 'verification'
--- Verification components auto-appear in UI!
-```
+Alerts:
+- POST /api/alerts/check-and-send
+- POST /api/alerts/send-bulk
+- POST /api/alerts/task-completed
+- GET /api/alerts/email-templates
+- PUT /api/alerts/email-templates
+- GET /api/alerts/verify-email
+- GET /api/alerts/statistics
 
-## 🧪 Testing
+## Scripts
 
-```bash
-# Backend tests
-cd backend
-npm test
+Root scripts from [package.json](package.json):
+- npm run dev
+- npm run build
+- npm run start
+- npm run lint
+- npm run extract:ddp-indexing
 
-# Frontend type checking
-npm run type-check
+Backend scripts from [backend/package.json](backend/package.json):
+- npm run dev
+- npm run build
+- npm run start
+- npm run lint
+- npm test
 
-# Lint code
-npm run lint
-```
+Note: Prisma-related backend scripts may exist as legacy entries depending on branch history and should be used only if a Prisma schema/migration setup is present.
 
-## 🐳 Docker Commands
+## Documentation Map
 
-```bash
-# Start all services
-docker-compose up
+- [DOCS_INDEX.md](DOCS_INDEX.md)
+- [GETTING_STARTED.md](GETTING_STARTED.md)
+- [SETUP.md](SETUP.md)
+- [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)
+- [DEADLINE_ALERTS_SETUP.md](DEADLINE_ALERTS_SETUP.md)
+- [EMAIL_ALERTS_IMPLEMENTATION.md](EMAIL_ALERTS_IMPLEMENTATION.md)
+- [EMAIL_ALERTS_QUICK_START.md](EMAIL_ALERTS_QUICK_START.md)
 
-# Stop all services
-docker-compose down
+When documentation and implementation differ, prefer the implementation in source files as the current truth.
 
-# View logs
-docker-compose logs -f
+## Security and Git Hygiene
 
-# Reset database
-docker-compose down -v
-docker-compose up
-```
+- Environment files are excluded from Git in [.gitignore](.gitignore)
+- Keep secrets only in local env files or secure secret stores
+- If any secret was previously committed, rotate it immediately
 
-## 🚢 Deployment
+## Contributing
 
-### Recommended Platforms
-- **Frontend**: Vercel (optimized for Next.js)
-- **Backend**: Railway, Render, AWS EC2
-- **Database**: AWS RDS PostgreSQL, Heroku PostgreSQL
-- **Cache**: Upstash Redis, AWS ElastiCache
+1. Create a feature branch from main.
+2. Make focused changes with clear commit messages.
+3. Verify frontend and backend start cleanly.
+4. Open a pull request with testing notes.
 
-See [SETUP.md - Production Deployment](./SETUP.md#production-deployment) for details.
+## License
 
-## 📱 Responsive Design
-
-- Mobile-first approach
-- Tablet optimized (768px+)
-- Desktop enhanced (1024px+)
-- Touch-friendly controls
-- Accessible color contrasts
-
-## 🔗 Real-Time Features (Future)
-
-- WebSocket notifications
-- Live activity updates
-- Instant approval notifications
-- Department performance alerts
-
-## 📄 License
-
-Proprietary - Bannari Amman Institute of Technology
-
-## 🤝 Support
-
-For issues, questions, or feature requests, please contact the development team or create an issue in the repository.
-
----
-
-**Made with ❤️ for Bannari Amman Institute of Technology**
+Internal academic software project for faculty achievement and compliance tracking.
