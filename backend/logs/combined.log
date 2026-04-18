@@ -5121,3 +5121,38 @@
 {"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-18 11:14:18"}
 {"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-18 11:14:20"}
 {"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-18 11:14:37"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-18 11:16:50"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:05"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:06"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:15"}
+{"level":"info","message":"POST /api/auth/logout","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:19"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:19"}
+{"level":"info","message":"POST /api/auth/google","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:25"}
+{"level":"info","message":"Google sign-in successful for pranavaditya.cs23@bitsathy.ac.in","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:25"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:26"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:26"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:26"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:26"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:32"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:36"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:36"}
+{"level":"info","message":"GET /api/workflow-targets/admin/deadlines","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:41"}
+{"level":"info","message":"GET /api/workflow-targets/designation-rules","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:41"}
+{"level":"info","message":"GET /api/workflow-targets/target-master","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:41"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:47"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:47"}
+{"level":"info","message":"PUT /api/roles/1","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:56"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:58"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-18 11:17:58"}
+{"level":"info","message":"PUT /api/roles/90002","service":"faculty-tracking-api","timestamp":"2026-04-18 11:18:07"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-18 11:18:09"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-18 11:18:09"}
+{"level":"info","message":"PUT /api/roles/90002","service":"faculty-tracking-api","timestamp":"2026-04-18 11:18:21"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-18 11:18:23"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-18 11:18:23"}
