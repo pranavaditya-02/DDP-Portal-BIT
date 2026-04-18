@@ -11605,3 +11605,7 @@
 {"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-17 08:57:53"}
 {"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-17 08:57:53"}
 {"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-17 08:57:54"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-18 15:23:37"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-18 15:23:37"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-18 15:23:37"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-18 15:23:39"}
