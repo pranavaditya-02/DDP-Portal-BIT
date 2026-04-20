@@ -19,6 +19,7 @@ import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
 import journalPublicationsAppliedRoutes from './routes/journalPublicationsApplied.routes';
 import journalPublicationsPublishedRoutes from './routes/journalPublicationsPublished.routes';
+import bookPublicationsRoutes from './routes/bookPublications.routes';
 import facultyActivitiesRoutes from './facultyActivities/facultyActivities.routes';
 import onlineCourseRoutes from './routes/onlineCourse.routes';
 import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
@@ -26,6 +27,7 @@ import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
 import usersRoutes from './routes/users.routes';
 import rolesRoutes from './routes/roles.routes';
 import workflowTargetsRoutes from './routes/workflowTargets.routes';
+import supervisorDetailsRoutes from './routes/supervisorDetails.routes';
 
 
 
@@ -132,6 +134,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/journal-publications-applied', journalPublicationsAppliedRoutes);
 app.use('/api/journal-publications-published', journalPublicationsPublishedRoutes);
+app.use('/api/book-publications', bookPublicationsRoutes);
 app.use('/api/faculty-activities', facultyActivitiesRoutes);
 app.use('/api/online/course', onlineCourseRoutes);
 
@@ -189,6 +192,7 @@ app.get('/api/courses/active', fetchActiveCourses);
 app.use('/api/users', usersRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/workflow-targets', workflowTargetsRoutes);
+app.use('/api/supervisor-details', supervisorDetailsRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

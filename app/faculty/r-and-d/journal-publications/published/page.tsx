@@ -1,21 +1,29 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { Search, Filter, PlusCircle } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
 interface JournalPublicationRecord {
   id: string;
-  taskId: string;
   faculty: string;
   indexing: string;
   journalName: string;
-  articleTitle: string;
-  createdAt: string;
+  submittedTitle: string;
+  submittedDate: string;
   proofUrl?: string | null;
   status: 'Submitted' | 'Under Review' | 'Accepted for Publication' | 'Rejected for Publication';
-  rdVerification: 'Initiated' | 'Approved' | 'Rejected';
+}
+
+interface JournalPublicationApiItem {
+  publication_id: string | number;
+  faculty_id: string;
+  indexing_type: string;
+  journal_name: string;
+  submitted_journal_title: string;
+  submitted_date: string;
+  proof_document_path?: string | null;
+  publication_status: JournalPublicationRecord['status'];
 }
 
 const statusOrder = ['Submitted', 'Under Review', 'Accepted for Publication', 'Rejected for Publication'] as const;
@@ -46,22 +54,22 @@ export default function PublishedPage() {
   useEffect(() => {
     const loadRecords = async () => {
       try {
-        const data = await apiClient.getJournalPublicationsPublished();
-        const publications = Array.isArray(data.publications) ? data.publications : [];
-        setRecords(
-          publications.map((item: any) => ({
+        const data = await apiClient.getJournalPublicationsApplied();
+        const publications: JournalPublicationApiItem[] = Array.isArray(data.publications) ? data.publications : [];
+        const publishedItems = publications
+          .map((item): JournalPublicationRecord => ({
             id: String(item.publication_id),
-            taskId: String(item.task_id),
-            faculty: item.faculty_name,
-            indexing: item.indexing ?? '',
+            faculty: item.faculty_id,
+            indexing: item.indexing_type,
             journalName: item.journal_name,
-            articleTitle: item.article_title,
-            createdAt: item.created_at ?? new Date().toISOString(),
-            proofUrl: item.document_proof_path,
-            status: item.publication_status ?? 'Submitted',
-            rdVerification: item.rd_verification ?? 'Initiated',
-          })),
-        );
+            submittedTitle: item.submitted_journal_title,
+            submittedDate: item.submitted_date,
+            proofUrl: item.proof_document_path,
+            status: item.publication_status,
+          }))
+          .filter((item) => item.status === 'Accepted for Publication');
+
+        setRecords(publishedItems);
       } catch (error: any) {
         setFetchError(error?.message || 'Unable to load published publications.');
       } finally {
@@ -73,14 +81,10 @@ export default function PublishedPage() {
   }, []);
 
   const filteredRecords = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
     return records.filter((record) => {
-      const matchesQuery =
-        normalizedQuery === '' ||
-        [record.taskId, record.faculty, record.journalName, record.articleTitle, record.indexing, record.status, record.rdVerification].some((value) =>
-          value.toLowerCase().includes(normalizedQuery),
-        );
+      const matchesQuery = query.trim() === '' ||
+        [record.faculty, record.journalName, record.submittedTitle, record.indexing, record.status]
+          .some((value) => value.toLowerCase().includes(query.trim().toLowerCase()));
 
       const matchesStatus = !filterStatus || record.status === filterStatus;
       return matchesQuery && matchesStatus;
@@ -116,16 +120,6 @@ export default function PublishedPage() {
             ))}
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/faculty/r-and-d/journal-publications/published/create"
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition"
-          >
-            <PlusCircle className="w-4 h-4" />
-            Add Record
-          </Link>
-        </div>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -135,7 +129,7 @@ export default function PublishedPage() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search faculty, journal, task or status..."
+              placeholder="Search faculty, journal or status..."
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
@@ -186,26 +180,23 @@ export default function PublishedPage() {
             <table className="min-w-full border-separate border-spacing-y-3">
               <thead>
                 <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  <th className="pb-2 px-3">Task ID</th>
                   <th className="pb-2 px-3">Faculty</th>
                   <th className="pb-2 px-3">Indexing</th>
                   <th className="pb-2 px-3">Journal</th>
-                  <th className="pb-2 px-3">Article Title</th>
-                  <th className="pb-2 px-3">Created At</th>
+                  <th className="pb-2 px-3">Submitted Title</th>
+                  <th className="pb-2 px-3">Submitted Date</th>
                   <th className="pb-2 px-3">Proof</th>
                   <th className="pb-2 px-3">Status</th>
-                  <th className="pb-2 px-3">R&D Verification</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRecords.map((record, index) => (
                   <tr key={record.id} className={index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.taskId}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.faculty}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.indexing}</td>
                     <td className="px-3 py-4 text-sm text-slate-700 min-w-[220px]">{record.journalName}</td>
-                    <td className="px-3 py-4 text-sm text-slate-700 min-w-[260px]">{record.articleTitle}</td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{new Date(record.createdAt).toLocaleDateString()}</td>
+                    <td className="px-3 py-4 text-sm text-slate-700 min-w-[260px]">{record.submittedTitle}</td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{new Date(record.submittedDate).toLocaleDateString()}</td>
                     <td className="px-3 py-4 text-sm">
                       {record.proofUrl ? (
                         <a href={record.proofUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800">
@@ -216,12 +207,11 @@ export default function PublishedPage() {
                       )}
                     </td>
                     <td className="px-3 py-4 text-sm">{renderStatusBadge(record.status)}</td>
-                    <td className="px-3 py-4 text-sm text-slate-700">{record.rdVerification}</td>
                   </tr>
                 ))}
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-10 text-center text-sm text-slate-500">
+                    <td colSpan={7} className="px-3 py-10 text-center text-sm text-slate-500">
                       No published publications found.
                     </td>
                   </tr>

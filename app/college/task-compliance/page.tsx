@@ -132,7 +132,7 @@ function buildComplianceData(totalTasks: number): FacultyCompliance[] {
 }
 
 export default function DeanTaskCompliancePage() {
-  const { isDean, isAdmin } = useRoles()
+  const { canAccessResource } = useRoles()
   const [activeTab, setActiveTab] = useState<TabKey>('pending')
   const [facultySearch, setFacultySearch] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all')
@@ -260,7 +260,7 @@ export default function DeanTaskCompliancePage() {
     setSelectedTaskFilter('all')
   }
 
-  if (!isDean() && !isAdmin()) {
+  if (!canAccessResource('/college/task-compliance')) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
         <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
@@ -268,7 +268,7 @@ export default function DeanTaskCompliancePage() {
             <ShieldAlert className="h-5 w-5" />
           </div>
           <h1 className="text-xl font-semibold text-slate-900">Access Restricted</h1>
-          <p className="mt-1 text-sm text-slate-500">Only dean users can access task compliance analytics.</p>
+          <p className="mt-1 text-sm text-slate-500">You do not have permission to view the task compliance dashboard.</p>
         </div>
       </div>
     )

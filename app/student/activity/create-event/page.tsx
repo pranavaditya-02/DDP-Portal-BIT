@@ -122,7 +122,7 @@ const diffDays = (startDate: string, endDate: string): number | null => {
 }
 
 export default function CreateEventPage() {
-  const { isAdmin } = useRoles()
+  const { canAccessResource } = useRoles()
   const router = useRouter()
   const searchParams = useSearchParams()
   const eventCodeParam = searchParams.get('eventCode')
@@ -137,6 +137,8 @@ export default function CreateEventPage() {
   const [currentStep, setCurrentStep] = useState(0)
 
   const durationDays = useMemo(() => diffDays(form.startDate, form.endDate), [form.startDate, form.endDate])
+
+  const canCreateEvent = canAccessResource('/student/activity/create-event')
 
   // Load draft or existing event on mount
   useEffect(() => {
@@ -235,8 +237,8 @@ export default function CreateEventPage() {
     setError("")
     setSuccess("")
 
-    if (!isAdmin()) {
-      setError("Only admin users can create events.")
+    if (!canCreateEvent) {
+      setError("You do not have permission to create events.")
       return
     }
 
@@ -332,12 +334,12 @@ export default function CreateEventPage() {
     )
   }
 
-  if (!isAdmin()) {
+  if (!canCreateEvent) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-[900px] mx-auto">
         <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
           <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
-          <p className="mt-2 text-sm text-rose-800">Only admin users can access the Create Event form.</p>
+          <p className="mt-2 text-sm text-rose-800">You do not have permission to access the Create Event form.</p>
           <div className="mt-5">
             <Link href="/students/activity-master" className="btn-outline inline-flex items-center gap-2">
               <LayoutGrid className="w-4 h-4" />

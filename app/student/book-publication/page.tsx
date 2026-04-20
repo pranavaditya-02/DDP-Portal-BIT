@@ -424,34 +424,48 @@ export default function BookChapterPublicationPage() {
           fetch("http://localhost:5000/departments"),
         ]);
 
-        // Check each response before parsing
-        const normalizeArrayResponse = (value: unknown, label: string) => {
-          if (Array.isArray(value)) return value;
-          if (value && typeof value === "object") {
-            const obj = value as Record<string, unknown>;
-            if (Array.isArray(obj.data)) return obj.data;
-            if (Array.isArray(obj.rows)) return obj.rows;
-            if (Array.isArray(obj.items)) return obj.items;
+        const normalizeArrayResponse = (parsed: unknown, label: string) => {
+          if (Array.isArray(parsed)) return parsed;
+          if (parsed && typeof parsed === "object") {
+            const normalized = Object.values(parsed);
+            if (Array.isArray(normalized)) return normalized;
           }
-          console.error(`❌ ${label} returned non-array JSON:`, value);
+          console.warn(`Unexpected ${label} response shape:`, parsed);
           return [];
         };
 
-        const checkJson = async (res: Response, label: string) => {
+        const parseJson = async (res: Response, label: string) => {
           const text = await res.text();
           try {
             const parsed = JSON.parse(text);
             return normalizeArrayResponse(parsed, label);
           } catch {
             console.error(`❌ ${label} returned non-JSON:`, text.slice(0, 200));
-            return [];
+            return null;
           }
         };
 
-        setRecords(await checkJson(recordRes, "book-chapter-publications"));
-        setStudents(await checkJson(studentRes, "students"));
-        setLabs(await checkJson(labRes, "speciallabs/active"));
-        setDepartments(await checkJson(deptRes, "departments"));
+        const bookRecords = await parseJson(recordRes, "book-chapter-publications");
+        if (!Array.isArray(bookRecords)) {
+          console.error(
+            "Unexpected book-chapter-publications response shape:",
+            bookRecords,
+            recordRes.status,
+            recordRes.statusText
+          );
+          setRecords([]);
+        } else {
+          setRecords(bookRecords);
+        }
+
+        const studentData = await parseJson(studentRes, "students");
+        setStudents(Array.isArray(studentData) ? studentData : []);
+
+        const labData = await parseJson(labRes, "speciallabs/active");
+        setLabs(Array.isArray(labData) ? labData : []);
+
+        const deptData = await parseJson(deptRes, "departments");
+        setDepartments(Array.isArray(deptData) ? deptData : []);
 
       } catch (err) {
         console.error("Failed to load data", err);
@@ -576,11 +590,11 @@ export default function BookChapterPublicationPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {recordsList.map((record) => {
+                      {recordsList.map((record, index) => {
                         const s = STATUS_MAP[record.iqac_status] ?? STATUS_MAP.Initiated;
                         return (
                           <tr
-                            key={record.id}
+                            key={`${record.id}-${index}`}
                             onClick={() => handleOpenDetail(record.id)}
                             className="group hover:bg-indigo-50/40 cursor-pointer transition-colors"
                           >
