@@ -435,10 +435,21 @@ export default function BookChapterPublicationPage() {
           }
         };
 
-        setRecords(await checkJson(recordRes, "book-chapter-publications"));
-        setStudents(await checkJson(studentRes, "students"));
-        setLabs(await checkJson(labRes, "speciallabs/active"));
-        setDepartments(await checkJson(deptRes, "departments"));
+        const normalizeArray = (value: unknown) => {
+          if (Array.isArray(value)) return value;
+          if (value && typeof value === "object") {
+            const obj = value as Record<string, unknown>;
+            if (Array.isArray(obj.bookChapterPublications)) return obj.bookChapterPublications;
+            if (Array.isArray(obj.data)) return obj.data;
+            if (Array.isArray(obj.records)) return obj.records;
+          }
+          return [];
+        };
+
+        setRecords(normalizeArray(await checkJson(recordRes, "book-chapter-publications")));
+        setStudents(normalizeArray(await checkJson(studentRes, "students")) as Student[]);
+        setLabs(normalizeArray(await checkJson(labRes, "speciallabs/active")) as { id: number; specialLabName: string }[]);
+        setDepartments(normalizeArray(await checkJson(deptRes, "departments")) as Department[]);
 
       } catch (err) {
         console.error("Failed to load data", err);

@@ -2,6 +2,7 @@ import express from 'express';
 import { z } from 'zod';
 import eventMasterService, { EventCodeExistsError } from '../services/eventMaster.service';
 import { logger } from '../utils/logger';
+import { authenticateToken, requireResource } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -80,7 +81,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requireResource('/student/activity/create-event'), async (req, res) => {
   try {
 
     const data = createEventSchema.parse(req.body);

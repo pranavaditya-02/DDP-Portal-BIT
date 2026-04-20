@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { z } from 'zod';
-import facultyActivitiesService, { FacultyActivityCategory } from './facultyActivities.service';
+import facultyActivitiesService, { FacultyActivityCategory } from '../services/facultyActivities.service';
 import { logger } from '../utils/logger';
 
 const router = express.Router();

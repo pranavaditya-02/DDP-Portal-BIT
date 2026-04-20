@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowLeft, ArrowRight, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock3, LayoutGrid, MapPin, Save, Shield, Star, User } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { apiClient, type CreateEventPayload } from "@/lib/api"
+import { RoleGuard } from '@/components/RoleGuard'
 import { useRoles } from "@/hooks/useRoles"
 
 type FormState = {
@@ -286,7 +287,7 @@ export default function CreateEventPage() {
       clearDraft()
       setForm(initialForm)
       setTimeout(() => {
-        router.push('/students/activity-master')
+        router.push('/student/activity/master')
       }, 2000)
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Failed to create event.")
@@ -334,25 +335,25 @@ export default function CreateEventPage() {
     )
   }
 
-  if (!canCreateEvent) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-[900px] mx-auto">
-        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
-          <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
-          <p className="mt-2 text-sm text-rose-800">You do not have permission to access the Create Event form.</p>
-          <div className="mt-5">
-            <Link href="/students/activity-master" className="btn-outline inline-flex items-center gap-2">
-              <LayoutGrid className="w-4 h-4" />
-              Back to Activity Master
-            </Link>
+  return (
+    <RoleGuard
+      resource="/student/activity/create-event"
+      fallback={
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[900px] mx-auto">
+          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
+            <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
+            <p className="mt-2 text-sm text-rose-800">You do not have permission to access the Create Event form.</p>
+            <div className="mt-5">
+              <Link href="/student/activity/master" className="btn-outline inline-flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4" />
+                Back to Activity Master
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+      }
+    >
+      <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center">
@@ -860,11 +861,12 @@ export default function CreateEventPage() {
         </div>
 
         <div className="mt-4">
-          <Link href="/students/activity-master" className="text-sm text-slate-600 hover:text-slate-900">
+          <Link href="/student/activity/master" className="text-sm text-slate-600 hover:text-slate-900">
             Back to Activity Master
           </Link>
         </div>
       </div>
     </div>
+    </RoleGuard>
   )
 }

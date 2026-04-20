@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import toast from 'react-hot-toast'
 import {
@@ -25,6 +25,8 @@ const ACTIVITY_TYPES = [
 
 export default function SubmitActivityPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const eventId = searchParams.get('eventId')
   const { user } = useAuthStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -65,9 +67,14 @@ export default function SubmitActivityPage() {
       </Link>
 
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 space-y-3">
         <h1 className="text-2xl font-bold text-slate-900">Submit New Activity</h1>
         <p className="text-sm text-slate-500 mt-1">Fill in the details below. Your submission will be reviewed by the verification team.</p>
+        {eventId ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            Submitting report for event ID: <strong>{eventId}</strong>
+          </div>
+        ) : null}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

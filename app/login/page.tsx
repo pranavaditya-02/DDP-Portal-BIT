@@ -62,49 +62,58 @@ export default function LoginPage() {
         return
       }
 
-      google.accounts.id.initialize({
-        client_id: clientId,
-        callback: async ({ credential }) => {
-          if (!credential) return
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async ({ credential }) => {
+            if (!credential) return
 
-          try {
-            setIsLoading(true)
-            const response = await apiClient.loginWithGoogle(credential)
-            setUser(response.user)
-            const access = response.access || null
-            if (access) {
-              setAllowedRoutes(access.routePaths || [])
-              setAllowedResources(access.resources || [])
+            try {
+              setIsLoading(true)
+              const response = await apiClient.loginWithGoogle(credential)
+              setUser(response.user)
+              const access = response.access || null
+              if (access) {
+                setAllowedRoutes(access.routePaths || [])
+                setAllowedResources(access.resources || [])
+              }
+              toast.success('Signed in successfully')
+
+              const targetRoute = response.defaultRoute || pickFirstAccessibleRoute({
+                resources: access?.resources,
+                routePaths: access?.routePaths?.length ? access.routePaths : allowedRoutes,
+              })
+              setIsLoading(false)
+              router.replace(targetRoute || getPostLoginRoute(response.user.roles || []))
+              return
+            } catch (error: any) {
+              const message = getApiErrorMessage(error, 'Google sign-in failed')
+              toast.error(message)
+              console.error('Google login error:', error)
+            } finally {
+              setIsLoading(false)
             }
-            toast.success('Signed in successfully')
+          },
+        })
 
-            const targetRoute = response.defaultRoute || pickFirstAccessibleRoute({
-              resources: access?.resources,
-              routePaths: access?.routePaths?.length ? access.routePaths : allowedRoutes,
-            })
-            setIsLoading(false)
-            router.replace(targetRoute || getPostLoginRoute(response.user.roles || []))
-            return
-          } catch (error: any) {
-            const message = getApiErrorMessage(error, 'Google sign-in failed')
-            toast.error(message)
-            console.error('Google login error:', error)
-          } finally {
-            setIsLoading(false)
-          }
-        },
-      })
-
-      buttonRef.current.innerHTML = ''
-      google.accounts.id.renderButton(buttonRef.current, {
-        theme: 'outline',
-        size: 'large',
-        shape: 'pill',
-        width: 370,
-        text: 'signin_with',
-      })
-      setGoogleError(null)
-      setGoogleButtonRendered(true)
+        buttonRef.current.innerHTML = ''
+        google.accounts.id.renderButton(buttonRef.current, {
+          theme: 'outline',
+          size: 'large',
+          shape: 'pill',
+          width: 370,
+          text: 'signin_with',
+        })
+        setGoogleError(null)
+        setGoogleButtonRendered(true)
+      } catch (error: any) {
+        const currentOrigin = window.location.origin
+        console.error('Google identity initialization failed:', error)
+        setGoogleButtonRendered(false)
+        setGoogleError(
+          `Google sign-in failed to initialize for origin ${currentOrigin}. Verify the client ID and make sure this exact origin is allowed in Google Cloud Console.`,
+        )
+      }
     }
 
     if (window.google) {

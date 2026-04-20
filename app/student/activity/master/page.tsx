@@ -374,7 +374,6 @@ export default function Page() {
   }, [registrations])
   const selectedEventImage = selectedEvent ? getCardImage(selectedEvent) : cardImages[0]
   const canCreate = canAccessResource('/student/activity/create-event')
-  const canAccessVerificationPanel = canAccessResource('/student/activity/verification-panel')
   const canAccessLogger = canAccessResource('/student/activity/logger')
 
   if (!canAccessLogger) {
@@ -590,16 +589,12 @@ export default function Page() {
           </div>
           <div>
             {canCreate ? (
-            <Link href="/students/create-event" className="btn-primary whitespace-nowrap">
+            <Link href="/student/activity/create-event" className="btn-primary whitespace-nowrap">
               Create Event
               <ArrowRight className="h-4 w-4" />
             </Link>
           ) : null}
-          {canAccessVerificationPanel ? (
-            <Link href="/students/verification-panel" className="btn-outline whitespace-nowrap">
-              Verification Panel
-            </Link>
-          ) : null}
+
           </div>
 
           <div className="mb-4">

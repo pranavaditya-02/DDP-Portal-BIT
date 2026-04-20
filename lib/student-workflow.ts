@@ -19,7 +19,7 @@ export type WorkflowRecord = {
 export const studentWorkflowStages: WorkflowStage[] = [
   {
     title: 'Activity Master',
-    route: '/students/activity-master',
+    route: '/student/activity/master',
     summary: 'Publish events, manage availability, and keep the master register in sync.',
     owner: 'Activity owner',
     accent: 'from-indigo-600 to-indigo-800',
@@ -27,7 +27,7 @@ export const studentWorkflowStages: WorkflowStage[] = [
   },
   {
     title: 'Activity Logger',
-    route: '/students/activity-logger',
+    route: '/student/activity/logger',
     summary: 'Track submissions, review status, and keep only approved items visible.',
     owner: 'Student logger',
     accent: 'from-emerald-600 to-teal-700',
@@ -46,17 +46,17 @@ export const studentWorkflowStages: WorkflowStage[] = [
 export const studentWorkflowQuickLinks = [
   {
     title: 'Create Event',
-    route: '/students/create-event',
+    route: '/student/activity/create-event',
     summary: 'Open the event intake form for a new master record.',
   },
   {
     title: 'Activity Master',
-    route: '/students/activity-master',
+    route: '/student/activity/master',
     summary: 'Open the master catalog and registration controls.',
   },
   {
     title: 'Activity Logger',
-    route: '/students/activity-logger',
+    route: '/student/activity/logger',
     summary: 'Open the approved activity feed.',
   },
 ]

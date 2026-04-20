@@ -18,8 +18,9 @@ import patentReportRoutes from './routes/patentReport.routes';
 import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
 import journalPublicationRoutes from './routes/journalPublication.routes';
-import facultyActivitiesRoutes from './facultyActivities/facultyActivities.routes';
+import facultyActivitiesRoutes from './routes/facultyActivities.routes';
 import onlineCourseRoutes from './routes/onlineCourse.routes';
+import competitionReportRoutes from './routes/competitionReport.routes';
 import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
 
 import usersRoutes from './routes/users.routes';
@@ -132,6 +133,7 @@ app.use('/api/registrations', registrationRoutes);
 app.use('/api/journal-publications', journalPublicationRoutes);
 app.use('/api/faculty-activities', facultyActivitiesRoutes);
 app.use('/api/online/course', onlineCourseRoutes);
+app.use('/api/competition', competitionReportRoutes);
 
 const fetchStudents = async (_req: express.Request, res: express.Response) => {
   try {

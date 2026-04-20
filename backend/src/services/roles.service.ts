@@ -121,19 +121,19 @@ const DEFAULT_ROLE_PROFILES: Record<string, DefaultRoleProfile> = {
     passwordPrefix: 'fc',
     editAccess: true,
     deleteAccess: false,
-    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan'],
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'student-activity-create-event'],
   },
   HOD: {
     passwordPrefix: 'hd',
     editAccess: true,
     deleteAccess: true,
-    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'student-activity-logger'],
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'student-activity-logger', 'student-activity-create-event'],
   },
   DEAN: {
     passwordPrefix: 'dn',
     editAccess: true,
     deleteAccess: true,
-    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'college-overview', 'college-task-compliance', 'student-activity-logger'],
+    resources: ['dashboard', 'my-activities', 'submit-achievements', 'submit-action-plan', 'department', 'leaderboard', 'college-overview', 'college-task-compliance', 'student-activity-logger', 'student-activity-create-event'],
   },
   IQAC: {
     passwordPrefix: 'vc',
@@ -151,7 +151,7 @@ const DEFAULT_ROLE_PROFILES: Record<string, DefaultRoleProfile> = {
     passwordPrefix: 'st',
     editAccess: true,
     deleteAccess: false,
-    resources: ['student-dashboard', 'student-overview', 'student-activity-master', 'student-activity-logger'],
+    resources: ['student-dashboard', 'student-overview', 'student-activity-master', 'student-activity-logger', 'student-activity-create-event'],
   },
 }
 
@@ -567,6 +567,7 @@ class RolesService {
       const discovered = await this.discoverAppPages()
       const merged = this.mergeCatalogResources(discovered)
       await this.syncAppPages(merged)
+      await this.syncDefaultRoleAccess()
     })()
 
     try {
@@ -604,6 +605,46 @@ class RolesService {
     )
 
     return rows.map((row) => this.mapPageRowToResource(row))
+  }
+
+  private async syncDefaultRoleAccess() {
+    const pool = getMysqlPool()
+    const roleNames = Object.keys(DEFAULT_ROLE_PROFILES)
+    if (roleNames.length === 0) return
+
+    const [roleRows] = await pool.query<Array<RowDataPacket & { id: number; name: string }>>(
+      `SELECT id, name FROM roles WHERE UPPER(TRIM(name)) IN (${roleNames.map(() => '?').join(', ')})`,
+      roleNames,
+    )
+
+    const roleIdByName = new Map<string, number>()
+    for (const row of roleRows) {
+      roleIdByName.set(normalizeDbRoleName(row.name), Number(row.id))
+    }
+
+    const resourceKeys = Array.from(
+      new Set(Object.values(DEFAULT_ROLE_PROFILES).flatMap((profile) => profile.resources)),
+    )
+    const pageIdByKey = await this.resolvePageIds(resourceKeys)
+
+    const values: number[] = []
+    for (const [roleName, profile] of Object.entries(DEFAULT_ROLE_PROFILES)) {
+      const roleId = roleIdByName.get(roleName)
+      if (!roleId) continue
+      for (const resourceKey of profile.resources) {
+        const pageId = pageIdByKey.get(resourceKey)
+        if (pageId) {
+          values.push(roleId, pageId)
+        }
+      }
+    }
+
+    if (values.length > 0) {
+      await pool.query(
+        `INSERT IGNORE INTO role_page_access (role_id, page_id) VALUES ${new Array(values.length / 2).fill('(?, ?)').join(', ')}`,
+        values,
+      )
+    }
   }
 
   async getRoleAccessByRoleId(roleId: number): Promise<RoleAccessSummary> {

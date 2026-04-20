@@ -109,12 +109,12 @@ const formatDeadline = (value: string | null) => {
 }
 
 const buildActivityEventLabel = (event: UiEvent) => {
-  return `Event Name : ${event.eventName} - Event Code : ${event.eventCode || 'N/A'} - Event Category : ${event.eventCategory || 'N/A'} - Organizer : ${event.eventOrganizer || 'N/A'} - Start Date : ${toInputDate(event.startDate) || 'N/A'} - End Date : ${toInputDate(event.endDate) || 'N/A'} - Balance Count : ${Math.max(0, event.balanceCount ?? 0)}`
+  return event.eventName || `Event Registration${event.eventCode ? ` (${event.eventCode})` : ''}`
 }
 
 const buildRegistrationDefaults = (event: UiEvent, studentName = 'Student Name'): RegistrationFormData => ({
   student: studentName,
-  eventCategory: '',
+  eventCategory: event.eventCategory || '',
   activityEvent: buildActivityEventLabel(event),
   fromDate: toInputDate(event.startDate),
   toDate: toInputDate(event.endDate || event.startDate),
@@ -561,7 +561,7 @@ export default function Page() {
 
                         {isEventApproved ? (
                           <Link
-                            href="/activities/submit"
+                            href={`/student/activity/logger/report?eventId=${selectedEvent.id}`}
                             className="inline-flex min-h-[48px] items-center justify-center rounded-[12px] bg-[#7D53F6] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A45D6]"
                           >
                             Submit report

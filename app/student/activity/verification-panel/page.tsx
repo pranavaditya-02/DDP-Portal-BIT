@@ -243,7 +243,7 @@ export default function VerificationPanelPage() {
           <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
           <p className="mt-2 text-sm text-rose-800">Only verification or admin users can access this panel.</p>
           <div className="mt-5">
-            <Link href="/students/activity-master" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition-colors">
+            <Link href="/student/activity/master" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition-colors">
               Back to Activity Master
             </Link>
           </div>
