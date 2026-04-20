@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { logger } from '../utils/logger';
 import sessionService from '../services/session.service';
-
+import rolesService from '../services/roles.service';
 
 export const AUTH_COOKIE_NAME = 'ddp_auth_token';
 
@@ -130,14 +130,71 @@ export const requireRole = (...roles: string[]) => {
 };
 
 export const generateToken = (payload: Omit<JWTPayload, 'sid'>, sessionId: string): string => {
-  return jwt.sign({ ...payload, sid: sessionId }, getJwtSecret(), {
+  const secret: Secret = getJwtSecret();
+  const expiresIn = process.env.JWT_EXPIRY || '24h';
+  const options: SignOptions = {
     algorithm: 'HS256',
     issuer: getJwtIssuer(),
     audience: getJwtAudience(),
     subject: String(payload.id),
-    expiresIn: process.env.JWT_EXPIRY || '24h',
-  } as SignOptions);
+    expiresIn: expiresIn as any,
+  };
+
+  return jwt.sign({ ...payload, sid: sessionId }, secret, options);
 };
+
+const normalizeRoute = (route: string) => {
+  if (!route || route === '/') return '/';
+  return route.replace(/\/+$/, '');
+}
+
+const routePatternToRegex = (pattern: string) => {
+  const escaped = normalizeRoute(pattern)
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\\\[\.\.\.([^\]]+)\\\]/g, '.+')
+    .replace(/\\\[([^\]]+)\\\]/g, '[^/]+')
+
+  return new RegExp(`^${escaped}$`)
+}
+
+const hasRouteAccess = (pathname: string, allowedRoutes: string[]) => {
+  const normalizedPath = normalizeRoute(pathname)
+
+  if (normalizedPath.endsWith('/submit')) {
+    const parentPath = normalizedPath.replace(/\/submit$/, '') || '/'
+    if (allowedRoutes.some((route) => normalizeRoute(route) === parentPath)) {
+      return true
+    }
+  }
+
+  return allowedRoutes.some((route) => {
+    const normalizedRoute = normalizeRoute(route)
+    if (normalizedRoute === normalizedPath) return true
+    if (!normalizedRoute.includes('[')) return false
+    return routePatternToRegex(normalizedRoute).test(normalizedPath)
+  })
+}
+
+export const requireResource = (resource: string) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' })
+    }
+
+    try {
+      const access = await rolesService.getRoleAccessByRoleId(req.user.roleId)
+      if (!hasRouteAccess(resource, access.routePaths)) {
+        logger.warn(`User ${req.user.email} lacks resource permission for ${resource}. Allowed routes: ${access.routePaths.join(', ')}`)
+        return res.status(403).json({ error: 'Insufficient permissions' })
+      }
+
+      next()
+    } catch (error) {
+      logger.error('Resource permission check failed:', error)
+      return res.status(500).json({ error: 'Permission verification failed' })
+    }
+  }
+}
 
 export const verifyToken = (token: string): JWTPayload | null => {
   try {

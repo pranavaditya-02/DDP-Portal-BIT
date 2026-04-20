@@ -1,5 +1,7 @@
 'use client'
 
+'use client'
+
 import React, { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
@@ -215,12 +217,7 @@ function RegistrationRow({ registration }: { registration: EventRegistrationReco
 }
 
 export default function Page() {
-<<<<<<< HEAD
-  const { isStudent, isFaculty, isHod, isDean, isAdmin, isVerification, isMaintenance } = useRoles()
-  const user = useAuthStore((state) => state.user)
-=======
-  const { isAdmin, isFaculty, isHod, isDean, isVerification, isMaintenance } = useRoles()
->>>>>>> main
+  const { canAccessResource } = useRoles()
   const [events, setEvents] = useState<UiEvent[]>([])
   const [registrations, setRegistrations] = useState<EventRegistrationRecord[]>([])
   const [activeTab, setActiveTab] = useState<TabKey>('active')
@@ -244,16 +241,7 @@ export default function Page() {
       try {
         setLoading(true)
         setErrorMessage(null)
-<<<<<<< HEAD
-        setUsingFallback(false)
-
-        const [eventsResponse, myRegistrationsResponse] = await Promise.all([
-          apiClient.getEvents({ sort: 'desc' }),
-          isStudent() ? apiClient.getMyRegistrations().catch(() => ({ registrations: [] })) : Promise.resolve({ registrations: [] }),
-        ])
-=======
         const response = await apiClient.getEvents({ sort: 'desc' })
->>>>>>> main
 
         if (!isMounted) return
         setEvents(response.events)
@@ -328,22 +316,7 @@ export default function Page() {
     [events]
   )
 
-<<<<<<< HEAD
-  const activeCount = filteredEvents.filter((event) => isActiveStatus(event)).length
-  const selectedEventRegistration = selectedEvent
-    ? myRegistrations.find((item) => item.eventId === selectedEvent.id)
-    : undefined
-  const isEventAlreadyRegistered = Boolean(selectedEventRegistration)
-  const isEventApproved = selectedEventRegistration?.status === 'approved'
-  const registrationStatusLabel = selectedEventRegistration
-    ? selectedEventRegistration.status.charAt(0).toUpperCase() + selectedEventRegistration.status.slice(1)
-    : null
-  const selectedEventImage = selectedEvent ? getCardImage(selectedEvent) : cardImages[0]
-
-  const openEventDetails = (event: UiEvent) => {
-=======
   const openEventDetails = async (event: UiEvent) => {
->>>>>>> main
     setSelectedEvent(event)
     setLoadingRegistrations(true)
     setErrorMessage(null)
@@ -371,49 +344,6 @@ export default function Page() {
     return registrations.filter((r) => r.status === registrationStatusFilter)
   }, [registrations, registrationStatusFilter])
 
-<<<<<<< HEAD
-    try {
-      setRegistrationSubmitting(true)
-      setErrorMessage(null)
-      const response = await apiClient.registerForEvent({
-        eventId: selectedEvent.id,
-        studentName: registrationForm.student,
-        studentDepartment: null,
-        eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
-        activityEvent: registrationForm.activityEvent,
-        fromDate: registrationForm.fromDate || null,
-        toDate: registrationForm.toDate || null,
-        modeOfParticipation: registrationForm.modeOfParticipation || null,
-        iqacVerification: registrationForm.iqacVerification || 'Initiated',
-      })
-      const createdRegistration = response.registration
-
-      setRegistrationSubmitted(true)
-      if (createdRegistration) {
-        setMyRegistrations((prev) => [createdRegistration as EventRegistrationRecord, ...prev.filter((item) => item.id !== createdRegistration.id)])
-      }
-
-      setEvents((prev) =>
-        prev.map((item) =>
-          item.id === selectedEvent.id
-            ? {
-                ...item,
-                appliedCount: item.appliedCount + 1,
-                balanceCount: Math.max(0, item.balanceCount - 1),
-              }
-            : item,
-        ),
-      )
-
-      setSelectedEvent(null)
-      setRegistrationForm(null)
-      setActiveTab('registered')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to register for the event.'
-      setErrorMessage(message)
-    } finally {
-      setRegistrationSubmitting(false)
-=======
   const sortedRegistrations = useMemo(() => {
     if (!visibleRegistrations) return []
 
@@ -431,7 +361,6 @@ export default function Page() {
           const statusOrder = { pending: 0, approved: 1, rejected: 2 }
           return (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
         })
->>>>>>> main
     }
     return sorted
   }, [visibleRegistrations, registrationSortBy])
@@ -444,14 +373,16 @@ export default function Page() {
     }
   }, [registrations])
   const selectedEventImage = selectedEvent ? getCardImage(selectedEvent) : cardImages[0]
-  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance()
+  const canCreate = canAccessResource('/student/activity/create-event')
+  const canAccessVerificationPanel = canAccessResource('/student/activity/verification-panel')
+  const canAccessLogger = canAccessResource('/student/activity/logger')
 
   if (!canAccessLogger) {
     return (
       <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
         <div className="mx-auto max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-6">
           <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
-          <p className="mt-2 text-sm text-rose-800">Activity Logger is available for faculty, HOD, dean, verification, and admin roles only.</p>
+          <p className="mt-2 text-sm text-rose-800">You do not have permission to access Activity Logger.</p>
           <Link href="/student/activity/master" className="mt-4 inline-flex rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-900">
             Go to Activity Master
           </Link>
@@ -460,52 +391,10 @@ export default function Page() {
     )
   }
 
-  const canAccessMaster = isStudent() || isFaculty() || isHod() || isDean() || isAdmin() || isVerification() || isMaintenance()
-
-  if (!canAccessMaster) {
-    return (
-      <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
-        <div className="mx-auto max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-6">
-          <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
-          <p className="mt-2 text-sm text-rose-800">Activity Master is available for student, faculty, HOD, dean, verification, and admin roles.</p>
-          <Link href="/dashboard" className="mt-4 inline-flex rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-900">
-            Go to Dashboard
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
-<<<<<<< HEAD
-      <div className="w-full">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        
-
-        <div className="flex flex-wrap gap-3">
-          {canCreate ? (
-            <Link href="/students/create-event" className="btn-primary whitespace-nowrap">
-              Create Event
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
-          {isVerification() ? (
-            <Link href="/students/verification-panel" className="btn-outline whitespace-nowrap">
-              Verification Panel
-            </Link>
-          ) : null}
-        </div>
-      </div>
-      </div>
-
-      {errorMessage ? <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 shadow-sm">{errorMessage}</div> : null}
-
-      {selectedEvent && registrationForm ? (
-=======
       
       {selectedEvent ? (
->>>>>>> main
         <section className="w-full">
           <button
             type="button"
@@ -529,13 +418,8 @@ export default function Page() {
                   </div>
                 </div>
 
-<<<<<<< HEAD
-                <div className="min-h-[280px] rounded-2xl border border-slate-200 bg-white p-6 sm:min-h-[340px]">
-                  <h3 className="text-2xl font-semibold text-slate-900">About the Event</h3>
-=======
                 <div className="min-h-[280px] rounded-2xl border border-slate-200 bg-white p-6 ">
                   <h3 className="text-3xl font-semibold text-slate-900">About the Event</h3>
->>>>>>> main
                   <p className="mt-4 text-base leading-8 text-slate-600">{getAboutText(selectedEvent)}</p>
                 </div>
               </section>
@@ -559,192 +443,6 @@ export default function Page() {
                       <p>Level: {selectedEvent.eventLevel || 'General'}</p>
                       <p>Within BIT: {selectedEvent.withinBit ? 'Yes' : 'No'}</p>
                       <p>Special Lab: {selectedEvent.relatedToSpecialLab ? 'Yes' : 'No'}</p>
-<<<<<<< HEAD
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                    <h3 className="text-2xl font-semibold text-slate-900">Date and Time</h3>
-                    <div className="mt-4 space-y-2 text-sm text-slate-600">
-                      <p className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-slate-500" />
-                        {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
-                      </p>
-                      <p>Duration: {selectedEvent.durationDays ? `${selectedEvent.durationDays} day(s)` : 'TBA'}</p>
-                      <p>Starts: {formatDeadline(selectedEvent.startDate)}</p>
-                      <p>Ends: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white p-6">
-                  {!registrationSubmitted ? (
-                    <div className="space-y-5">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h3 className="text-3xl font-semibold text-slate-900">Registration</h3>
-                        {isEventAlreadyRegistered ? (
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold border ${
-                              isEventApproved
-                                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                                : selectedEventRegistration?.status === 'pending'
-                                  ? 'border-amber-300 bg-amber-50 text-amber-800'
-                                  : 'border-rose-300 bg-rose-50 text-rose-800'
-                            }`}
-                          >
-                            {registrationStatusLabel}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Seats Left</p>
-                          <p className="mt-1 text-lg font-semibold text-slate-900">{Math.max(0, selectedEvent.balanceCount ?? 0)}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registered</p>
-                          <p className="mt-1 text-lg font-semibold text-slate-900">{Math.max(0, selectedEvent.appliedCount ?? 0)}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Total Seats</p>
-                          <p className="mt-1 text-lg font-semibold text-slate-900">{Math.max(1, selectedEvent.maximumCount || 1)}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs font-medium text-slate-600">
-                          <span>Seat Fill Progress</span>
-                          <span>
-                            {Math.round((Math.max(0, selectedEvent.appliedCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100)}%
-                          </span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-slate-200">
-                          <div
-                            className={`h-2 rounded-full ${getSeatsProgressTone(
-                              Math.max(0, selectedEvent.balanceCount ?? 0),
-                              Math.max(1, selectedEvent.maximumCount || 1),
-                            )}`}
-                            style={{
-                              width: `${Math.round(
-                                (Math.max(0, selectedEvent.appliedCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100,
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className={`grid gap-3 ${isEventAlreadyRegistered && !isEventApproved ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
-                        <a
-                          href={selectedEvent.webLink || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex min-h-[48px] items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-40' : ''}`}
-                        >
-                          Visit Event Page
-                        </a>
-
-                        {isEventApproved ? (
-                          <Link
-                            href="/activities/submit"
-                            className="inline-flex min-h-[48px] items-center justify-center rounded-[12px] bg-[#7D53F6] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A45D6]"
-                          >
-                            Submit
-                          </Link>
-                        ) : isEventAlreadyRegistered ? (
-                          null
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={registrationSubmitting || Math.max(0, selectedEvent.balanceCount ?? 0) === 0}
-                            onClick={handleQuickRegister}
-                            className="min-h-[48px] rounded-[12px] bg-[#7D53F6] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A45D6] disabled:cursor-not-allowed disabled:bg-slate-400"
-                          >
-                            {registrationSubmitting ? 'Registering...' : Math.max(0, selectedEvent.balanceCount ?? 0) === 0 ? 'No Seats Left' : 'Register'}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-[20px] border border-emerald-300 bg-emerald-50 p-5 text-center">
-                      <CheckCircle2 className="mx-auto h-11 w-11 text-emerald-600" />
-                      <h4 className="mt-3 text-xl font-semibold text-emerald-900">Registration Submitted!</h4>
-                      <p className="mt-1 text-sm text-emerald-700">Your application is under review.</p>
-                    </div>
-                  )}
-                </div>
-              </section>
-            </div>
-          </div>
-        </section>
-      ) : (
-      <>
-      <div className="mb-4">
-        <div className="flex flex-wrap gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-              className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                activeTab === tab.key ? 'bg-[#7D53F6] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#7D53F6]/40 hover:bg-[#7D53F6]/5'
-              }`}
-            >
-              {tab.label}
-              <span className="ml-2 text-xs opacity-70">({counts[tab.key]})</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-2 rounded-2xl">
-        <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search event name or code"
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20"
-            />
-          </div>
-
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
-            {categoryOptions.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'All Categories' : item}
-              </option>
-            ))}
-          </select>
-
-          <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
-            {levelOptions.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'All Levels' : item}
-              </option>
-            ))}
-          </select>
-
-          <select value={delivery} onChange={(e) => setDelivery(e.target.value as DeliveryFilter)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
-            <option value="all">Online / Offline</option>
-            <option value="ONLINE">ONLINE</option>
-            <option value="OFFLINE">OFFLINE</option>
-          </select>
-        </div>
-      </div>
-
-
-      {loading ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="h-3 w-28 rounded bg-slate-200" />
-              <div className="mt-4 h-8 w-4/5 rounded bg-slate-200" />
-              <div className="mt-3 h-4 w-2/3 rounded bg-slate-200" />
-              <div className="mt-2 h-4 w-1/2 rounded bg-slate-200" />
-              <div className="mt-4 h-5 w-full rounded bg-slate-100" />
-              <div className="mt-4 h-10 w-36 rounded-xl bg-slate-200" />
-=======
                     </div>
                   </div>
 
@@ -886,9 +584,22 @@ export default function Page() {
         <>
           <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold text-slate-900">Activity Logger</h1>
+              <h1 className="text-3xl font-bold text-slate-900">Activity Master</h1>
               <p className="text-sm text-slate-600">View all events and their registrations</p>
             </div>
+          </div>
+          <div>
+            {canCreate ? (
+            <Link href="/students/create-event" className="btn-primary whitespace-nowrap">
+              Create Event
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : null}
+          {canAccessVerificationPanel ? (
+            <Link href="/students/verification-panel" className="btn-outline whitespace-nowrap">
+              Verification Panel
+            </Link>
+          ) : null}
           </div>
 
           <div className="mb-4">
@@ -906,7 +617,6 @@ export default function Page() {
                   <span className="ml-2 text-xs opacity-70">({counts[tab.key]})</span>
                 </button>
               ))}
->>>>>>> main
             </div>
           </div>
 

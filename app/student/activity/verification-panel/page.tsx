@@ -89,7 +89,7 @@ const isEventCompleted = (event?: EventMasterRecord) => {
 }
 
 export default function VerificationPanelPage() {
-  const { isVerification, isAdmin } = useRoles()
+  const { canAccessResource } = useRoles()
   const [records, setRecords] = useState<EventRegistrationRecord[]>([])
   const [eventsById, setEventsById] = useState<Record<number, EventMasterRecord>>({})
   const [loading, setLoading] = useState(true)
@@ -108,7 +108,7 @@ export default function VerificationPanelPage() {
   const [eventDetailsError, setEventDetailsError] = useState<string | null>(null)
   const deferredSearch = useDeferredValue(search)
 
-  const canVerify = isVerification() || isAdmin()
+  const canVerify = canAccessResource('/student/activity/verification-panel')
 
   const loadRecords = async () => {
     try {

@@ -59,6 +59,12 @@ export interface DesignationTargetRuleRecord {
   targets: Record<string, number>;
 }
 
+export interface WorkflowTargetDefinitionRecord {
+  code: string;
+  name: string;
+  unit: string;
+}
+
 export interface WorkflowPlanTaskRecord {
   id: string;
   baseId: string;
@@ -88,6 +94,20 @@ export interface UpsertRolePayload {
   status: boolean;
   resources: string[];
   isSystem?: boolean;
+}
+
+export interface AppPageRecord {
+  id: number;
+  pageKey: string;
+  pageName: string;
+  routePath: string;
+  createdAt: string;
+}
+
+export interface CreateAppPagePayload {
+  pageKey?: string;
+  pageName: string;
+  routePath: string;
 }
 
 export interface EventMasterRecord {
@@ -228,6 +248,17 @@ function normalizeApiUrl(rawUrl?: string) {
   const urlValue = rawUrl?.toString().trim();
   if (!urlValue) return undefined;
 
+  if (urlValue.startsWith('/')) {
+    const pathname = urlValue.replace(/\/+$/, '') || '/';
+    if (pathname === '/' ) {
+      return '/api';
+    }
+    if (pathname.toLowerCase().endsWith('/auth')) {
+      return pathname.replace(/\/auth$/i, '') || '/api';
+    }
+    return pathname;
+  }
+
   let normalizedUrl = urlValue;
   if (normalizedUrl.startsWith(':')) {
     normalizedUrl = `http://localhost${normalizedUrl}`;
@@ -238,15 +269,71 @@ function normalizeApiUrl(rawUrl?: string) {
   }
 
   try {
-    return new URL(normalizedUrl).toString().replace(/\/+$/, '');
+    const parsedUrl = new URL(normalizedUrl);
+    parsedUrl.pathname = parsedUrl.pathname.replace(/\/+$/, '');
+
+    if (parsedUrl.pathname === '' || parsedUrl.pathname === '/') {
+      parsedUrl.pathname = '/api';
+    } else if (parsedUrl.pathname.toLowerCase().endsWith('/auth')) {
+      parsedUrl.pathname = parsedUrl.pathname.replace(/\/auth$/i, '') || '/api';
+    }
+
+    return parsedUrl.toString().replace(/\/+$/, '');
   } catch {
     return undefined;
   }
 }
 
-const apiBaseURL = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL) || DEFAULT_API_URL;
+const apiBaseURL = (() => {
+  const normalized = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
+  if (!normalized) {
+    if (process.env.NEXT_PUBLIC_API_URL !== undefined && process.env.NEXT_PUBLIC_API_URL !== '') {
+      console.warn(
+        `[lib/api] NEXT_PUBLIC_API_URL value "${process.env.NEXT_PUBLIC_API_URL}" could not be parsed. Falling back to ${DEFAULT_API_URL}`,
+      );
+    }
+    return DEFAULT_API_URL;
+  }
+  return normalized;
+})();
 
 const API_UNREACHABLE_MESSAGE = `Cannot reach API server at ${apiBaseURL}. Start the backend and verify NEXT_PUBLIC_API_URL/ALLOWED_ORIGINS.`
+
+const WORKFLOW_CACHE_TTL_MS = 60 * 1000;
+type WorkflowCacheEntry = {
+  expiresAt: number;
+  value: unknown;
+};
+
+const workflowCache = new Map<string, WorkflowCacheEntry>();
+
+function getCachedWorkflowValue<T>(key: string): T | null {
+  const entry = workflowCache.get(key);
+  if (!entry) return null;
+
+  if (entry.expiresAt <= Date.now()) {
+    workflowCache.delete(key);
+    return null;
+  }
+
+  return entry.value as T;
+}
+
+function setCachedWorkflowValue<T>(key: string, value: T, ttlMs = WORKFLOW_CACHE_TTL_MS) {
+  workflowCache.set(key, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+function invalidateWorkflowCache() {
+  const keys = Array.from(workflowCache.keys());
+  for (const key of keys) {
+    if (key.startsWith('workflow:')) {
+      workflowCache.delete(key);
+    }
+  }
+}
 
 const client: AxiosInstance = axios.create({
   baseURL: apiBaseURL,
@@ -286,6 +373,16 @@ export const getApiErrorMessage = (error: unknown, fallback = 'Request failed') 
     const responseMessage = error.response?.data?.error
     if (typeof responseMessage === 'string' && responseMessage.trim().length > 0) {
       return responseMessage
+    }
+
+    const requestUrl = error.config?.url
+      ? error.config.baseURL
+        ? `${error.config.baseURL.replace(/\/+$/, '')}/${error.config.url.replace(/^\/+/, '')}`
+        : error.config.url
+      : undefined
+
+    if (error.response?.status === 404) {
+      return `API endpoint not found${requestUrl ? `: ${requestUrl}` : ''}. Verify NEXT_PUBLIC_API_URL and backend auth route configuration.`
     }
 
     if (error.code === 'ERR_NETWORK') {
@@ -412,6 +509,11 @@ export const apiClient = {
     return response.data;
   },
 
+  getSupervisorDetails: async () => {
+    const response = await client.get('/supervisor-details');
+    return response.data;
+  },
+
   getJournalPublicationsApplied: async () => {
     const response = await client.get('/journal-publications-applied');
     return response.data;
@@ -419,6 +521,16 @@ export const apiClient = {
 
   createJournalPublicationApplied: async (formData: FormData) => {
     const response = await client.post('/journal-publications-applied', formData);
+    return response.data;
+  },
+
+  getBookPublications: async () => {
+    const response = await client.get('/book-publications');
+    return response.data;
+  },
+
+  createBookPublication: async (formData: FormData) => {
+    const response = await client.post('/book-publications', formData);
     return response.data;
   },
 
@@ -458,7 +570,11 @@ export const apiClient = {
   },
 
   createPatentReport: async (formData: FormData) => {
-    const response = await client.post('/patent-report', formData);
+    const response = await client.post('/patent-tracker', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 
@@ -480,7 +596,7 @@ export const apiClient = {
   },
 
   getPatentReports: async () => {
-    const response = await client.get('/patent-report');
+    const response = await client.get('/patent-tracker');
     return response.data;
   },
 
@@ -730,10 +846,49 @@ export const apiClient = {
     return response.data;
   },
 
+  getManagedPages: async (): Promise<{ pages: AppPageRecord[] }> => {
+    const response = await client.get('/roles/pages');
+    return response.data;
+  },
+
+  createManagedPage: async (data: CreateAppPagePayload): Promise<{ message: string; page: AppPageRecord }> => {
+    const response = await client.post('/roles/pages', data);
+    return response.data;
+  },
+
+  updateManagedPage: async (id: number, data: CreateAppPagePayload): Promise<{ message: string; page: AppPageRecord }> => {
+    const response = await client.put(`/roles/pages/${id}`, data);
+    return response.data;
+  },
+
+  deleteManagedPage: async (id: number): Promise<{ message: string }> => {
+    const response = await client.delete(`/roles/pages/${id}`);
+    return response.data;
+  },
+
   getWorkflowDesignationRules: async (academicYear = '2026-27'): Promise<{ academicYear: string; rules: DesignationTargetRuleRecord[] }> => {
+    const cacheKey = `workflow:designation-rules:${academicYear}`;
+    const cached = getCachedWorkflowValue<{ academicYear: string; rules: DesignationTargetRuleRecord[] }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const response = await client.get('/workflow-targets/designation-rules', {
       params: { academicYear },
     });
+    setCachedWorkflowValue(cacheKey, response.data);
+    return response.data;
+  },
+
+  getWorkflowTargetDefinitions: async (): Promise<{ targets: WorkflowTargetDefinitionRecord[] }> => {
+    const cacheKey = 'workflow:target-master';
+    const cached = getCachedWorkflowValue<{ targets: WorkflowTargetDefinitionRecord[] }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const response = await client.get('/workflow-targets/target-master');
+    setCachedWorkflowValue(cacheKey, response.data);
     return response.data;
   },
 
@@ -742,30 +897,47 @@ export const apiClient = {
     data: { academicYear: string; targets: Record<string, number> },
   ) => {
     const response = await client.put(`/workflow-targets/designation-rules/${designationId}`, data);
+    invalidateWorkflowCache();
     return response.data;
   },
 
   rebuildWorkflowAssignments: async (data: { academicYear: string; designationId?: number }) => {
     const response = await client.post('/workflow-targets/assignments/rebuild', data);
+    invalidateWorkflowCache();
     return response.data;
   },
 
   getWorkflowDeadlines: async (academicYear = '2026-27'): Promise<{ academicYear: string; settings: Record<string, string> }> => {
+    const cacheKey = `workflow:deadlines:${academicYear}`;
+    const cached = getCachedWorkflowValue<{ academicYear: string; settings: Record<string, string> }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const response = await client.get('/workflow-targets/admin/deadlines', {
       params: { academicYear },
     });
+    setCachedWorkflowValue(cacheKey, response.data);
     return response.data;
   },
 
   updateWorkflowDeadlines: async (data: { academicYear: string; settings: Record<string, string> }) => {
     const response = await client.put('/workflow-targets/admin/deadlines', data);
+    invalidateWorkflowCache();
     return response.data;
   },
 
   getMyWorkflowPlan: async (academicYear = '2026-27'): Promise<WorkflowPlanRecord> => {
+    const cacheKey = `workflow:my-plan:${academicYear}`;
+    const cached = getCachedWorkflowValue<WorkflowPlanRecord>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const response = await client.get('/workflow-targets/me/workflow', {
       params: { academicYear },
     });
+    setCachedWorkflowValue(cacheKey, response.data, 30 * 1000);
     return response.data;
   },
 
@@ -783,6 +955,7 @@ export const apiClient = {
       taskCode: data.taskCode,
       payload: data.payload,
     });
+    invalidateWorkflowCache();
     return response.data;
   },
 };

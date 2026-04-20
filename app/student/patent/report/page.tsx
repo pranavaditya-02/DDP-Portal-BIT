@@ -28,7 +28,7 @@ export default function Page() {
       try {
         setLoading(true);
         const resp = await apiClient.getPatentReports();
-        setReports(resp?.reports || []);
+        setReports(resp?.trackers || resp?.reports || []);
       } catch (err) {
         console.error(err);
         setError('Failed to load patent reports.');

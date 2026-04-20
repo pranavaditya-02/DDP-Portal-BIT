@@ -11,6 +11,7 @@ interface InternshipReportSummary {
   id: number;
   report_number?: number;
   tracker_id?: number;
+  tracker_number?: number | null;
   student_name?: string | null;
   special_lab_name?: string | null;
   year_of_study: number;
