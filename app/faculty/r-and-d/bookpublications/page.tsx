@@ -8,6 +8,7 @@ import { apiClient } from "@/lib/api";
 interface BookPublicationRecord {
   PublicationID: number;
   FacultyName: string;
+  FacultyID: string | null;
   TaskID: string | null;
   Role: string | null;
   Author1_Type: string | null;
@@ -186,7 +187,7 @@ const BookPublicationsPage: React.FC = () => {
                   filteredRecords.map((record, index) => (
                     <tr key={record.PublicationID} className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.PublicationID}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.FacultyName || "-"}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.FacultyName || record.FacultyID || "-"}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.TaskID || "-"}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.Role || "-"}</td>
                       <td className="px-3 py-4 text-sm text-slate-700 min-w-[220px]">{record.BookTitle || "-"}</td>

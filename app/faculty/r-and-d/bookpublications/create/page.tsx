@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Save, ArrowLeft } from "lucide-react";
 import { apiClient } from "@/lib/api";
@@ -26,7 +26,12 @@ type AuthorInfo = {
 
 export default function BookPublicationPage() {
   const router = useRouter();
-  const [facultyName, setFacultyName] = useState("");
+  const [facultyQuery, setFacultyQuery] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState<{ id: string; name: string | null } | null>(null);
+  const [facultySuggestions, setFacultySuggestions] = useState<Array<{ id: string; name: string | null }>>([]);
+  const [showFacultySuggestions, setShowFacultySuggestions] = useState(false);
+  const [facultyLoading, setFacultyLoading] = useState(false);
+  const [facultyFetchError, setFacultyFetchError] = useState("");
   const [taskId, setTaskId] = useState("");
   const [role, setRole] = useState<string>(ROLE_OPTIONS[0]);
   const [numAuthors, setNumAuthors] = useState<number>(1);
@@ -66,11 +71,61 @@ export default function BookPublicationPage() {
     }
   };
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!facultyQuery.trim()) {
+      setFacultySuggestions([]);
+      setFacultyLoading(false);
+      return;
+    }
+
+    setFacultyLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await apiClient.getFaculties(facultyQuery.trim());
+        if (!cancelled) {
+          setFacultySuggestions(Array.isArray(response.faculties) ? response.faculties : []);
+          setFacultyFetchError("");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setFacultySuggestions([]);
+          setFacultyFetchError("Unable to fetch faculty list.");
+        }
+      } finally {
+        if (!cancelled) setFacultyLoading(false);
+      }
+    }, 200);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [facultyQuery]);
+
+  const resetFacultySelection = () => {
+    setSelectedFaculty(null);
+    setFacultyFetchError("");
+  };
+
+  const handleFacultySelect = (faculty: { id: string; name: string | null }) => {
+    setSelectedFaculty(faculty);
+    setFacultyQuery(faculty.name || faculty.id);
+    setShowFacultySuggestions(false);
+    setFacultyFetchError("");
+  };
+
+  const handleFacultyInputChange = (value: string) => {
+    setFacultyQuery(value);
+    resetFacultySelection();
+    setShowFacultySuggestions(true);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const errors: Record<string, string> = {};
-    if (!facultyName.trim()) errors.facultyName = "Faculty name is required";
+    if (!selectedFaculty?.id) errors.facultyQuery = "Please select a faculty from the list.";
     if (!bookTitle.trim()) errors.bookTitle = "Book title is required";
     if (!claimedBy.trim()) errors.claimedBy = "Claimed by is required";
     for (let i = 0; i < numAuthors; i += 1) {
@@ -90,7 +145,7 @@ export default function BookPublicationPage() {
 
     try {
       const fd = new FormData();
-      fd.append("FacultyName", facultyName);
+      fd.append("FacultyId", selectedFaculty?.id || "");
       fd.append("TaskID", taskId);
       fd.append("Role", role);
       fd.append("BookType", bookType);
@@ -137,14 +192,38 @@ export default function BookPublicationPage() {
         <div className="bg-white rounded-xl p-6 border border-slate-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Faculty Name</label>
+              <div className="relative">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Faculty <span className="text-red-500">*</span></label>
                 <input
-                  value={facultyName}
-                  onChange={(e) => setFacultyName(e.target.value)}
+                  value={facultyQuery}
+                  onChange={(e) => handleFacultyInputChange(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  placeholder="Search faculty name or ID..."
+                  autoComplete="off"
                 />
-                {localErrors.facultyName && <p className="mt-1 text-sm text-rose-600">{localErrors.facultyName}</p>}
+                {showFacultySuggestions && facultyQuery.trim() && (
+                  <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg">
+                    {facultyLoading ? (
+                      <div className="px-3 py-3 text-sm text-slate-500">Searching faculties...</div>
+                    ) : facultySuggestions.length === 0 ? (
+                      <div className="px-3 py-3 text-sm text-slate-500">No matching faculties found.</div>
+                    ) : (
+                      facultySuggestions.map((faculty) => (
+                        <button
+                          key={faculty.id}
+                          type="button"
+                          onClick={() => handleFacultySelect(faculty)}
+                          className="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                        >
+                          {faculty.name ? `${faculty.name} (${faculty.id})` : faculty.id}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+                {(localErrors.facultyQuery || facultyFetchError) && (
+                  <p className="mt-1 text-sm text-rose-600">{localErrors.facultyQuery || facultyFetchError}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Task ID</label>

@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 
 const router = express.Router();
 
-const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_DIR || './uploads/books');
+const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_DIR || './uploads/bookpublications');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -19,7 +19,7 @@ const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 const CREATE_BOOK_PUBLICATIONS_TABLE_SQL = `CREATE TABLE IF NOT EXISTS BookPublications (
   PublicationID INT PRIMARY KEY AUTO_INCREMENT,
-  FacultyName VARCHAR(255) NOT NULL,
+  FacultyID VARCHAR(50) NULL,
   TaskID VARCHAR(100),
   Role ENUM('Author', 'Editor') NOT NULL,
   Author1_Type ENUM('BIT Faculty', 'BIT Student', 'Institute - National', 'Institute - International', 'Industry', 'NA'),
@@ -49,14 +49,17 @@ const CREATE_BOOK_PUBLICATIONS_TABLE_SQL = `CREATE TABLE IF NOT EXISTS BookPubli
   DateOfPublication DATE,
   ProofFilePath VARCHAR(500),
   ClaimedBy VARCHAR(255),
-  AuthorPosition ENUM('First', 'Second', 'Third', 'Fourth', 'Corresponding', 'NA'),
-  RD_Verification ENUM('Initiated', 'Approved', 'Rejected') DEFAULT 'Initiated'
+  AuthorPosition ENUM('First', 'Second', 'Third', 'Fourth', 'Corresponding', 'NA') DEFAULT NULL,
+  RD_Verification ENUM('Initiated', 'Approved', 'Rejected') DEFAULT 'Initiated',
+  KEY fk_faculty_id (FacultyID),
+  CONSTRAINT fk_faculty_id FOREIGN KEY (FacultyID) REFERENCES faculty (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
 
 (async () => {
   try {
     const pool = getMysqlPool();
     await pool.query(CREATE_BOOK_PUBLICATIONS_TABLE_SQL);
+    await pool.query('ALTER TABLE BookPublications ADD COLUMN IF NOT EXISTS FacultyID VARCHAR(50) NULL AFTER PublicationID');
   } catch (error) {
     logger.error('Error initializing BookPublications table:', error);
   }
@@ -66,11 +69,13 @@ router.post('/', upload.single('proof'), async (req, res) => {
   try {
     const body = req.body as any;
     const file = req.file;
-    const proofPath = file ? `/uploads/books/${file.filename}` : null;
+    const proofPath = file ? `/uploads/bookpublications/${file.filename}` : null;
 
     const pool = getMysqlPool();
+    const facultyId = String(body.FacultyId || body.faculty_id || body.FacultyID || "").trim() || null;
+
     const sql = `INSERT INTO BookPublications (
-      FacultyName, TaskID, Role,
+      FacultyID, TaskID, Role,
       Author1_Type, Author1_Name, Author1_Details,
       Author2_Type, Author2_Name, Author2_Details,
       Author3_Type, Author3_Name, Author3_Details,
@@ -79,10 +84,10 @@ router.post('/', upload.single('proof'), async (req, res) => {
       Author6_Type, Author6_Name, Author6_Details,
       BookType, ChapterTitle, BookTitle, ISBN_Number, PublisherName, Indexing, DateOfPublication, ProofFilePath,
       ClaimedBy, AuthorPosition, RD_Verification
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const params = [
-      body.FacultyName || body.faculty || null,
+      facultyId,
       body.TaskID || null,
       body.Role || null,
       body.Author1_Type || null,
@@ -127,7 +132,9 @@ router.post('/', upload.single('proof'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const pool = getMysqlPool();
-    const [rows] = await pool.query('SELECT * FROM BookPublications ORDER BY PublicationID DESC LIMIT 200');
+    const [rows] = await pool.query(
+      'SELECT bp.*, f.name AS FacultyName FROM BookPublications bp LEFT JOIN faculty f ON bp.FacultyID = f.id ORDER BY bp.PublicationID DESC LIMIT 200'
+    );
     return res.json({ items: rows });
   } catch (error) {
     logger.error('Error listing book publications:', error);
