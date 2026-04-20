@@ -15,24 +15,27 @@ export const Navigation: React.FC = () => {
   const { user, logout, allowedRoutes, allowedResources } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
 
+  const effectiveAllowedResources = allowedResources;
+  const effectiveAllowedRoutes = allowedRoutes;
+
   const visibleNavItems = useMemo(() => {
-    if (allowedResources.length > 0) {
-      return allowedResources
+    if (effectiveAllowedResources.length > 0) {
+      return effectiveAllowedResources
         .filter((item) => item?.href)
         .map((item) => ({ href: item.href, label: item.label || routeToLabel(item.href) }))
         .filter((item) => !shouldHideInNavigation(item.href));
     }
 
-    return allowedRoutes
+    return effectiveAllowedRoutes
       .filter((href) => !href.includes('['))
       .map((href) => ({ href, label: routeToLabel(href) }))
-      .filter((item) => hasRouteAccess(item.href, allowedRoutes))
+      .filter((item) => hasRouteAccess(item.href, effectiveAllowedRoutes))
       .filter((item) => !shouldHideInNavigation(item.href));
-  }, [allowedResources, allowedRoutes]);
+  }, [effectiveAllowedResources, effectiveAllowedRoutes]);
 
   const homeHref = pickFirstAccessibleRoute({
-    resources: allowedResources,
-    routePaths: allowedRoutes,
+    resources: effectiveAllowedResources,
+    routePaths: effectiveAllowedRoutes,
   }) || '/dashboard';
 
   const handleLogout = async () => {

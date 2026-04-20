@@ -62,6 +62,13 @@ export interface UserLookupMetadata {
   departments: UserDepartmentOption[];
   roles: UserRoleOption[];
   designations: UserDesignationOption[];
+  faculties: UserFacultyOption[];
+}
+
+export interface UserFacultyOption {
+  id: string;
+  name: string;
+  department: string;
 }
 
 type DbUserRow = RowDataPacket & {
@@ -103,6 +110,14 @@ type RoleLookupRow = RowDataPacket & {
 type DesignationLookupRow = RowDataPacket & {
   id: number;
   designation_name: string;
+};
+
+type FacultyLookupRow = RowDataPacket & {
+  faculty_id: string;
+  faculty_name: string;
+  department_code: string | null;
+  department_name: string | null;
+  role_name: string | null;
 };
 
 type DepartmentIdRow = RowDataPacket & {
@@ -551,6 +566,28 @@ class UsersService {
          ORDER BY designation_name ASC`
       );
 
+      const [facultyRows] = await pool.query<FacultyLookupRow[]>(
+        `SELECT
+            f.id AS faculty_id,
+            COALESCE(
+              NULLIF(TRIM(CONCAT_WS(' ', f.salutation, f.name)), ''),
+              NULLIF(TRIM(f.name), ''),
+              f.id
+            ) AS faculty_name,
+            d.dept_code AS department_code,
+            d.dept_name AS department_name,
+            r.name AS role_name
+         FROM faculty f
+         LEFT JOIN users u ON u.user_id = f.id
+         LEFT JOIN roles r ON r.id = u.role_id
+         LEFT JOIN departments d ON d.id = f.department_id
+         WHERE (
+           r.name IS NULL
+           OR UPPER(r.name) NOT IN ('ADMIN', 'HOD', 'IQAC', 'VERIFICATION', 'MAINTENANCE')
+         )
+         ORDER BY faculty_name ASC`
+      );
+
       return {
         departments: departmentRows.map((row) => ({
           id: row.id,
@@ -571,6 +608,13 @@ class UsersService {
           .map((row) => ({
             id: row.id,
             name: row.designation_name,
+          })),
+        faculties: facultyRows
+          .filter((row) => row.faculty_name?.trim().length > 0)
+          .map((row) => ({
+            id: row.faculty_id,
+            name: row.faculty_name,
+            department: row.department_code || row.department_name || 'N/A',
           })),
       };
     } catch (error) {

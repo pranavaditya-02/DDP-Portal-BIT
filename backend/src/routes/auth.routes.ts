@@ -161,6 +161,17 @@ router.post('/verify', authenticateToken, async (req, res) => {
     }
 
     const user = await authService.getUserWithRoles(req.user.id);
+    if (!user) {
+      const token = extractToken(req)
+      if (token) {
+        const decoded = verifyToken(token)
+        if (decoded?.sid) {
+          sessionService.revokeSession(decoded.sid)
+        }
+      }
+      clearAuthCookie(res)
+      return res.status(401).json({ error: 'Account is inactive or access changed. Please sign in again.' })
+    }
 
     res.json({
       valid: true,
@@ -180,6 +191,17 @@ router.get('/me', authenticateToken, async (req, res) => {
     }
 
     const user = await authService.getUserWithRoles(req.user.id);
+    if (!user) {
+      const token = extractToken(req)
+      if (token) {
+        const decoded = verifyToken(token)
+        if (decoded?.sid) {
+          sessionService.revokeSession(decoded.sid)
+        }
+      }
+      clearAuthCookie(res)
+      return res.status(401).json({ error: 'Account is inactive or access changed. Please sign in again.' })
+    }
 
     res.json({ user });
   } catch (error) {

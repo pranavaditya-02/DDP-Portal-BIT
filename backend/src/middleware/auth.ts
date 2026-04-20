@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
 import sessionService from '../services/session.service';
+import authService from '../services/auth.service';
 
 export const AUTH_COOKIE_NAME = 'ddp_auth_token';
 
@@ -75,7 +76,7 @@ export const extractToken = (req: Request) => {
   return cookies[AUTH_COOKIE_NAME] || null
 }
 
-export const authenticateToken = (
+export const authenticateToken = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -98,15 +99,22 @@ export const authenticateToken = (
     return res.status(401).json({ error: 'Session expired or revoked' })
   }
 
+  const latestUser = await authService.getUserWithRoles(decoded.id)
+  if (!latestUser) {
+    sessionService.revokeSession(decoded.sid)
+    logger.debug(`Session revoked for inactive or unauthorized user ${decoded.email}`)
+    return res.status(401).json({ error: 'Account is inactive or access changed. Please sign in again.' })
+  }
+
   req.user = {
-    id: decoded.id,
-    username: decoded.username,
-    email: decoded.email,
-    name: decoded.name,
-    roleId: decoded.roleId,
-    roleName: decoded.roleName,
-    roles: decoded.roles,
-    facultyId: decoded.facultyId,
+    id: latestUser.id,
+    username: latestUser.username,
+    email: latestUser.email,
+    name: latestUser.name,
+    roleId: latestUser.roleId,
+    roleName: latestUser.roleName,
+    roles: latestUser.roles,
+    facultyId: latestUser.facultyId,
   }
 
   next()

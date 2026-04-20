@@ -36,6 +36,123 @@ const completeTaskSchema = z.object({
   payload: z.record(z.any()).optional(),
 })
 
+const adminComplianceQuerySchema = z.object({
+  academicYear: academicYearSchema.default('2026-27'),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(5).max(2000).default(500),
+  fetchAll: z.coerce.boolean().optional(),
+  search: z.string().trim().optional(),
+  department: z.string().trim().optional(),
+  designation: z.string().trim().optional(),
+})
+
+const awaitComplianceUpdateQuerySchema = z.object({
+  academicYear: academicYearSchema.default('2026-27'),
+  since: z.coerce.number().int().nonnegative().default(0),
+  timeoutMs: z.coerce.number().int().min(1000).max(60000).default(30000),
+})
+
+const createAcademicYearSchema = z.object({
+  academicYear: academicYearSchema,
+  copyFromAcademicYear: academicYearSchema.optional(),
+})
+
+const slotLimitsSchema = z.object({
+  paperSlots: z.coerce.number().int().min(1).max(12),
+  proposalSlots: z.coerce.number().int().min(1).max(8),
+  patentSlots: z.coerce.number().int().min(0).max(4),
+})
+
+router.get('/active-academic-year', authenticateToken, async (_req: AuthRequest, res) => {
+  try {
+    const config = await workflowTargetsService.getActiveAcademicYearConfig()
+    res.json(config)
+  } catch (error) {
+    logger.error('Error fetching active workflow academic year:', error)
+    res.status(500).json({ error: 'Failed to fetch active workflow academic year' })
+  }
+})
+
+router.get('/admin/academic-years', authenticateToken, requireRole('maintenance', 'admin'), async (_req, res) => {
+  try {
+    const years = await workflowTargetsService.listAcademicYearConfigs()
+    const active = years.find((item) => item.isActive) || null
+    res.json({ years, activeAcademicYear: active?.academicYear || null })
+  } catch (error) {
+    logger.error('Error fetching workflow academic year configs:', error)
+    res.status(500).json({ error: 'Failed to fetch workflow academic year configs' })
+  }
+})
+
+router.post('/admin/academic-years', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
+  try {
+    const payload = createAcademicYearSchema.parse(req.body)
+    const config = await workflowTargetsService.createAcademicYearConfig({
+      academicYear: payload.academicYear,
+      copyFromAcademicYear: payload.copyFromAcademicYear || null,
+    })
+
+    res.json({
+      message: 'Workflow academic year created successfully',
+      config,
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors })
+    }
+
+    logger.error('Error creating workflow academic year:', error)
+    res.status(500).json({ error: 'Failed to create workflow academic year' })
+  }
+})
+
+router.put('/admin/academic-years/:academicYear/slots', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
+  try {
+    const parsedYear = academicYearSchema.safeParse(req.params.academicYear)
+    if (!parsedYear.success) {
+      return res.status(400).json({ error: parsedYear.error.errors })
+    }
+
+    const payload = slotLimitsSchema.parse(req.body)
+    const config = await workflowTargetsService.updateAcademicYearSlotLimits({
+      academicYear: parsedYear.data,
+      paperSlots: payload.paperSlots,
+      proposalSlots: payload.proposalSlots,
+      patentSlots: payload.patentSlots,
+    })
+
+    res.json({
+      message: 'Workflow slot limits updated successfully',
+      config,
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors })
+    }
+
+    logger.error('Error updating workflow slot limits:', error)
+    res.status(500).json({ error: 'Failed to update workflow slot limits' })
+  }
+})
+
+router.post('/admin/academic-years/:academicYear/activate', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
+  try {
+    const parsedYear = academicYearSchema.safeParse(req.params.academicYear)
+    if (!parsedYear.success) {
+      return res.status(400).json({ error: parsedYear.error.errors })
+    }
+
+    const config = await workflowTargetsService.activateAcademicYear(parsedYear.data)
+    res.json({
+      message: 'Workflow academic year activated successfully',
+      config,
+    })
+  } catch (error) {
+    logger.error('Error activating workflow academic year:', error)
+    res.status(500).json({ error: 'Failed to activate workflow academic year' })
+  }
+})
+
 router.get('/designation-rules', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
   try {
     const parsed = academicYearSchema.safeParse(req.query.academicYear || '2026-27')
@@ -75,10 +192,16 @@ router.put('/designation-rules/:designationId', authenticateToken, requireRole('
       targets: payload.targets,
     })
 
-    res.json({
-      message: 'Designation targets updated successfully',
+    const assignmentCount = await workflowTargetsService.rebuildAssignments({
       academicYear: payload.academicYear,
       designationId,
+    })
+
+    res.json({
+      message: 'Designation targets updated successfully and assignments rebuilt',
+      academicYear: payload.academicYear,
+      designationId,
+      assignmentCount,
       rules,
     })
   } catch (error) {
@@ -169,6 +292,82 @@ router.get('/admin/deadlines', authenticateToken, requireRole('maintenance', 'ad
   }
 })
 
+router.get('/admin/compliance-summary', authenticateToken, requireRole('dean', 'maintenance', 'admin'), async (req: AuthRequest, res) => {
+  try {
+    const query = adminComplianceQuerySchema.parse(req.query)
+    const summary = await workflowTargetsService.getAdminComplianceSummary({
+      academicYear: query.academicYear,
+      page: query.page,
+      pageSize: query.pageSize,
+      fetchAll: query.fetchAll,
+      search: query.search,
+      department: query.department,
+      designation: query.designation,
+    })
+
+    res.json(summary)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors })
+    }
+
+    logger.error('Error fetching admin compliance summary:', error)
+    res.status(500).json({ error: 'Failed to fetch admin compliance summary' })
+  }
+})
+
+router.get('/admin/compliance-summary/check-updates', authenticateToken, requireRole('dean', 'maintenance', 'admin'), async (req: AuthRequest, res) => {
+  try {
+    const parsed = academicYearSchema.safeParse(req.query.academicYear || '2026-27')
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.errors })
+    }
+
+    const lastUpdate = await workflowTargetsService.getComplianceLastUpdate(parsed.data)
+    res.json({
+      lastUpdate,
+      timestamp: lastUpdate > 0 ? new Date(lastUpdate).toISOString() : null,
+    })
+  } catch (error) {
+    logger.error('Error checking admin compliance updates:', error)
+    res.status(500).json({ error: 'Failed to check admin compliance updates' })
+  }
+})
+
+router.get('/admin/compliance-summary/await-update', authenticateToken, requireRole('dean', 'maintenance', 'admin'), async (req: AuthRequest, res) => {
+  try {
+    const query = awaitComplianceUpdateQuerySchema.parse(req.query)
+    const deadline = Date.now() + query.timeoutMs
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    while (Date.now() < deadline) {
+      const latest = await workflowTargetsService.getComplianceLastUpdate(query.academicYear)
+      if (latest > query.since) {
+        return res.json({
+          changed: true,
+          lastUpdate: latest,
+          timestamp: new Date(latest).toISOString(),
+        })
+      }
+
+      await sleep(1000)
+    }
+
+    res.json({
+      changed: false,
+      lastUpdate: query.since,
+      timestamp: query.since > 0 ? new Date(query.since).toISOString() : null,
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors })
+    }
+
+    logger.error('Error awaiting admin compliance update:', error)
+    res.status(500).json({ error: 'Failed while waiting for admin compliance update' })
+  }
+})
+
 router.put('/admin/deadlines', authenticateToken, requireRole('maintenance', 'admin'), async (req: AuthRequest, res) => {
   try {
     const payload = deadlineSettingsSchema.parse(req.body)
@@ -218,6 +417,37 @@ router.get('/me/workflow', authenticateToken, async (req: AuthRequest, res) => {
   } catch (error) {
     logger.error('Error fetching current user workflow plan:', error)
     res.status(500).json({ error: 'Failed to fetch workflow plan' })
+  }
+})
+
+router.get('/admin/faculty/:facultyId/workflow', authenticateToken, requireRole('dean', 'maintenance', 'admin'), async (req: AuthRequest, res) => {
+  try {
+    const parsed = academicYearSchema.safeParse(req.query.academicYear || '2026-27')
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.errors })
+    }
+
+    const facultyId = String(req.params.facultyId || '').trim()
+    if (!facultyId) {
+      return res.status(400).json({ error: 'Faculty id is required' })
+    }
+
+    const facultyEmail = typeof req.query.facultyEmail === 'string' ? req.query.facultyEmail : undefined
+
+    const plan = await workflowTargetsService.getWorkflowPlanForFaculty({
+      academicYear: parsed.data,
+      facultyId,
+      facultyEmail,
+    })
+
+    if (!plan) {
+      return res.status(404).json({ error: 'No workflow plan found for faculty' })
+    }
+
+    res.json(plan)
+  } catch (error) {
+    logger.error('Error fetching workflow plan for faculty:', error)
+    res.status(500).json({ error: 'Failed to fetch workflow plan for faculty' })
   }
 })
 

@@ -51,6 +51,19 @@ export interface UsersLookupMetadata {
   designations: UserDesignationOption[];
 }
 
+export interface SystemUserRecord {
+  id: number;
+  facultyId: string;
+  username: string;
+  email: string;
+  name: string;
+  department: string;
+  designation: string;
+  role: string;
+  status: 'active' | 'inactive';
+  joinedDate: string;
+}
+
 export interface DesignationTargetRuleRecord {
   designationId: number;
   designationName: string;
@@ -83,6 +96,53 @@ export interface WorkflowPlanRecord {
   deadlineMap: Record<string, string>;
   completedTaskIds: string[];
   tasks: WorkflowPlanTaskRecord[];
+}
+
+export interface WorkflowAcademicYearConfigRecord {
+  academicYear: string;
+  isActive: boolean;
+  paperSlots: number;
+  proposalSlots: number;
+  patentSlots: number;
+  createdAt: string;
+  updatedAt: string;
+  activatedAt: string | null;
+}
+
+export interface AdminFacultyComplianceRecord {
+  facultyId: string;
+  name: string;
+  email: string;
+  department: string;
+  designation: string;
+  completedTasks: number;
+  pendingTasks: number;
+  completionRate: number;
+  completedTaskIds: string[];
+}
+
+export interface AdminTaskComplianceRecord {
+  key: string;
+  task: string;
+  workflow: string;
+  type: 'paper' | 'patent' | 'proposal';
+  targetIndex: number;
+  deadlineISO: string;
+  completionRate: number;
+  completedFaculty: number;
+  pendingFaculty: number;
+  statusLabel: 'Upcoming' | 'Near deadline' | 'Overdue';
+}
+
+export interface AdminComplianceSummaryRecord {
+  rows: AdminFacultyComplianceRecord[];
+  tasks: AdminTaskComplianceRecord[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface UpsertRolePayload {
@@ -686,7 +746,7 @@ export const apiClient = {
   },
 
   // User Management endpoints
-  getAllUsers: async (): Promise<{ users: any[] }> => {
+  getAllUsers: async (): Promise<{ users: SystemUserRecord[] }> => {
     const response = await client.get('/users');
     return response.data;
   },
@@ -876,6 +936,111 @@ export const apiClient = {
       params: { academicYear },
     });
     setCachedWorkflowValue(cacheKey, response.data, 30 * 1000);
+    return response.data;
+  },
+
+  getActiveWorkflowAcademicYear: async (): Promise<WorkflowAcademicYearConfigRecord> => {
+    const cacheKey = 'workflow:active-academic-year';
+    const cached = getCachedWorkflowValue<WorkflowAcademicYearConfigRecord>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const response = await client.get('/workflow-targets/active-academic-year');
+    setCachedWorkflowValue(cacheKey, response.data, 30 * 1000);
+    return response.data;
+  },
+
+  getWorkflowAcademicYears: async (): Promise<{ years: WorkflowAcademicYearConfigRecord[]; activeAcademicYear: string | null }> => {
+    const response = await client.get('/workflow-targets/admin/academic-years');
+    return response.data;
+  },
+
+  createWorkflowAcademicYear: async (data: { academicYear: string; copyFromAcademicYear?: string }) => {
+    const response = await client.post('/workflow-targets/admin/academic-years', data);
+    invalidateWorkflowCache();
+    return response.data;
+  },
+
+  updateWorkflowAcademicYearSlots: async (
+    academicYear: string,
+    data: { paperSlots: number; proposalSlots: number; patentSlots: number },
+  ) => {
+    const response = await client.put(`/workflow-targets/admin/academic-years/${encodeURIComponent(academicYear)}/slots`, data);
+    invalidateWorkflowCache();
+    return response.data;
+  },
+
+  activateWorkflowAcademicYear: async (academicYear: string) => {
+    const response = await client.post(`/workflow-targets/admin/academic-years/${encodeURIComponent(academicYear)}/activate`);
+    invalidateWorkflowCache();
+    return response.data;
+  },
+
+  getWorkflowPlanForFaculty: async (
+    facultyId: string,
+    options?: { academicYear?: string; facultyEmail?: string },
+  ): Promise<WorkflowPlanRecord> => {
+    const academicYear = options?.academicYear || '2026-27';
+    const cacheKey = `workflow:faculty-plan:${academicYear}:${facultyId}`;
+    const cached = getCachedWorkflowValue<WorkflowPlanRecord>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const response = await client.get(`/workflow-targets/admin/faculty/${encodeURIComponent(facultyId)}/workflow`, {
+      params: {
+        academicYear,
+        facultyEmail: options?.facultyEmail,
+      },
+    });
+    setCachedWorkflowValue(cacheKey, response.data, 30 * 1000);
+    return response.data;
+  },
+
+  getAdminComplianceSummary: async (options?: {
+    academicYear?: string;
+    page?: number;
+    pageSize?: number;
+    fetchAll?: boolean;
+    search?: string;
+    department?: string;
+    designation?: string;
+  }): Promise<AdminComplianceSummaryRecord> => {
+    const response = await client.get('/workflow-targets/admin/compliance-summary', {
+      params: {
+        academicYear: options?.academicYear || '2026-27',
+        page: options?.page || 1,
+        pageSize: options?.pageSize || 500,
+        fetchAll: options?.fetchAll,
+        search: options?.search,
+        department: options?.department,
+        designation: options?.designation,
+      },
+    });
+    return response.data;
+  },
+
+  checkComplianceUpdates: async (academicYear = '2026-27'): Promise<{ lastUpdate: number; timestamp: string | null }> => {
+    const response = await client.get('/workflow-targets/admin/compliance-summary/check-updates', {
+      params: { academicYear },
+    });
+    return response.data;
+  },
+
+  awaitComplianceUpdate: async (options?: {
+    academicYear?: string;
+    since?: number;
+    timeoutMs?: number;
+  }): Promise<{ changed: boolean; lastUpdate: number; timestamp: string | null }> => {
+    const response = await client.get('/workflow-targets/admin/compliance-summary/await-update', {
+      params: {
+        academicYear: options?.academicYear || '2026-27',
+        since: options?.since || 0,
+        timeoutMs: options?.timeoutMs || 30000,
+      },
+      timeout: (options?.timeoutMs || 30000) + 5000,
+    });
     return response.data;
   },
 

@@ -28,6 +28,16 @@ const generatePageKey = (routePath: string) => {
     .toLowerCase()
 }
 
+const formatCreatedDate = (value: string) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 export default function PagesManagementClientPage() {
   const [pages, setPages] = useState<AppPageRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -137,6 +147,11 @@ export default function PagesManagementClientPage() {
         })
         toast.success('Page route added successfully')
       } else {
+        if (!editingPage) {
+          toast.error('No page selected for editing')
+          return
+        }
+
         await apiClient.updateManagedPage(editingPage.id, {
           pageName: modalPageName.trim(),
           routePath: normalizedPath,
@@ -195,17 +210,18 @@ export default function PagesManagementClientPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Page Name</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Page Key</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Route Path</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Created Date</th>
                 <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide">Action</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-slate-400" colSpan={4}>Loading page routes...</td>
+                  <td className="px-4 py-8 text-center text-slate-400" colSpan={5}>Loading page routes...</td>
                 </tr>
               ) : filteredPages.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-slate-400" colSpan={4}>No page routes found</td>
+                  <td className="px-4 py-8 text-center text-slate-400" colSpan={5}>No page routes found</td>
                 </tr>
               ) : (
                 filteredPages.map((page) => (
@@ -213,6 +229,7 @@ export default function PagesManagementClientPage() {
                     <td className="px-4 py-3 text-slate-800">{page.pageName}</td>
                     <td className="px-4 py-3 text-slate-600 font-mono">{page.pageKey}</td>
                     <td className="px-4 py-3 text-slate-600 font-mono">{page.routePath}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatCreatedDate(page.createdAt)}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex items-center gap-1">
                         <button

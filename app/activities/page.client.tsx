@@ -42,7 +42,7 @@ type WorkflowStep = {
   fields: DynamicField[]
 }
 
-const ACADEMIC_YEAR = '2026-27'
+const DEFAULT_ACADEMIC_YEAR = '2026-27'
 
 const TAB_OPTIONS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -662,6 +662,7 @@ function WorkflowCard({
 export default function ActivitiesPage() {
   const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
+  const [academicYear, setAcademicYear] = useState<string>(DEFAULT_ACADEMIC_YEAR)
   const [completed, setCompleted] = useState<Record<string, boolean>>({})
   const [pendingCompletionStep, setPendingCompletionStep] = useState<WorkflowStep | null>(null)
   const [workflowTasks, setWorkflowTasks] = useState<WorkflowPlanTaskRecord[]>([])
@@ -675,10 +676,14 @@ export default function ActivitiesPage() {
     const loadPlan = async () => {
       setIsLoadingPlan(true)
       try {
-        const plan = await apiClient.getMyWorkflowPlan(ACADEMIC_YEAR)
+        const activeYear = await apiClient.getActiveWorkflowAcademicYear()
+        const selectedYear = activeYear?.academicYear || DEFAULT_ACADEMIC_YEAR
+        setAcademicYear(selectedYear)
+
+        const plan = await apiClient.getMyWorkflowPlan(selectedYear)
         setWorkflowTasks(plan.tasks || [])
-        setPaperTargets(Math.max(1, Math.min(4, Number(plan.paperTargets || 1))))
-        setProposalSlots(Math.max(1, Math.min(2, Number(plan.proposalSlots || 1))))
+        setPaperTargets(Math.max(1, Number(plan.paperTargets || 1)))
+        setProposalSlots(Math.max(1, Number(plan.proposalSlots || 1)))
         setPatentEnabled(Boolean(plan.patentEnabled))
 
         const completedMap: Record<string, boolean> = {}
@@ -894,7 +899,7 @@ export default function ActivitiesPage() {
 
     try {
       await apiClient.completeMyWorkflowTask({
-        academicYear: ACADEMIC_YEAR,
+        academicYear,
         workflowType: step.type,
         slotNo: step.targetIndex || 1,
         taskCode: step.baseId,
@@ -1019,9 +1024,9 @@ export default function ActivitiesPage() {
                           {item.title}{' '}
                           <span className="text-slate-400">
                             - {item.type === 'paper'
-                              ? `Paper${item.targetIndex ? ` T${item.targetIndex}` : ''}`
+                              ? `Journal Publication${item.targetIndex ? ` - Target ${item.targetIndex}` : ''}`
                               : item.type === 'proposal'
-                                ? `Proposal${item.targetIndex ? ` Slot ${item.targetIndex}` : ''}`
+                                ? `Funding Proposal${item.targetIndex ? ` - Target ${item.targetIndex}` : ''}`
                                 : 'Patent'}
                           </span>
                         </h3>
@@ -1040,7 +1045,7 @@ export default function ActivitiesPage() {
                                   : 'bg-emerald-50 text-emerald-700',
                             )}
                           >
-                            {item.type === 'paper' ? 'Paper' : item.type === 'patent' ? 'Patent' : 'Funding Proposal'}
+                            {item.type === 'paper' ? 'Journal Publication' : item.type === 'patent' ? 'Patent' : 'Funding Proposal'}
                           </span>
                         </div>
                       </div>

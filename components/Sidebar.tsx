@@ -121,9 +121,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
   const pendingCountLastFetchedAtRef = useRef(0);
 
+  const effectiveAllowedResources = allowedResources;
+  const effectiveAllowedRoutes = allowedRoutes;
+
   const baseItems = useMemo<DynamicNavItem[]>(() => {
-    if (allowedResources.length > 0) {
-      return allowedResources
+    if (effectiveAllowedResources.length > 0) {
+      return effectiveAllowedResources
         .filter((resource) => Boolean(resource.href))
         .filter((resource) => !isDynamicPatternRoute(resource.href))
         .filter((resource) => !shouldHideInNavigation(resource.href))
@@ -137,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         .sort((a, b) => a.href.localeCompare(b.href));
     }
 
-    return Array.from(new Set(allowedRoutes.map((route) => normalizePath(route))))
+    return Array.from(new Set(effectiveAllowedRoutes.map((route) => normalizePath(route))))
       .filter((href) => href !== "/" && href !== "/login" && href !== "/register")
       .filter((href) => !isDynamicPatternRoute(href))
       .filter((href) => !shouldHideInNavigation(href))
@@ -149,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         icon: routeToIcon(href),
       }))
       .sort((a, b) => a.href.localeCompare(b.href));
-  }, [allowedResources, allowedRoutes]);
+  }, [effectiveAllowedResources, effectiveAllowedRoutes]);
 
   const hasVerificationPages = useMemo(
     () => baseItems.some((item) => item.href === "/verification" || item.href === "/verification-panel"),

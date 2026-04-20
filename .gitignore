@@ -20,3 +20,4 @@ backend/.env.*
 backend/.env
 backend/logs/*.log
 assets/.docx_extract
+backend/scripts
