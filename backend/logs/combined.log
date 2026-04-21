@@ -15195,3 +15195,48 @@
 {"level":"debug","message":"Inactive session rejected for user santhoshs.cs25@bitsathy.ac.in","service":"faculty-tracking-api","timestamp":"2026-04-20 15:24:04"}
 {"level":"info","message":"POST /api/auth/logout","service":"faculty-tracking-api","timestamp":"2026-04-20 15:24:04"}
 {"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-20 15:24:05"}
+{"level":"info","message":"Email service initialized successfully","service":"faculty-tracking-api","timestamp":"2026-04-21 08:40:39"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-21 08:40:39"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-21 08:40:39"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-21 08:40:41"}
+{"level":"info","message":"POST /api/auth/google","service":"faculty-tracking-api","timestamp":"2026-04-21 08:51:17"}
+{"level":"info","message":"Google sign-in successful for santhoshs.cs25@bitsathy.ac.in","service":"faculty-tracking-api","timestamp":"2026-04-21 08:51:19"}
+{"level":"info","message":"POST /api/auth/google","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:10"}
+{"level":"info","message":"Google sign-in successful for santhoshs.cs25@bitsathy.ac.in","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:10"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:11"}
+{"level":"warn","message":"ActivityService.getPendingActivities called while Prisma is disabled.","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:11"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:11"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:11"}
+{"level":"info","message":"GET /api/book-publications","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:17"}
+{"level":"info","message":"GET /api/journal-publications-applied","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:22"}
+{"level":"info","message":"journal_publications_applied table is ready","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:22"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:37"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:37"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:37"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-21 08:52:48"}
+{"level":"info","message":"DELETE /api/roles/pages/962168","service":"faculty-tracking-api","timestamp":"2026-04-21 08:53:19"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-21 08:53:20"}
+{"level":"info","message":"PUT /api/roles/pages/420507","service":"faculty-tracking-api","timestamp":"2026-04-21 08:53:58"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-21 08:54:00"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-21 08:54:11"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-21 08:54:11"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-21 08:54:11"}
+{"level":"info","message":"PUT /api/roles/pages/420507","service":"faculty-tracking-api","timestamp":"2026-04-21 08:54:43"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-21 08:54:44"}
+{"level":"info","message":"PUT /api/roles/pages/420505","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:02"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:03"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:12"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:12"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:14"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:18"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:18"}
+{"level":"info","message":"PUT /api/roles/1","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:34"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:35"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:36"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:58"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:58"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-21 08:55:58"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-21 08:56:26"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-21 08:56:27"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-21 08:56:27"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-21 08:56:27"}

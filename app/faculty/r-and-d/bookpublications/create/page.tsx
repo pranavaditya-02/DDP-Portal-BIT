@@ -34,7 +34,7 @@ export default function BookPublicationPage() {
   const [facultyFetchError, setFacultyFetchError] = useState("");
   const [taskId, setTaskId] = useState("");
   const [role, setRole] = useState<string>(ROLE_OPTIONS[0]);
-  const [numAuthors, setNumAuthors] = useState<number>(1);
+  const [numAuthors, setNumAuthors] = useState<number>(0);
   const [authors, setAuthors] = useState<AuthorInfo[]>(
     Array.from({ length: 6 }, () => ({ name: "", type: "NA", details: "" })),
   );
@@ -371,7 +371,7 @@ export default function BookPublicationPage() {
                 onChange={handleNumAuthors}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               >
-                {[1, 2, 3, 4, 5, 6].map((count) => (
+                {[0, 1, 2, 3, 4, 5, 6].map((count) => (
                   <option key={count} value={count}>
                     {count}
                   </option>
